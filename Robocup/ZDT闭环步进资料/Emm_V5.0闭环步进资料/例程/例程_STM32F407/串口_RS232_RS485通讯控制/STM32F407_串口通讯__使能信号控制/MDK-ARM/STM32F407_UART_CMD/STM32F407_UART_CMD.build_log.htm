@@ -1,0 +1,96 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: μVision V5.40.0.0
+Copyright (C) 2024 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: df df, dff, LIC=9WSKC-7ZRYP-Z9IG9-48KJ6-WNZ0F-6SAIC
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Plus  Version: 5.40.0.3
+Toolchain Path:  D:\keil\MDK\ARM\ARMCLANG\Bin
+C Compiler:      ArmClang.exe V6.22
+Assembler:       Armasm.exe V6.22
+Linker/Locator:  ArmLink.exe V6.22
+Library Manager: ArmAr.exe V6.22
+Hex Converter:   FromElf.exe V6.22
+CPU DLL:         SARMCM3.DLL V5.40.0.3
+Dialog DLL:      DCM.DLL V1.17.5.0
+Target DLL:      Segger\JL2CM3.dll V2.99.44.0
+Dialog DLL:      TCM.DLL V1.56.4.0
+ 
+<h2>Project:</h2>
+D:\stmproject\dragonproject\contest\Robocup\ZDT闭环步进资料\Emm_V5.0闭环步进资料\例程\例程_STM32F407\串口_RS232_RS485通讯控制\STM32F407_串口通讯__使能信号控制\MDK-ARM\STM32F407_UART_CMD.uvprojx
+Project File Date:  03/06/2025
+
+<h2>Output:</h2>
+*** Using Compiler 'V6.22', folder: 'D:\keil\MDK\ARM\ARMCLANG\Bin'
+Build target 'STM32F407_UART_CMD'
+assembling startup_stm32f407xx.s...
+compiling stm32f4xx_hal_msp.c...
+compiling stm32f4xx_hal_tim_ex.c...
+compiling stm32f4xx_hal_tim.c...
+compiling gpio.c...
+compiling stm32f4xx_it.c...
+../Src/main.c(116): warning: while loop has empty body [-Wempty-body]
+  116 |         while(rxFrameFlag == false); rxFrameFlag = false;
+      |                                    ^
+../Src/main.c(116): note: put the semicolon on a separate line to silence this warning
+../Src/main.c(131): warning: while loop has empty body [-Wempty-body]
+  131 |         while(rxFrameFlag == false); rxFrameFlag = false;
+      |                                    ^
+../Src/main.c(131): note: put the semicolon on a separate line to silence this warning
+../Src/main.c(146): warning: while loop has empty body [-Wempty-body]
+  146 |         while(rxFrameFlag == false); rxFrameFlag = false;
+      |                                    ^
+../Src/main.c(146): note: put the semicolon on a separate line to silence this warning
+3 warnings generated.
+compiling main.c...
+compiling dma.c...
+compiling usart.c...
+compiling stm32f4xx_hal_rcc_ex.c...
+compiling stm32f4xx_hal_rcc.c...
+compiling stm32f4xx_hal_flash.c...
+compiling Emm_V5.c...
+compiling stm32f4xx_hal_flash_ex.c...
+compiling stm32f4xx_hal_uart.c...
+compiling stm32f4xx_hal_flash_ramfunc.c...
+compiling stm32f4xx_hal_pwr.c...
+compiling stm32f4xx_hal_gpio.c...
+compiling stm32f4xx_hal_dma_ex.c...
+compiling stm32f4xx_hal_dma.c...
+compiling stm32f4xx_hal_pwr_ex.c...
+compiling system_stm32f4xx.c...
+compiling stm32f4xx_hal.c...
+compiling stm32f4xx_hal_exti.c...
+compiling stm32f4xx_hal_cortex.c...
+linking...
+Program Size: Code=6468 RO-data=456 RW-data=12 ZI-data=2668  
+FromELF: creating hex file...
+"STM32F407_UART_CMD\STM32F407_UART_CMD.axf" - 0 Error(s), 3 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                https://www.keil.com/pack/ARM.CMSIS.6.1.0.pack
+                ARM::CMSIS@6.1.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 6.1.0
+
+Package Vendor: Keil
+                https://www.keil.com/pack/Keil.STM32F4xx_DFP.3.0.0.pack
+                Keil::STM32F4xx_DFP@3.0.0
+                STMicroelectronics STM32F4 Series Device Support
+
+<h2>Collection of Component include folders:</h2>
+  ./RTE/_STM32F407_UART_CMD
+  D:/keil/Pack/ARM/CMSIS/6.1.0/CMSIS/Core/Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE@6.1.0
+Build Time Elapsed:  00:00:02
+</pre>
+</body>
+</html>
