@@ -57,6 +57,8 @@
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
+extern DMA_HandleTypeDef hdma_usart6_rx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6;
 /* USER CODE BEGIN EV */
@@ -202,6 +204,34 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 stream0 global interrupt.
+  */
+void DMA1_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream0_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_rx);
+  /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream1 global interrupt.
+  */
+void DMA1_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_tx);
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream1_IRQn 1 */
+}
+
+/**
   * @brief This function handles USART1 global interrupt.
   */
 void USART1_IRQHandler(void)
@@ -260,6 +290,19 @@ void DMA2_Stream7_IRQHandler(void)
 void USART6_IRQHandler(void)
 {
   /* USER CODE BEGIN USART6_IRQn 0 */
+  uint32_t tmp_flag ;
+	uint8_t len;
+	uint8_t data[25];
+	tmp_flag  = __HAL_UART_GET_FLAG(&huart6, UART_FLAG_IDLE);
+
+	if( tmp_flag  != RESET)
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(&huart6);//清除标志位
+		HAL_UART_DMAStop(&huart6); //停止DMA接收，防止数据出错
+		len = USART_REC_LEN - __HAL_DMA_GET_COUNTER(&hdma_usart6_rx);// 获取DMA中传输的数据个数
+    memcpy(data,rx_buff,len);	
+		HAL_UART_Receive_DMA(&huart6,rx_buff,USART_REC_LEN);   //打开DMA接收，数据存入rx_buffer数组中。
+	}
 
   /* USER CODE END USART6_IRQn 0 */
   HAL_UART_IRQHandler(&huart6);
@@ -269,5 +312,54 @@ void USART6_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+//方法2：分支1：使用HAL_UARTEx_ReceiveToIdle_DMA写HAL_UARTEx_RxEventCallback
+// void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+// {
+// 	uint8_t len;
+// 	uint8_t data[25];
+// 	if(huart->Instance == USART6)
+// 	{
+// 		HAL_UART_DMAStop(huart);
+// 		len = USART_REC_LEN - __HAL_DMA_GET_COUNTER(&hdma_usart6_rx);// 获取DMA中传输的数据个数
+// 		if (rx_buff[0] == 0x0F && len == 25)	//接受完一帧数据
+// 		{
+// 			memcpy(data,rx_buff,len);
+// 		}
+// 		HAL_UARTEx_ReceiveToIdle_DMA(&huart6,rx_buff,USART_REC_LEN);		// 再次开启DMA空闲中断
+// 	}
+// }	
+//方法2：分支2：也可使用HAL_UARTEx_ReceiveToIdle_DMA写HAL_UARTEx_RxEventCallback
+// void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+// {
+//   uint8_t cnt = 0;
+//     if (huart->Instance == USART6)
+//     {
+//         cnt = USART_REC_LEN - __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
+//         HAL_UART_Transmit(&huart6, rx_buff, cnt, 0xffff);	//将接受到的数据再发回上位机
+//         memset(rx_buff, 0, cnt);
+//     }
+// }
+
+//方法3：使用HAL_UARTEx_ReceiveToIdle_IT（不使用DMA）
+
+// void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+// {
+// 	uint8_t len=0;
+// 	uint8_t data[25];
+// 	uint8_t uart4_len=0;
+// 	uint8_t uart4_data[50];
+// 	if(huart->Instance == USART6)
+// 	{
+// 		HAL_UART_DMAStop(huart);
+// 		len = USART_REC_LEN - __HAL_DMA_GET_COUNTER(&hdma_usart6_rx);// 获取DMA中传输的数据个数
+// 		if (rx_buff[0] == 0x0F && len == 25)	//接受完一帧数据
+// 		{
+// 			memcpy(data,rx_buff,len);
+// 			update_sbus(data);
+// 		}
+// 		HAL_UARTEx_ReceiveToIdle_DMA(&huart2,rx_buff,USART_REC_LEN);		// 再次开启DMA空闲中断
+// 	}
+// }
+
 
 /* USER CODE END 1 */

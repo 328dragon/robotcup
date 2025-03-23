@@ -139,7 +139,15 @@ int main(void)
  	__HAL_UART_CLEAR_IDLEFLAG(&huart1); 											// 清除IDLE标志
 	__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE); 							// 使能串UART1 IDLE中断
   HAL_UART_Receive_DMA(&huart1, (uint8_t *)rxCmd, CMD_LEN); // 开启DMA接收模式
-	//串口6加dma，不定长度
+	//方法1：串口6加dma，不定长度
+  __HAL_UART_ENABLE_IT(&huart6, UART_IT_IDLE);		// 开启串口空闲中断，必须调用
+ HAL_UART_Receive_DMA(&huart6,rx_buff,USART_REC_LEN);
+// //方法2：使用HAL_UARTEx_ReceiveToIdle_DMA
+// HAL_UARTEx_ReceiveToIdle_DMA(&huart2,rxCmd,CMD_LEN);
+
+//方法3 ：使用HAL_UARTEx_ReceiveToIdle_IT（不使用DMA）
+// HAL_UARTEx_ReceiveToIdle_IT(&huart6,rx_buff,USART_REC_LEN);
+
 
 // 	/**********************************************************
 // ***	上电延时2秒等待Emm_V5.0闭环初始化完毕
@@ -149,13 +157,13 @@ int main(void)
 // /**********************************************************
 // ***	地址1电机：位置模式，方向CW，速度1000RPM，加速度0（不使用加减速直接启动），脉冲数3200（16细分下发送3200个脉冲电机转一圈），相对运动
 // **********************************************************/	
- Step_Pos_Control(1, 0, 1000, 0, 3200, 0, 0); // 多机同步标志位置1
+ Step_Pos_Control(1, 0, 1000, 0, 3200, 0, 1); // 多机同步标志位置1
  	HAL_Delay(10);																 // 每条命令后面延时10毫秒，防止粘包
 
 // /**********************************************************
 // ***	地址2电机：位置模式，方向CW，速度1000RPM，加速度0（不使用加减速直接启动），脉冲数3200（16细分下发送3200个脉冲电机转一圈），相对运动
 // **********************************************************/	
- Step_Pos_Control(2, 0, 1000, 0, 3200, 0, 0); // 多机同步标志位置1
+ Step_Pos_Control(2, 0, 1000, 0, 3200, 0, 1); // 多机同步标志位置1
  	HAL_Delay(10);																 // 每条命令后面延时10毫秒，防止粘包
 // 	/**********************************************************                                                                                           
 // 	***	触发多机同步开始运动
@@ -166,9 +174,6 @@ int main(void)
 // ***	等待返回到位命令，命令数据缓存在数组rxCmd上，长度为rxCount
 // **********************************************************/	
 // //	while(rxCmd[1] != 0xFD || rxCmd[2] != 0x9F); rxFrameFlag = false;
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
   /* USER CODE END 2 */
 
   /* Infinite loop */

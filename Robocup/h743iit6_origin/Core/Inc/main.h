@@ -85,6 +85,9 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #include "stepmotor.h"
 #include "Emm_V5.h"
+#include "string.h"
+#include "stdio.h"
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

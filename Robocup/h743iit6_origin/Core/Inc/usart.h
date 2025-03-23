@@ -51,6 +51,8 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
+#define USART_REC_LEN 200
+extern uint8_t rx_buff[USART_REC_LEN];
 
 /* USER CODE END Private defines */
 
