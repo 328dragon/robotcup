@@ -83,7 +83,8 @@ void Error_Handler(void);
 #define PH_1_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#include "stepmotor.h"
+#include "Emm_V5.h"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -4,6 +4,7 @@
 "begin\gpio.o"
 "begin\adc.o"
 "begin\dac.o"
+"begin\dma.o"
 "begin\fdcan.o"
 "begin\i2c.o"
 "begin\usart.o"
@@ -40,6 +41,8 @@
 "begin\stm32h7xx_hal_tim.o"
 "begin\stm32h7xx_hal_tim_ex.o"
 "begin\system_stm32h7xx.o"
+"begin\stepmotor.o"
+"begin\emm_v5.o"
 --library_type=microlib --strict --scatter "begin\begin.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
