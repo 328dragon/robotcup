@@ -1,0 +1,74 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "d:/23工训/2023-training-master-code/gx8_28/include",
+                "d:/23工训/2023-training-master-code/gx8_28/src",
+                "d:/23工训/2023-training-master-code/gx8_28/lib/Arduino_sdk",
+                "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/GFX Library for Arduino/src",
+                "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/U8g2/src",
+                "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/Adafruit SSD1306",
+                "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/Adafruit GFX Library",
+                "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/Adafruit BusIO",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "d:/23工训/2023-training-master-code/gx8_28/lib/JY901SerialMega2560",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                "d:/23工训/2023-training-master-code/gx8_28/lib/SCServo",
+                "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/SoftwareSerial",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/variants/mega",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "d:/23工训/2023-training-master-code/gx8_28/include",
+                    "d:/23工训/2023-training-master-code/gx8_28/src",
+                    "d:/23工训/2023-training-master-code/gx8_28/lib/Arduino_sdk",
+                    "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/GFX Library for Arduino/src",
+                    "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/U8g2/src",
+                    "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/Adafruit SSD1306",
+                    "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/Adafruit GFX Library",
+                    "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/Adafruit BusIO",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                    "d:/23工训/2023-training-master-code/gx8_28/lib/JY901SerialMega2560",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                    "d:/23工训/2023-training-master-code/gx8_28/lib/SCServo",
+                    "d:/23工训/2023-training-master-code/gx8_28/.pio/libdeps/megaatmega2560/SoftwareSerial",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/cores/arduino",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/variants/mega",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                    "C:/Users/10416/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60111",
+                "ARDUINO_AVR_MEGA2560",
+                "F_CPU=16000000L",
+                "ARDUINO_ARCH_AVR",
+                "ARDUINO=10808",
+                "__AVR_ATmega2560__",
+                ""
+            ],
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++11",
+            "compilerPath": "C:/Users/10416/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+            "compilerArgs": [
+                "-mmcu=atmega2560",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
