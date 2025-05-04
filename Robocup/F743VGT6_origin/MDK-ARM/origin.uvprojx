@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;..\mcu_bsp\planning</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -884,6 +884,16 @@
               <FileName>Mecanum.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\chassis\Mecanum.c</FilePath>
+            </File>
+            <File>
+              <FileName>controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\planning\controller.c</FilePath>
+            </File>
+            <File>
+              <FileName>planner.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\planning\planner.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -4,6 +4,8 @@
         "cstdint": "c",
         "motor_def.h": "c",
         "mainwork.h": "c",
-        "mecanum.h": "c"
+        "mecanum.h": "c",
+        "controller.h": "c",
+        "planner.h": "c"
     }
 }

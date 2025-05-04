@@ -1,86 +1,15 @@
 *** Using Compiler 'V6.22', folder: 'D:\keil\MDK\ARM\ARMCLANG\Bin'
 Build target 'origin'
-../mcu_bsp/chassis/Mecanum.c(1): warning: In file included from...../mcu_bsp/chassis\Mecanum.h(26): error: unknown type name 'tyepdef'; did you mean 'typedef'?
-   26 | tyepdef struct Mecanum_t
-      | ^~~~~~~
-      | typedef
-../mcu_bsp/chassis\Mecanum.h(30): error: must use 'enum' tag to refer to type 'class_t'
-   30 |     class_t diclass; // 车轮布局类型
-      |     ^
-      |     enum 
-../mcu_bsp/chassis\Mecanum.h(31): error: must use 'struct' tag to refer to type 'odom_t'
-   31 |     odom_t current_odom; // 当前里程计数据
-      |     ^
-      |     struct 
-../mcu_bsp/chassis\Mecanum.h(32): error: must use 'struct' tag to refer to type 'odom_t'
-   32 |     odom_t target_odom;
-      |     ^
-      |     struct 
-../mcu_bsp/chassis\Mecanum.h(33): error: must use 'struct' tag to refer to type 'cmd_vel_t'
-   33 |     cmd_vel_t current_vel;
-      |     ^
-      |     struct 
-../mcu_bsp/chassis\Mecanum.h(34): error: must use 'struct' tag to refer to type 'cmd_vel_t'
-   34 |     cmd_vel_t target_val;
-      |     ^
-      |     struct 
-../mcu_bsp/chassis\Mecanum.h(35): error: must use 'struct' tag to refer to type 'odom_t'
-   35 |     odom_t _odom_error;
-      |     ^
-      |     struct 
-../mcu_bsp/chassis/Mecanum.c(2): warning: 'PI' macro redefined [-Wmacro-redefined]
-    2 | #define PI 3.1415926
-      |         ^
-../mcu_bsp/chassis\Mecanum.h(5): note: previous definition is here
-    5 | #define PI 3.1415926535
-      |         ^
-../mcu_bsp/chassis/Mecanum.c(9): error: must use 'struct' tag to refer to type 'cmd_vel_t'
-    9 | void inv(cmd_vel_t *cmd_vel_in, float *speed_control)
-      |          ^
-      |          struct 
-../mcu_bsp/chassis/Mecanum.c(12): error: use of undeclared identifier 'diclass'
-   12 |     switch (diclass)
-      |             ^
-../mcu_bsp/chassis/Mecanum.c(16): error: member reference type 'struct cmd_vel_t *' is a pointer; did you mean to use '->'?
-   16 |         speed_control[0] = cmd_vel_in.linear_y - cmd_vel_in.linear_x + cmd_vel_in.angular_z * (a + b);
-      |                            ~~~~~~~~~~^
-      |                                      ->
-../mcu_bsp/chassis/Mecanum.c(16): error: member reference type 'struct cmd_vel_t *' is a pointer; did you mean to use '->'?
-   16 |         speed_control[0] = cmd_vel_in.linear_y - cmd_vel_in.linear_x + cmd_vel_in.angular_z * (a + b);
-      |                                                  ~~~~~~~~~~^
-      |                                                            ->
-../mcu_bsp/chassis/Mecanum.c(16): error: member reference type 'struct cmd_vel_t *' is a pointer; did you mean to use '->'?
-   16 |         speed_control[0] = cmd_vel_in.linear_y - cmd_vel_in.linear_x + cmd_vel_in.angular_z * (a + b);
-      |                                                                        ~~~~~~~~~~^
-      |                                                                                  ->
-../mcu_bsp/chassis/Mecanum.c(16): error: use of undeclared identifier 'a'
-   16 |         speed_control[0] = cmd_vel_in.linear_y - cmd_vel_in.linear_x + cmd_vel_in.angular_z * (a + b);
-      |                                                                                                ^
-../mcu_bsp/chassis/Mecanum.c(16): error: use of undeclared identifier 'b'
-   16 |         speed_control[0] = cmd_vel_in.linear_y - cmd_vel_in.linear_x + cmd_vel_in.angular_z * (a + b);
-      |                                                                                                    ^
-../mcu_bsp/chassis/Mecanum.c(17): error: member reference type 'struct cmd_vel_t *' is a pointer; did you mean to use '->'?
-   17 |         speed_control[1] = cmd_vel_in.linear_y + cmd_vel_in.linear_x - cmd_vel_in.angular_z * (a + b);
-      |                            ~~~~~~~~~~^
-      |                                      ->
-../mcu_bsp/chassis/Mecanum.c(17): error: member reference type 'struct cmd_vel_t *' is a pointer; did you mean to use '->'?
-   17 |         speed_control[1] = cmd_vel_in.linear_y + cmd_vel_in.linear_x - cmd_vel_in.angular_z * (a + b);
-      |                                                  ~~~~~~~~~~^
-      |                                                            ->
-../mcu_bsp/chassis/Mecanum.c(17): error: member reference type 'struct cmd_vel_t *' is a pointer; did you mean to use '->'?
-   17 |         speed_control[1] = cmd_vel_in.linear_y + cmd_vel_in.linear_x - cmd_vel_in.angular_z * (a + b);
-      |                                                                        ~~~~~~~~~~^
-      |                                                                                  ->
-../mcu_bsp/chassis/Mecanum.c(17): error: use of undeclared identifier 'a'
-   17 |         speed_control[1] = cmd_vel_in.linear_y + cmd_vel_in.linear_x - cmd_vel_in.angular_z * (a + b);
-      |                                                                                                ^
-../mcu_bsp/chassis/Mecanum.c(17): error: use of undeclared identifier 'b'
-   17 |         speed_control[1] = cmd_vel_in.linear_y + cmd_vel_in.linear_x - cmd_vel_in.angular_z * (a + b);
-      |                                                                                                    ^
-fatal error: too many errors emitted, stopping now [-ferror-limit=]
-1 warning and 20 errors generated.
-compiling Mecanum.c...
-compiling ZDTstepmotor.c...
-"origin\origin.axf" - 19 Error(s), 1 Warning(s).
+../mcu_bsp/planning/controller.c(1): warning: In file included from...../mcu_bsp/planning\controller.h(4): error: 'Lib_pormise.h' file not found
+    4 | #include "Lib_pormise.h"
+      |          ^~~~~~~~~~~~~~~
+1 error generated.
+compiling controller.c...
+../mcu_bsp/planning/planner.c(1): warning: In file included from...../mcu_bsp/planning\planner.h(4): error: 'Lib_Math.h' file not found
+    4 | #include "Lib_Math.h"
+      |          ^~~~~~~~~~~~
+1 error generated.
+compiling planner.c...
+"origin\origin.axf" - 2 Error(s), 0 Warning(s).
 Target not created.
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02

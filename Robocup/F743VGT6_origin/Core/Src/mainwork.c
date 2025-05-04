@@ -61,7 +61,7 @@ void OnPlannerUpdate(void *pvParameters)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
-        planner_ptr->update(dt);
+//        planner_ptr->update(dt);
         vTaskDelay(50);
     }
 }
