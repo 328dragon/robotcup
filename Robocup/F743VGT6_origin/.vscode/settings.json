@@ -6,6 +6,12 @@
         "mainwork.h": "c",
         "mecanum.h": "c",
         "controller.h": "c",
-        "planner.h": "c"
+        "planner.h": "c",
+        "lib_common.h": "c",
+        "lib_math.h": "c",
+        "pid.h": "c",
+        "kinematic.h": "c",
+        "math.h": "c",
+        "lib_pormise.h": "c"
     }
 }

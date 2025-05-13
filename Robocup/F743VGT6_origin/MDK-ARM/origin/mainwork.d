@@ -48,4 +48,6 @@ origin/mainwork.o: ..\Core\Src\mainwork.c ..\Core\Inc\mainwork.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\semphr.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\event_groups.h \
   ..\mcu_bsp\Motor\ZDTstepmotor.h ..\mcu_bsp\Motor\motor_def.h \
-  ..\mcu_bsp\chassis\Mecanum.h
+  ..\mcu_bsp\chassis\Kinematic.h ..\mcu_bsp\planning\controller.h \
+  ..\Lib\Lib_pormise.h ..\mcu_bsp\system_controller\pid.h \
+  ..\mcu_bsp\planning\planner.h ..\Lib\Lib_Math.h

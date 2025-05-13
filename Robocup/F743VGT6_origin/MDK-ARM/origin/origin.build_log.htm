@@ -22,24 +22,32 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\stmproject\dragonproject\contest\robotcup_handing\Robocup\F743VGT6_origin\MDK-ARM\origin.uvprojx
-Project File Date:  05/04/2025
+Project File Date:  05/13/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.22', folder: 'D:\keil\MDK\ARM\ARMCLANG\Bin'
 Build target 'origin'
-../mcu_bsp/planning/planner.c(1): warning: In file included from...
-../mcu_bsp/planning\planner.h(4): error: 'Lib_Math.h' file not found
-    4 | #include "Lib_Math.h"
-      |          ^~~~~~~~~~~~
-1 error generated.
-compiling planner.c...
-../mcu_bsp/planning/controller.c(1): warning: In file included from...
-../mcu_bsp/planning\controller.h(4): error: 'Lib_pormise.h' file not found
-    4 | #include "Lib_pormise.h"
-      |          ^~~~~~~~~~~~~~~
-1 error generated.
+compiling ZDTstepmotor.c...
+../mcu_bsp/planning/controller.c(17): error: call to undeclared function 'IMotorSpeed_t_update'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+   17 |          IMotorSpeed_t_update(controller->MotorList[i], &dt);
+      |          ^
+../mcu_bsp/planning/controller.c(18): warning: incompatible pointer types passing 'Motor_Controller_struct *' to parameter of type 'StepMotorZDT_t *' [-Wincompatible-pointer-types]
+   18 |          controller->current_speed[i] = get_linear_speed(controller->MotorList[i]);
+      |                                                          ^~~~~~~~~~~~~~~~~~~~~~~~
+../mcu_bsp/Motor\ZDTstepmotor.h(21): note: passing argument to parameter 'zdt_motor' here
+   21 | float get_linear_speed(StepMotorZDT_t* zdt_motor);
+      |                                        ^
+1 warning and 1 error generated.
 compiling controller.c...
-"origin\origin.axf" - 2 Error(s), 0 Warning(s).
+../Core/Src/mainwork.c(28): warning: incompatible pointer types passing 'StepMotorZDT_t *(*)[4]' to parameter of type 'Motor_Controller_struct **' [-Wincompatible-pointer-types]
+   28 |          Controller_Init(ChassisControl_ptr, &stepmotor_ptr, kinematic_ptr);
+      |                                              ^~~~~~~~~~~~~~
+../mcu_bsp/planning\controller.h(36): note: passing argument to parameter 'MotorList' here
+   36 | void Controller_Init(Controller_t *controller, Motor_Controller_struct **MotorList, Kinematic_t *kinematic);
+      |                                                                          ^
+1 warning generated.
+compiling mainwork.c...
+"origin\origin.axf" - 1 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 

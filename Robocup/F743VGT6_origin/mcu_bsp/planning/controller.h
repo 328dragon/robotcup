@@ -1,10 +1,14 @@
 #ifndef __CONTROLLER_H
 #define __CONTROLLER_H
 
+
+//#include "Motor.h"
+
 #include "Lib_pormise.h"
-#include "Motor.h"
 #include "Kinematic.h"
-#include "Lib_List.h"
+#include "pid.h"
+#include "motor_def.h"
+#include "ZDTstepmotor.h"
 
 typedef enum {
     LOCATION_CONTROL,     // 位置闭环
@@ -12,26 +16,29 @@ typedef enum {
     SPEED_CONTROL_GROUND  // 大地坐标系速度开环
 } ControlMode_t;
 
-typedef struct {
-    IMotorSpeed_t** MotorList;
+typedef struct _{  
+	StepMotorZDT_t *zdt_mot;
+Motor_Controller_struct **MotorList;
     float target_speed[4];
     float current_speed[4];
     ControlMode_t ControlMode;
     SimpleStatus_t status;
-    pid_Increment_template_t pid_x;
-    pid_Increment_template_t pid_y;
-    pid_Increment_template_t pid_yaw;
+    pid_t pid_x;
+    pid_t pid_y;
+    pid_t pid_yaw;
     Kinematic_t* kinematic;
+	void (*setmotor_speed) (StepMotorZDT_t*, float *);
+	void (*Controller_MotorUpdate)(struct _*, uint16_t);
 } Controller_t;
 
-// 构造函数
-void Controller_Init(Controller_t* controller, IMotorSpeed_t** MotorList, Kinematic_t* kinematic);
+//初始化函数
 
-// 成员函数
+void Controller_Init(Controller_t *controller, Motor_Controller_struct **MotorList, Kinematic_t *kinematic);
+void Controller_setMotorTargetSpeed(StepMotorZDT_t *_stepzdt,float *target_vel);
+
+//
 void Controller_KinematicAndControlUpdate(Controller_t* controller, uint16_t dt);
 void Controller_KinematicAndControlUpdateWithYaw(Controller_t* controller, uint16_t dt, float yaw);
-void Controller_setMotorTargetSpeed(Controller_t* controller, float* target_speed);
-void Controller_MotorUpdate(Controller_t* controller, uint16_t dt);
 void Controller_StatusUpdate(Controller_t* controller, odom_t* odom_in);
 void Controller_set_vel_target(Controller_t* controller, cmd_vel_t cmd_vel_in, bool use_ground_control);
 void Controller_control_update(Controller_t* controller, odom_t* odom_in);

@@ -1,6 +1,16 @@
 #include "ZDTstepmotor.h"
  
 #include "math.h"
+
+void stepZDT_init(StepMotorZDT_t *_step_zdt)
+{
+
+
+
+}
+
+
+
 /**
  * @brief    位置模式
  * @param    addr：电机地址

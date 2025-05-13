@@ -1,17 +1,17 @@
-#include "Mecanum.h"
+#include "Kinematic.h"
 #include <math.h>
 
 /**
  * @brief 根据自身坐标系解算运动学逆解(只算一次)
  * @param cmd_vel_in 输入速度指令
  * @param speed_control 输出速度控制数组
- * @param mecanum 麦轮结构体指针
+ * @param _Kinematic 麦轮结构体指针
  */
-void inv(const cmd_vel_t *cmd_vel_in, float *speed_control, const Mecanum_t *mecanum) {
-    float a = mecanum->a;
-    float b = mecanum->b;
+void Kinematic_inv( cmd_vel_t *cmd_vel_in, float *speed_control,  Kinematic_t *_Kinematic) {
+    float a = _Kinematic->a;
+    float b = _Kinematic->b;
     
-    switch (mecanum->diclass) {
+    switch (_Kinematic->diclass) {
         // o型
         case O_shape:
             speed_control[0] = cmd_vel_in->linear_y - cmd_vel_in->linear_x + cmd_vel_in->angular_z * (a + b);
@@ -45,9 +45,9 @@ void inv(const cmd_vel_t *cmd_vel_in, float *speed_control, const Mecanum_t *mec
  * @param cmd_vel_in 输入速度指令
  * @param speed_control 输出速度控制数组
  * @param odom_in 里程计信息指针
- * @param mecanum 麦轮结构体指针
+ * @param _Kinematic 麦轮结构体指针
  */
-void inv_global(const cmd_vel_t *cmd_vel_in, float *speed_control, const odom_t *odom_in, const Mecanum_t *mecanum) {
+void  Kinematic_inv_global( cmd_vel_t *cmd_vel_in, float *speed_control,  odom_t *odom_in,  Kinematic_t *_Kinematic) {
     float yaw = odom_in->yaw;
     cmd_vel_t cmd_vel_body;
     
@@ -59,22 +59,24 @@ void inv_global(const cmd_vel_t *cmd_vel_in, float *speed_control, const odom_t 
     cmd_vel_body.linear_y = -target_vx * sin(yaw) + target_vy * cos(yaw);
     cmd_vel_body.angular_z = cmd_vel_in->angular_z;
     
-    inv(&cmd_vel_body, speed_control, mecanum);
+    Kinematic_inv(&cmd_vel_body, speed_control, _Kinematic);
 }
 
 /**
  * @brief 从当前车身的速度推算底盘的速度
  * @param current_speed 当前速度数组
  * @param cmd_vel_in 输出速度指令
- * @param mecanum 麦轮结构体指针
+ * @param _Kinematic 麦轮结构体指针
  */
-void forward(const float *current_speed, cmd_vel_t *cmd_vel_in, const Mecanum_t *mecanum) {
-    float a = mecanum->a;
-    float b = mecanum->b;
+void Kinematic_forward( float *current_speed, cmd_vel_t *cmd_vel_in,  Kinematic_t *_Kinematic) {
+    float a = _Kinematic->a;
+    float b = _Kinematic->b;
     float v0 = current_speed[0]; // 左上轮子速度
     float v1 = current_speed[1]; // 右上轮子速度
     float v2 = current_speed[2]; // 左下轮子速度
-    float v3 = current_speed[3]; // 右下轮子速度
+    float v3 = current_speed[3]; // 右下轮子速度                                     445
+	
+	
 
     // 修正后的正解算公式
     cmd_vel_in->linear_x = (v0 + v1 + v2 + v3) / 4.0;               // X轴方向速度
@@ -88,7 +90,7 @@ void forward(const float *current_speed, cmd_vel_t *cmd_vel_in, const Mecanum_t 
  * @param cmd_vel_in 传入当前的速度指针
  * @param odom_in 传入被更新里程计指针
  */
-void CalculationUpdate(uint16_t dt, const cmd_vel_t *cmd_vel_in, odom_t *odom_in) {
+void Kinematic_CalculationUpdate(uint16_t dt,  cmd_vel_t *cmd_vel_in, odom_t *odom_in) {
     float delta_t = (float)dt / 1000;
     float dyaw = cmd_vel_in->angular_z * delta_t;
     float dx = cmd_vel_in->linear_x * delta_t;
@@ -106,7 +108,7 @@ void CalculationUpdate(uint16_t dt, const cmd_vel_t *cmd_vel_in, odom_t *odom_in
  * @param odom_in 传入被更新里程计指针
  * @param yaw 传入的yaw角度
  */
-void CalculationUpdateWithYaw(uint16_t dt, const cmd_vel_t *cmd_vel_in, odom_t *odom_in, float yaw) {
+void Kinematic_CalculationUpdateWithYaw(uint16_t dt,  cmd_vel_t *cmd_vel_in, odom_t *odom_in, float yaw) {
     float delta_t = (float)dt / 1000;
     float dyaw = cmd_vel_in->angular_z * delta_t;
     float dx = cmd_vel_in->linear_x * delta_t;
@@ -119,19 +121,19 @@ void CalculationUpdateWithYaw(uint16_t dt, const cmd_vel_t *cmd_vel_in, odom_t *
 
 /**
  * @brief 清除里程计数据
- * @param mecanum 麦轮结构体指针
+ * @param _Kinematic 麦轮结构体指针
  */
-void ClearOdometry(Mecanum_t *mecanum) {
-    mecanum->current_odom.x = 0;
-    mecanum->current_odom.y = 0;
-    mecanum->current_odom.yaw = 0;
+void Kinematic_ClearOdometry(Kinematic_t *_Kinematic) {
+    _Kinematic->current_odom.x = 0;
+    _Kinematic->current_odom.y = 0;
+    _Kinematic->current_odom.yaw = 0;
 }
 
 /**
  * @brief 更新里程计
  * @param odom_in 传入的里程计指针
- * @param mecanum 麦轮结构体指针
+ * @param _Kinematic 麦轮结构体指针
  */
-void update_odom(const odom_t *odom_in, Mecanum_t *mecanum) {
-    mecanum->current_odom = *odom_in;
+void Kinematic_update_odom( odom_t *odom_in, Kinematic_t *_Kinematic) {
+    _Kinematic->current_odom = *odom_in;
 }

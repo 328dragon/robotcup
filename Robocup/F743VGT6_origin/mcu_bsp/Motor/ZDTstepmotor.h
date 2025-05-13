@@ -6,10 +6,6 @@
 #include "stdbool.h"
 #include "motor_def.h"
 
-
-
-
-
 typedef struct 
 {
     Motor_Controller_struct motor_controller_t;
@@ -20,6 +16,8 @@ typedef struct
     bool _have_pub_permission; // 是否有发布权限
     uint8_t _cmd_buffer[20];     // 命令缓冲区
 }StepMotorZDT_t;
+
 void set_speed_target(StepMotorZDT_t* zdt_motor,float target);
+float get_linear_speed(StepMotorZDT_t* zdt_motor);
 
 #endif

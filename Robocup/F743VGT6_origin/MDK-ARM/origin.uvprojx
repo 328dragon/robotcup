@@ -331,7 +331,7 @@
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
-            <v6LangP>3</v6LangP>
+            <v6LangP>8</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;..\mcu_bsp\planning</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;..\mcu_bsp\planning;..\mcu_bsp\system_controller;..\Lib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -881,9 +881,14 @@
               <FilePath>..\mcu_bsp\Motor\ZDTstepmotor.c</FilePath>
             </File>
             <File>
-              <FileName>Mecanum.c</FileName>
+              <FileName>pid.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\mcu_bsp\chassis\Mecanum.c</FilePath>
+              <FilePath>..\mcu_bsp\system_controller\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>Kinematic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\chassis\Kinematic.c</FilePath>
             </File>
             <File>
               <FileName>controller.c</FileName>
@@ -1528,6 +1533,26 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Lib</GroupName>
+          <Files>
+            <File>
+              <FileName>Lib_Common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Lib_Common.c</FilePath>
+            </File>
+            <File>
+              <FileName>Lib_Math.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Lib_Math.c</FilePath>
+            </File>
+            <File>
+              <FileName>Lib_promise.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Lib_promise.c</FilePath>
             </File>
           </Files>
         </Group>

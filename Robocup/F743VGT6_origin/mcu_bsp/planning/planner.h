@@ -15,15 +15,15 @@ typedef struct {
     uint16_t current_t;
     odom_t start_odom;
     odom_t target_odom;
-    CubicSpline spline[3];
-    Controller* controller;
-    SimpleStatus promise;
+    CubicSpline_t cub_spline[3];
+    Controller_t* controller;
+    SimpleStatus_t promise;
     PlannerMode control_mode;
-} Planner;
+} Planner_t;
 
-void Planner_init(Planner* self, Controller* controller);
-SimpleStatus* Planner_LoactaionOpenControl(Planner* self, const odom_t* target_odom, float max_v, const cmd_vel_t* target_vel, bool clearodom);
-SimpleStatus* Planner_LoactaionCloseControl(Planner* self, const odom_t* target_odom, float max_v, const odom_t* target_error, bool clearodom);
-void Planner_update(Planner* self, uint16_t dt);
+void Planner_init(Planner_t* self, Controller_t* controller);
+SimpleStatus_t* Planner_LoactaionOpenControl(Planner_t* self, const odom_t* target_odom, float max_v, const cmd_vel_t* target_vel, bool clearodom);
+SimpleStatus_t* Planner_LoactaionCloseControl(Planner_t* self, const odom_t* target_odom, float max_v, const odom_t* target_error, bool clearodom);
+void Planner_update(Planner_t* self, uint16_t dt);
 
 #endif

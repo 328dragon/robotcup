@@ -108,7 +108,7 @@ float pid_sp_calc(pid_t *pid, float get, float set, float gyro)
     pid->set[NOW] = set;
     pid->err[NOW] = set - get; // set - measure
 
-    if (pid->pid_mode == POSITION_PID) // λ��ʽp
+    if (pid->pid_mode == POSITION_PID) //位置
     {
         pid->pout = pid->p * pid->err[NOW];
         if (fabs(pid->i) >= 0.001f)
