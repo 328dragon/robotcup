@@ -40,6 +40,7 @@
 "origin\stm32f4xx_hal_pcd_ex.o"
 "origin\stm32f4xx_ll_usb.o"
 "origin\system_stm32f4xx.o"
+"origin\motor_def.o"
 "origin\bsp_can.o"
 "origin\dm_j4310.o"
 "origin\zdtstepmotor.o"

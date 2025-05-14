@@ -1,15 +1,14 @@
 #include "ZDTstepmotor.h"
- 
+
 #include "math.h"
-
-void stepZDT_init(StepMotorZDT_t *_step_zdt)
+void Step_ZDT_Init(StepMotorZDT_t *zdt_mot,  uint32_t id ,UART_HandleTypeDef *_USART,int8_t _dir, float _wheel_diameter, bool _have_pub_permission)
 {
-
-
-
+zdt_mot->motor_controller_t.id=id;
+zdt_mot->_USART=_USART;
+zdt_mot->_dir=_dir;
+zdt_mot->_wheel_diameter=_wheel_diameter;
+zdt_mot->_have_pub_permission=_have_pub_permission;
 }
-
-
 
 /**
  * @brief    位置模式
@@ -89,15 +88,15 @@ static uint8_t Step_Synchronous_motion(uint8_t *cmd, uint8_t addr)
     return (4);
 }
 
-void set_speed_target(StepMotorZDT_t* zdt_motor,float target)
+void set_speed_target(StepMotorZDT_t *zdt_motor, float target)
 {
-  zdt_motor->motor_controller_t.set.velocity = target;
-  zdt_motor->_target_rpm = (int16_t)(target * 60 / (3.14 *( zdt_motor->_wheel_diameter))); // 转化为转速(RPM)
+    zdt_motor->motor_controller_t.set.velocity = target;
+    zdt_motor->_target_rpm = (int16_t)(target * 60 / (3.14 * (zdt_motor->_wheel_diameter))); // 转化为转速(RPM)
     // 发送数据到电机
     uint8_t len;
-    if (zdt_motor->_target_rpm  > 0)
+    if (zdt_motor->_target_rpm > 0)
     {
-        len = Step_Vel_Control(zdt_motor->_cmd_buffer,  zdt_motor->motor_controller_t.id_protocol, zdt_motor->_dir, (uint16_t)(zdt_motor->_target_rpm), 0, false);
+        len = Step_Vel_Control(zdt_motor->_cmd_buffer, zdt_motor->motor_controller_t.id_protocol, zdt_motor->_dir, (uint16_t)(zdt_motor->_target_rpm), 0, false);
     }
     else
     { // 反转
@@ -105,19 +104,17 @@ void set_speed_target(StepMotorZDT_t* zdt_motor,float target)
         len = Step_Vel_Control(zdt_motor->_cmd_buffer, zdt_motor->motor_controller_t.id_protocol, dir_trans, (uint16_t)(-zdt_motor->_target_rpm), 0, false);
     }
     HAL_UART_Transmit(zdt_motor->_USART, zdt_motor->_cmd_buffer, len, 1000); // 发送数据到电机
-    HAL_Delay(1);                                          // 傻逼电机需要延迟避免重包
+    HAL_Delay(1);                                                            // 傻逼电机需要延迟避免重包
     if (zdt_motor->_have_pub_permission)
     {
         // 发布同步信号
-        len = Step_Synchronous_motion(zdt_motor->_cmd_buffer, 0);     // 发送数据到电机
+        len = Step_Synchronous_motion(zdt_motor->_cmd_buffer, 0);                // 发送数据到电机
         HAL_UART_Transmit(zdt_motor->_USART, zdt_motor->_cmd_buffer, len, 1000); // 发送数据到电机
         HAL_Delay(1);
     }
 }
 
-
-
-float get_linear_speed(StepMotorZDT_t* zdt_motor)
+float get_linear_speed(StepMotorZDT_t *zdt_motor)
 {
     // 返回电机的线速度
     // return _target_speed * 3.14 * _wheel_diameter / 60; // 转化为米每秒

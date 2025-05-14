@@ -12,6 +12,7 @@
         "pid.h": "c",
         "kinematic.h": "c",
         "math.h": "c",
-        "lib_pormise.h": "c"
+        "lib_pormise.h": "c",
+        "main.h": "c"
     }
 }

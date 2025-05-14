@@ -172,7 +172,7 @@ void PID_struct_init(
     //	pid->f_cal_sp_pid = pid_sp_calc;	//addition
 
     /*init pid param */
-    pid->f_param_init(pid, mode, maxout, intergral_limit, kp, ki, kd);
+     pid->f_param_init(pid, mode, maxout, intergral_limit, kp, ki, kd);
 }
 
 

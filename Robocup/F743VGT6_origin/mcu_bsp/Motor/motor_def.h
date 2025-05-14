@@ -62,20 +62,24 @@ typedef struct
     Motor_Control_Setting_s motor_cofig;
     Motor_Limit_Setting_s motor_lim_cofig;
 
+
     // 输入和输出数据不互通
     struct in // 用作输入传感,不参与输出控制
     {
         float velocity; // rad/s
         float deg_pos;  // (rad)
         float current;  // (A)
+        float get_yaw;
     } get;
     struct out // 用作电机输出
     {
         float velocity;//目标速度
         float deg_pos;//目标位置
         float current;//目标电流
+        float target_yaw;
     } set;
 
 } Motor_Controller_struct;
 
+void Motor_Update_Getinfo(Motor_Controller_struct *_motor,uint16_t *dt);
 #endif // !MOTOR_DEF_H

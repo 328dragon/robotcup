@@ -1,5 +1,15 @@
 #include "Kinematic.h"
 #include <math.h>
+void Kinematic_init(Kinematic_t *_Kinematic,float _a,float _b,chassis_t _disclass)
+{
+_Kinematic->a = _a;
+_Kinematic->b = _b;
+_Kinematic->diclass = _disclass;
+_Kinematic->current_odom.x = 0;
+_Kinematic->current_odom.y = 0;
+_Kinematic->current_odom.yaw = 0;
+}
+
 
 /**
  * @brief 根据自身坐标系解算运动学逆解(只算一次)

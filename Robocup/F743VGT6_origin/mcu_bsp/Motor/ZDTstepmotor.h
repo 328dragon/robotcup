@@ -17,7 +17,9 @@ typedef struct
     uint8_t _cmd_buffer[20];     // 命令缓冲区
 }StepMotorZDT_t;
 
-void set_speed_target(StepMotorZDT_t* zdt_motor,float target);
+void Step_ZDT_Init(StepMotorZDT_t *zdt_mot,  uint32_t id ,UART_HandleTypeDef *_USART,int8_t _dir, float _wheel_diameter, bool _have_pub_permission);
+
+void set_speed_target(StepMotorZDT_t *zdt_motor, float target);
 float get_linear_speed(StepMotorZDT_t* zdt_motor);
 
 #endif

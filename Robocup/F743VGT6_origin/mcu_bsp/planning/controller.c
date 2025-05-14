@@ -1,38 +1,41 @@
 #include "controller.h"
 
-  void Controller_setMotorTargetSpeed(StepMotorZDT_t *_stepzdt,float *target_vel)
- {
- 
- 
- 
- 
- }
+void Controller_setMotorTargetSpeed(Controller_t *controller, float *target_vel)
+{
+    for (int i = 0; i < 4 ; i++)
+    {
+        controller->zdt_mot[i]->motor_controller_t.set.velocity = target_vel[i];
+    }
+}
 
-  void ZDTController_MotorUpdate(Controller_t *controller, uint16_t dt)
+void ZDTController_MotorUpdate(Controller_t *controller, uint16_t dt)
 {
     for (int i = 0; i < 4; i++)
     {
-        if (controller->MotorList[i] != NULL)
-        {
-         IMotorSpeed_t_update(controller->MotorList[i], &dt);
-         controller->current_speed[i] = get_linear_speed(&controller->MotorList[i]);
-        }
+        // 更新状态
+        Motor_Update_Getinfo(&controller->zdt_mot[i]->motor_controller_t, &dt);
+        // 更新电机速度
+        controller->current_speed[i] = get_linear_speed(controller->zdt_mot[i]);
     }
 }
- 
 
-void Controller_Init(Controller_t *controller, Motor_Controller_struct **MotorList, Kinematic_t *kinematic)
+void Controller_Init(Controller_t *controller, StepMotorZDT_t **_zdt_motor, Kinematic_t *kinematic)
 {
-    controller->MotorList = MotorList;
+    for (int i = 0; i < 4; i++)
+    {
+        controller->zdt_mot[i] = _zdt_motor[i];
+    }
     controller->kinematic = kinematic;
     controller->ControlMode = SPEED_CONTROL_SELF;
-	controller->setmotor_speed = Controller_setMotorTargetSpeed;
-    controller->Controller_MotorUpdate = ZDTController_MotorUpdate; 
-
+    controller->setmotor_speed = Controller_setMotorTargetSpeed;
+    controller->Controller_MotorUpdate = ZDTController_MotorUpdate;
+    uint32_t init_x_maxout=1;
+    uint32_t init_y_maxout=1;
+    uint32_t init_yaw_maxout=1;
     // 初始化PID控制器
-    PID_struct_init(&controller->pid_x, POSITION_PID, (uint32_t)0.3f, 1.0f, 0.2f, -0.4f, 0.4f);
-    PID_struct_init(&controller->pid_y, POSITION_PID,(uint32_t)0.3f, 1.0f, 0.2f, -0.4f, 0.4f);
-    PID_struct_init(&controller->pid_yaw, POSITION_PID,(uint32_t) 0.6f, 2.0f, 0.2f, -0.6f, 0.6f);
+    PID_struct_init(&controller->pid_x, POSITION_PID, init_x_maxout, 1.0f, 0.2f, -0.4f, 0.4f);
+    PID_struct_init(&controller->pid_y, POSITION_PID, init_y_maxout, 1.0f, 0.2f, -0.4f, 0.4f);
+    PID_struct_init(&controller->pid_yaw, POSITION_PID, init_yaw_maxout, 2.0f, 0.2f, -0.6f, 0.6f);
 
     // 初始化状态
     SimpleStatus_t_init(&controller->status);
@@ -44,7 +47,6 @@ void Controller_Init(Controller_t *controller, Motor_Controller_struct **MotorLi
         controller->current_speed[i] = 0.0f;
     }
 }
-
 
 void Controller_StatusUpdate(Controller_t *controller, odom_t *odom_in)
 {
@@ -76,7 +78,7 @@ void Controller_set_vel_target(Controller_t *controller, cmd_vel_t cmd_vel_in, b
     else
     {
         controller->ControlMode = SPEED_CONTROL_SELF;
-        Kinematic_inv( &(controller->kinematic->target_val),controller->target_speed ,controller->kinematic);
+        Kinematic_inv(&(controller->kinematic->target_val), controller->target_speed, controller->kinematic);
     }
 }
 
@@ -139,7 +141,8 @@ void Controller_KinematicAndControlUpdate(Controller_t *controller, uint16_t dt)
     Kinematic_CalculationUpdate(dt, &controller->kinematic->current_vel, &controller->kinematic->current_odom);
     Controller_control_update(controller, &controller->kinematic->current_odom);
     Controller_StatusUpdate(controller, &controller->kinematic->current_odom);
-    Controller_setMotorTargetSpeed(controller->zdt_mot, controller->target_speed);
+    // 这个函数随机应变的
+    controller->setmotor_speed(controller, controller->target_speed);
 }
 
 void Controller_KinematicAndControlUpdateWithYaw(Controller_t *controller, uint16_t dt, float yaw)
@@ -148,5 +151,6 @@ void Controller_KinematicAndControlUpdateWithYaw(Controller_t *controller, uint1
     Kinematic_CalculationUpdateWithYaw(dt, &controller->kinematic->current_vel, &controller->kinematic->current_odom, yaw);
     Controller_control_update(controller, &controller->kinematic->current_odom);
     Controller_StatusUpdate(controller, &controller->kinematic->current_odom);
-    Controller_setMotorTargetSpeed(controller, controller->target_speed);
+    // 这个函数随电机改变
+    controller->setmotor_speed(controller, controller->target_speed);
 }

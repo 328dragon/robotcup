@@ -33,6 +33,8 @@ typedef struct {
     odom_t _odom_error;
 } Kinematic_t;
 
+void Kinematic_init(Kinematic_t *_Kinematic, float _a, float _b, chassis_t _disclass);
+
 // 函数声明
 void Kinematic_inv( cmd_vel_t *cmd_vel_in, float *speed_control,  Kinematic_t *_Kinematic);
 void  Kinematic_inv_global( cmd_vel_t *cmd_vel_in, float *speed_control,  odom_t *odom_in,  Kinematic_t *_Kinematic);
