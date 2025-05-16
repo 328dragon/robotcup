@@ -35,9 +35,9 @@ void Onmaincpp(void *pvParameters);
 void main_work(void)
 {
     Step_ZDT_Init(stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[0], 2, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[0], 3, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[0], 4, &huart3, 1, 0.06f, true);
+    Step_ZDT_Init(stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false);
+    Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -85,11 +85,11 @@ void OnChassicControl(void *pvParameters)
     uint16_t last_tick = xTaskGetTickCount();
     while (1)
     {
-        uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
-        last_tick = xTaskGetTickCount();
-        Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
-        // 步进不需要速度环，此处仅为了读取电机速度
-        ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
+       uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
+       last_tick = xTaskGetTickCount();
+       Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
+       // 步进不需要速度环，此处仅为了读取电机速度
+       ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
         vTaskDelay(10);
     }
 }

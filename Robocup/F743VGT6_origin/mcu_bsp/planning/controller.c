@@ -2,10 +2,14 @@
 
 void Controller_setMotorTargetSpeed(Controller_t *controller, float *target_vel)
 {
-    for (int i = 0; i < 4 ; i++)
+    for (int i = 0; i < 4; i++)
     {
         controller->zdt_mot[i]->motor_controller_t.set.velocity = target_vel[i];
     }
+    set_speed_target(controller->zdt_mot[0], target_vel[0]);
+    set_speed_target(controller->zdt_mot[1], target_vel[1]);
+    set_speed_target(controller->zdt_mot[2], target_vel[2]);
+    set_speed_target(controller->zdt_mot[3], target_vel[3]);
 }
 
 void ZDTController_MotorUpdate(Controller_t *controller, uint16_t dt)
@@ -29,9 +33,9 @@ void Controller_Init(Controller_t *controller, StepMotorZDT_t **_zdt_motor, Kine
     controller->ControlMode = SPEED_CONTROL_SELF;
     controller->setmotor_speed = Controller_setMotorTargetSpeed;
     controller->Controller_MotorUpdate = ZDTController_MotorUpdate;
-    uint32_t init_x_maxout=1;
-    uint32_t init_y_maxout=1;
-    uint32_t init_yaw_maxout=1;
+    uint32_t init_x_maxout = 1;
+    uint32_t init_y_maxout = 1;
+    uint32_t init_yaw_maxout = 1;
     // 初始化PID控制器
     PID_struct_init(&controller->pid_x, POSITION_PID, init_x_maxout, 1.0f, 0.2f, -0.4f, 0.4f);
     PID_struct_init(&controller->pid_y, POSITION_PID, init_y_maxout, 1.0f, 0.2f, -0.4f, 0.4f);
