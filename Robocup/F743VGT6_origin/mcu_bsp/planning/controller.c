@@ -1,5 +1,18 @@
 #include "controller.h"
 
+void Controller_setMotorTargetpos_vel(Controller_t *controller, float *target_vel, float *target_pos)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        controller->zdt_mot[i]->motor_controller_t.set.velocity = target_vel[i];
+        controller->zdt_mot[i]->motor_controller_t.set.deg_pos = target_pos[i];
+    }
+    set_speed_pos_target(controller->zdt_mot[0], target_vel[0], target_pos[0]);
+    set_speed_pos_target(controller->zdt_mot[1], target_vel[1], target_pos[1]);
+    set_speed_pos_target(controller->zdt_mot[2], target_vel[2], target_pos[2]);
+    set_speed_pos_target(controller->zdt_mot[3], target_vel[3], target_pos[3]);
+}
+
 void Controller_setMotorTargetSpeed(Controller_t *controller, float *target_vel)
 {
     for (int i = 0; i < 4; i++)
@@ -128,7 +141,6 @@ SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller, const odom
 {
     controller->kinematic->target_odom = *target_odom;
     controller->kinematic->_odom_error = *target_error;
-
     if (clearodom)
     {
         Kinematic_ClearOdometry(controller->kinematic);
