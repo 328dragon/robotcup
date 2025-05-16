@@ -96,12 +96,12 @@ void set_speed_target(StepMotorZDT_t *zdt_motor, float target)
     uint8_t len;
     if (zdt_motor->_target_rpm > 0)
     {
-        len = Step_Vel_Control(zdt_motor->_cmd_buffer, zdt_motor->motor_controller_t.id_protocol, zdt_motor->_dir, (uint16_t)(zdt_motor->_target_rpm), 0, false);
+        len = Step_Vel_Control(zdt_motor->_cmd_buffer, zdt_motor->motor_controller_t.id, zdt_motor->_dir, (uint16_t)(zdt_motor->_target_rpm), 0, false);
     }
     else
     { // 反转
         int dir_trans = zdt_motor->_dir == 0 ? 1 : 0;
-        len = Step_Vel_Control(zdt_motor->_cmd_buffer, zdt_motor->motor_controller_t.id_protocol, dir_trans, (uint16_t)(-zdt_motor->_target_rpm), 0, false);
+        len = Step_Vel_Control(zdt_motor->_cmd_buffer, zdt_motor->motor_controller_t.id, dir_trans, (uint16_t)(-zdt_motor->_target_rpm), 0, false);
     }
     HAL_UART_Transmit(zdt_motor->_USART, zdt_motor->_cmd_buffer, len, 1000); // 发送数据到电机
     HAL_Delay(1);                                                            // 傻逼电机需要延迟避免重包

@@ -33,12 +33,23 @@ void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
 
 void main_work(void)
-{
-    Step_ZDT_Init(stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false);
+{    
+	//x,z正常
+//    Step_ZDT_Init(stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false);
+//    Step_ZDT_Init(stepmotor_ptr[1], 2, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
+	//y,z正常
+//	    Step_ZDT_Init(stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false);
+//    Step_ZDT_Init(stepmotor_ptr[1], 2, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 1, 0.06f, false);
+//    Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 0, 0.06f, true);
+		    Step_ZDT_Init(stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
     Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
     Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
-
+	
+	
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
