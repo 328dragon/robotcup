@@ -71,8 +71,10 @@ void Error_Handler(void);
 #define LED_B_GPIO_Port GPIOD
 #define INT1_GRYO_Pin GPIO_PIN_2
 #define INT1_GRYO_GPIO_Port GPIOD
+#define INT1_GRYO_EXTI_IRQn EXTI2_IRQn
 #define INT1_ACCEL_Pin GPIO_PIN_3
 #define INT1_ACCEL_GPIO_Port GPIOD
+#define INT1_ACCEL_EXTI_IRQn EXTI3_IRQn
 #define CS1_GYRO_Pin GPIO_PIN_4
 #define CS1_GYRO_GPIO_Port GPIOD
 #define CS1_ACCEL_Pin GPIO_PIN_7

@@ -6,6 +6,9 @@
 #include "controller.h"
 #include "planner.h"
 #include "usart.h"
+#include "BMI088driver.h"
+
+
 float DEBUG = 0.0f;
 float DEBUG2 = 0.0f;
 float DEBUG3 = 0.0f;
@@ -27,23 +30,20 @@ StepMotorZDT_t *stepmotor_ptr[4] = {
 TaskHandle_t Chassic_control_handle; // 底盘控制
 TaskHandle_t main_cpp_handle;        // 主函数
 TaskHandle_t Planner_update_handle;  // 轨迹规划
-
+TaskHandle_t IMU_read_handle;     // IMU读取
 void OnChassicControl(void *pvParameters);
 void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
-
+void IMU_Read_task(void *pvParameters);
 void main_work(void)
 {    
-	//x,z正常
-//    Step_ZDT_Init(stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false);
-//    Step_ZDT_Init(stepmotor_ptr[1], 2, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
-	//y,z正常
-//	    Step_ZDT_Init(stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false);
-//    Step_ZDT_Init(stepmotor_ptr[1], 2, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 1, 0.06f, false);
-//    Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 0, 0.06f, true);
+
+			  while(BMI088_init())
+  {
+      ;
+  }
+	
+	//注意电机编号如下所示
 		    Step_ZDT_Init(stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
     Step_ZDT_Init(stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
     Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
@@ -60,6 +60,7 @@ void main_work(void)
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 600, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 1000, NULL, 4, &Planner_update_handle);
+	BaseType_t ok5 = xTaskCreate(IMU_Read_task, "IMU_Read_task", 1000, NULL, 4, &IMU_read_handle); 
     if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS)
     {
         // 任务创建失败，进入死循环
@@ -68,6 +69,13 @@ void main_work(void)
             // uart_printf("create task failed\n");
         }
     }
+}
+
+
+void IMU_Read_task(void *pvParameters)
+{
+BMI088_read(gyro, accel, &temp);
+vTaskDelay(10);
 }
 
 void Onmaincpp(void *pvParameters)

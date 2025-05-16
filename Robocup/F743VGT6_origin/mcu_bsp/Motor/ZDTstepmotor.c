@@ -165,7 +165,7 @@ void set_speed_pos_target(StepMotorZDT_t *zdt_motor, float target_speed, float t
     
     // 更新控制器设置
     zdt_motor->motor_controller_t.set.velocity = target_speed;
-    zdt_motor->motor_controller_t.set.position = target_pos;
+    zdt_motor->motor_controller_t.set.deg_pos = target_pos;
 }
 
 float get_linear_speed(StepMotorZDT_t *zdt_motor)
