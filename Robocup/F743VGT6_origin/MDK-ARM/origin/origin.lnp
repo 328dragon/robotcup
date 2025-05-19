@@ -64,6 +64,8 @@
 "origin\lib_common.o"
 "origin\lib_math.o"
 "origin\lib_promise.o"
+"origin\lcd.o"
+"origin\lcd_init.o"
 --strict --scatter "origin\origin.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

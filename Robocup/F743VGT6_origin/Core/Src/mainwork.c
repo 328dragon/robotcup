@@ -7,6 +7,9 @@
 #include "planner.h"
 #include "usart.h"
 #include "BMI088driver.h"
+#include "lcd.h"
+#include "lcd_init.h"
+#include "pic.h"
 
 float DEBUG = 0.0f;
 float DEBUG2 = 0.0f;
@@ -26,6 +29,7 @@ StepMotorZDT_t *stepmotor_ptr[4] = {
     &stepmotor_instances[2],
     &stepmotor_instances[3]};
 
+TaskHandle_t LCD_Show_handle;      // 显示
 TaskHandle_t Chassic_control_handle; // 底盘控制
 TaskHandle_t main_cpp_handle;        // 主函数
 TaskHandle_t Planner_update_handle;  // 轨迹规划
@@ -34,7 +38,8 @@ void OnChassicControl(void *pvParameters);
 void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
 void IMU_Read_task(void *pvParameters);
-
+void LCD_Show_task(void *pvParameters);
+		
 void main_work(void)
 {
     while (BMI088_init())
@@ -42,6 +47,7 @@ void main_work(void)
         ;
     }
 
+		
     // 注意电机编号如下所示
     Step_ZDT_Init(stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
     Step_ZDT_Init(stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
@@ -54,18 +60,41 @@ void main_work(void)
     Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
     Controller_Init(ChassisControl_ptr, stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
-
+		 
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 600, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
-    BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 1000, NULL, 4, &Planner_update_handle);
-    BaseType_t ok5 = xTaskCreate(IMU_Read_task, "IMU_Read_task", 1000, NULL, 4, &IMU_read_handle);
-    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS)
+    BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 600, NULL, 4, &Planner_update_handle);
+    BaseType_t ok5 = xTaskCreate(IMU_Read_task, "IMU_Read_task", 400, NULL, 4, &IMU_read_handle);
+    BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 600, NULL, 1, &LCD_Show_handle);
+    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS||ok5 != pdPASS )
     {
         // 任务创建失败，进入死循环
         while (1)
         {
             // uart_printf("create task failed\n");
         }
+    }
+
+}
+
+void LCD_Show_task(void *pvParameters)
+{
+		float t=0;
+			//屏幕
+		LCD_Init();
+		LCD_Fill(0,0,LCD_W,LCD_H,WHITE);
+    while (1)
+    {
+        // 显示
+		LCD_ShowChinese(40,0,"中景园电子",RED,WHITE,16,0);
+		LCD_ShowString(10,20,"LCD_W:",RED,WHITE,16,0);
+		LCD_ShowIntNum(58,20,LCD_W,3,RED,WHITE,16);
+		LCD_ShowString(10,40,"LCD_H:",RED,WHITE,16,0);
+		LCD_ShowIntNum(58,40,LCD_H,3,RED,WHITE,16);
+		LCD_ShowFloatNum1(10,60,t,4,RED,WHITE,16);
+		t+=0.11;
+		LCD_ShowPicture(100,20,40,40,gImage_1);
+        vTaskDelay(100);
     }
 }
 
@@ -82,6 +111,7 @@ void Onmaincpp(void *pvParameters)
 {
     while (1)
     {
+			
         Controller_set_vel_target(ChassisControl_ptr, (cmd_vel_t){DEBUG, DEBUG2, DEBUG3}, true);
         vTaskDelay(500);
     }

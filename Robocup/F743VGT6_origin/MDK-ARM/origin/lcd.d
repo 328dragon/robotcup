@@ -1,5 +1,6 @@
-origin/mainwork.o: ..\Core\Src\mainwork.c ..\Core\Inc\mainwork.h \
-  ..\Core\Inc\main.h ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
+origin/lcd.o: ..\mcu_bsp\LCD\lcd.c ..\mcu_bsp\LCD\lcd.h \
+  ..\mcu_bsp\LCD\lcd_init.h ..\Core\Inc\main.h \
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   ..\Core\Inc\stm32f4xx_hal_conf.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h \
@@ -33,7 +34,6 @@ origin/mainwork.o: ..\Core\Src\mainwork.c ..\Core\Inc\mainwork.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pcd.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_ll_usb.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pcd_ex.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
   ..\Core\Inc\FreeRTOSConfig.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
@@ -43,13 +43,4 @@ origin/mainwork.o: ..\Core\Src\mainwork.c ..\Core\Inc\mainwork.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\timers.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\queue.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\semphr.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\event_groups.h \
-  ..\mcu_bsp\Motor\ZDTstepmotor.h ..\mcu_bsp\Motor\motor_def.h \
-  ..\mcu_bsp\chassis\Kinematic.h ..\mcu_bsp\planning\controller.h \
-  ..\Lib\Lib_pormise.h ..\mcu_bsp\system_controller\pid.h \
-  ..\mcu_bsp\planning\planner.h ..\Lib\Lib_Math.h ..\Core\Inc\usart.h \
-  ..\mcu_bsp\IMU\BMI088driver.h ..\mcu_bsp\IMU\BMI_struct_typedef.h \
-  ..\mcu_bsp\LCD\lcd.h ..\mcu_bsp\LCD\lcd_init.h ..\mcu_bsp\LCD\pic.h
+  ..\mcu_bsp\LCD\lcdfont.h

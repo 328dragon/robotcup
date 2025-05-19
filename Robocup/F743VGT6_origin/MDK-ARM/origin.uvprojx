@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../mcu_bsp/planning;../mcu_bsp/system_controller;../Lib;../mcu_bsp/IMU</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../mcu_bsp/planning;../mcu_bsp/system_controller;../Lib;../mcu_bsp/IMU;../mcu_bsp/LCD</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1624,6 +1624,21 @@
               <FileName>Lib_promise.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Lib\Lib_promise.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>LCD</GroupName>
+          <Files>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\LCD\lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd_init.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\LCD\lcd_init.c</FilePath>
             </File>
           </Files>
         </Group>
