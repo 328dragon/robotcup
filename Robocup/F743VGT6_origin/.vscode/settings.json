@@ -13,6 +13,10 @@
         "kinematic.h": "c",
         "math.h": "c",
         "lib_pormise.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "lcd.h": "c",
+        "lcdfont.h": "c",
+        "lcd_init.h": "c",
+        "stdint.h": "c"
     }
 }

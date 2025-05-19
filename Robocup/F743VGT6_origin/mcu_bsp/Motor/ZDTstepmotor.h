@@ -20,6 +20,7 @@ typedef struct
 void Step_ZDT_Init(StepMotorZDT_t *zdt_mot,  uint32_t id ,UART_HandleTypeDef *_USART,int8_t _dir, float _wheel_diameter, bool _have_pub_permission);
 
 void set_speed_target(StepMotorZDT_t *zdt_motor, float target);
+void set_speed_pos_target(StepMotorZDT_t *zdt_motor, float target_speed, float target_pos);
 float get_linear_speed(StepMotorZDT_t* zdt_motor);
 
 #endif

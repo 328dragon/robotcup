@@ -1,26 +1,27 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
 #include "can.h"
+#include "dma.h"
 #include "i2c.h"
 #include "spi.h"
 #include "tim.h"
@@ -97,9 +98,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_CAN1_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_CAN2_Init();
@@ -119,29 +120,28 @@ int main(void)
   MX_USART6_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_14,0);
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_15,0);
-	
-	main_work();
-	
-//uint8_t data[8]={1,2,3,4,5,6,7,8};		
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, 0);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, 0);
 
-//		
-//		  DM_4310_Register(&hcan2, 0x01, 0x00, pos_vel_mode);
-//			DM_4310_Register(&hcan2, 0x02, 0x03, pos_vel_mode);
-//  Enable_DM(DM_J4310_instnce[0]);
-//	HAL_Delay(10);
-//	  Enable_DM(DM_J4310_instnce[1]);
-//	 DM_J4310_instnce[0]->dm_controller_instance.P_des=0;
-//	 DM_J4310_instnce[0]->dm_controller_instance.V_des=6; 
-//	 	 DM_J4310_instnce[1]->dm_controller_instance.P_des=0;
-//	 DM_J4310_instnce[1]->dm_controller_instance.V_des=6; 
+  main_work();
 
+  // uint8_t data[8]={1,2,3,4,5,6,7,8};
+
+  //
+  //		  DM_4310_Register(&hcan2, 0x01, 0x00, pos_vel_mode);
+  //			DM_4310_Register(&hcan2, 0x02, 0x03, pos_vel_mode);
+  //  Enable_DM(DM_J4310_instnce[0]);
+  //	HAL_Delay(10);
+  //	  Enable_DM(DM_J4310_instnce[1]);
+  //	 DM_J4310_instnce[0]->dm_controller_instance.P_des=0;
+  //	 DM_J4310_instnce[0]->dm_controller_instance.V_des=6;
+  //	 	 DM_J4310_instnce[1]->dm_controller_instance.P_des=0;
+  //	 DM_J4310_instnce[1]->dm_controller_instance.V_des=6;
 
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
-   MX_FREERTOS_Init();
+  MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
@@ -156,12 +156,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		HAL_UART_Transmit(&huart3,data,8,HAL_MAX_DELAY);
-//    HAL_Delay(10);
-//		Control_DM( DM_J4310_instnce[0]);
-//		Control_DM( DM_J4310_instnce[1]);
-//    HAL_Delay(10);
-
+    //		HAL_UART_Transmit(&huart3,data,8,HAL_MAX_DELAY);
+    //    HAL_Delay(10);
+    //		Control_DM( DM_J4310_instnce[0]);
+    //		Control_DM( DM_J4310_instnce[1]);
+    //    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }

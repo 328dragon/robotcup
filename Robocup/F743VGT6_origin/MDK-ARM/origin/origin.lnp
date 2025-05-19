@@ -6,6 +6,7 @@
 "origin\freertos.o"
 "origin\adc.o"
 "origin\can.o"
+"origin\dma.o"
 "origin\i2c.o"
 "origin\spi.o"
 "origin\tim.o"
@@ -48,6 +49,8 @@
 "origin\kinematic.o"
 "origin\controller.o"
 "origin\planner.o"
+"origin\bmi088driver.o"
+"origin\bmi088middleware.o"
 "origin\croutine.o"
 "origin\event_groups.o"
 "origin\list.o"
@@ -61,6 +64,8 @@
 "origin\lib_common.o"
 "origin\lib_math.o"
 "origin\lib_promise.o"
+"origin\lcd.o"
+"origin\lcd_init.o"
 --strict --scatter "origin\origin.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
