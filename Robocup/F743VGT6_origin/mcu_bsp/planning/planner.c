@@ -10,7 +10,7 @@ void Planner_init(Planner_t *self, Controller_t *controller)
     CubicSpline_Init(&self->cub_spline[2], (Point){0, 0}, (Point){0, 0}, (Point){0, 0});
     self->controller = controller;
     SimpleStatus_t_init(&self->promise);
-    self->control_mode = PLANNER_MODE_OPEN_CONTROL;
+    self->control_mode = PLANNER_MODE_CLOSE_CONTROL;
 }
 void Planner_update(Planner_t *self, uint16_t dt)
 {
@@ -40,9 +40,9 @@ void Planner_update(Planner_t *self, uint16_t dt)
             t = t > self->target_t ? self->target_t : t;
 
             odom_t position = {
-                CubicSpline_Eval(&self->cub_spline[0],t) + self->start_odom.x,
-               CubicSpline_Eval(&self->cub_spline[1],t) + self->start_odom.y,
-                CubicSpline_Eval(&self->cub_spline[2],t) + self->start_odom.yaw};
+                CubicSpline_Eval(&self->cub_spline[0], t) + self->start_odom.x,
+                CubicSpline_Eval(&self->cub_spline[1], t) + self->start_odom.y,
+                CubicSpline_Eval(&self->cub_spline[2], t) + self->start_odom.yaw};
 
             Controller_SetClosePosition(self->controller, &position, &self->controller->kinematic->_odom_error, false);
 
@@ -82,8 +82,17 @@ SimpleStatus_t *Planner_LoactaionOpenControl(Planner_t *self, const odom_t *targ
         targetyaw = target_odom->yaw;
         Kinematic_ClearOdometry(self->controller->kinematic);
     }
-
-    float target_t = Sqrt(targetx * targetx + targety * targety) / (max_v * 0.5);
+    float target_t;
+		
+    if (targetx == 0 && targety == 0 && targetyaw == 0)
+    {
+        target_t = 0;
+    }
+    else
+    {
+       target_t = Sqrt(targetx * targetx + targety * targety) / (max_v * 0.5) + fabs(targetyaw) / (max_v * 0.5);
+    }
+		
     CubicSpline_Init(&self->cub_spline[0], (Point){0, 0}, (Point){target_t, targetx}, (Point){0, target_vel->linear_x});
     CubicSpline_Init(&self->cub_spline[1], (Point){0, 0}, (Point){target_t, targety}, (Point){0, target_vel->linear_y});
     CubicSpline_Init(&self->cub_spline[2], (Point){0, 0}, (Point){target_t, targetyaw}, (Point){0, target_vel->angular_z});

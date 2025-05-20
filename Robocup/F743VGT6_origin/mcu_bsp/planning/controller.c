@@ -1,6 +1,6 @@
 #include "controller.h"
-
-void Controller_setMotorTargetpos_vel(Controller_t *controller, float *target_vel, float *target_pos)
+//绝对式，速度只是一个参考，调用内部函数
+void Controller_setMotor_Targetpos_vel(Controller_t *controller, float *target_pos,float *target_vel)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -43,9 +43,10 @@ void Controller_Init(Controller_t *controller, StepMotorZDT_t **_zdt_motor, Kine
         controller->zdt_mot[i] = _zdt_motor[i];
     }
     controller->kinematic = kinematic;
-    controller->ControlMode = SPEED_CONTROL_SELF;
+    controller->ControlMode = LOCATION_CONTROL;
     controller->setmotor_speed = Controller_setMotorTargetSpeed;
     controller->Controller_MotorUpdate = ZDTController_MotorUpdate;
+    controller->setmotor_pos_vel = Controller_setMotor_Targetpos_vel;
     uint32_t init_x_maxout = 1;
     uint32_t init_y_maxout = 1;
     uint32_t init_yaw_maxout = 1;
@@ -98,6 +99,24 @@ void Controller_set_vel_target(Controller_t *controller, cmd_vel_t cmd_vel_in, b
         Kinematic_inv(&(controller->kinematic->target_val), controller->target_speed, controller->kinematic);
     }
 }
+void Controller_set_pos_vel_target(Controller_t *controller, odom_t target_pos_odom,cmd_vel_t cmd_vel_in, bool use_ground_control)
+{
+    controller->kinematic->target_odom = target_pos_odom;
+    controller->kinematic->target_val = cmd_vel_in;
+
+    if (use_ground_control)
+    {
+        controller->ControlMode = SPEED_CONTROL_GROUND;
+    }
+    else
+    {
+        controller->ControlMode = LOCATION_CONTROL;
+        Kinematic_inv(&(controller->kinematic->target_val), controller->target_speed, controller->kinematic);
+    }
+}
+
+
+
 
 void Controller_control_update(Controller_t *controller, odom_t *odom_in)
 {
@@ -137,7 +156,7 @@ void Controller_control_update(Controller_t *controller, odom_t *odom_in)
     }
 }
 
-SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller, const odom_t *target_odom, const odom_t *target_error, bool clearodom)
+SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller,  odom_t *target_odom,  odom_t *target_error, bool clearodom)
 {
     controller->kinematic->target_odom = *target_odom;
     controller->kinematic->_odom_error = *target_error;
@@ -145,7 +164,6 @@ SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller, const odom
     {
         Kinematic_ClearOdometry(controller->kinematic);
     }
-
     controller->ControlMode = LOCATION_CONTROL;
     SimpleStatus_t_start(&controller->status);
     return &controller->status;
@@ -153,11 +171,11 @@ SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller, const odom
 
 void Controller_KinematicAndControlUpdate(Controller_t *controller, uint16_t dt)
 {
-    Kinematic_forward(controller->current_speed, &controller->kinematic->current_vel, controller->kinematic);
-    Kinematic_CalculationUpdate(dt, &controller->kinematic->current_vel, &controller->kinematic->current_odom);
+    Kinematic_forward(controller->current_speed, &controller->kinematic->current_vel, controller->kinematic);//从当前车身的速度推算底盘的速度
+    Kinematic_CalculationUpdate(dt, &controller->kinematic->current_vel, &controller->kinematic->current_odom);//里程计更新函数，需要传递进dt(单位为ms)
     Controller_control_update(controller, &controller->kinematic->current_odom);
-    Controller_StatusUpdate(controller, &controller->kinematic->current_odom);
-    // 这个函数随机应变的
+    Controller_StatusUpdate(controller, &controller->kinematic->current_odom);//状态更新（更新完成与否）
+    // 这个函数根据电机随机应变
     controller->setmotor_speed(controller, controller->target_speed);
 }
 
@@ -169,4 +187,5 @@ void Controller_KinematicAndControlUpdateWithYaw(Controller_t *controller, uint1
     Controller_StatusUpdate(controller, &controller->kinematic->current_odom);
     // 这个函数随电机改变
     controller->setmotor_speed(controller, controller->target_speed);
+
 }

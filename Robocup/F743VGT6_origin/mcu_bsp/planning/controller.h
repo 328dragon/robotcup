@@ -21,6 +21,8 @@ typedef struct _
     StepMotorZDT_t *zdt_mot[4];
     float target_speed[4];
     float current_speed[4];
+    float target_pos[4];
+    float current_pos[4];
     ControlMode_t ControlMode;
     SimpleStatus_t status;
     pid_t pid_x;
@@ -28,6 +30,7 @@ typedef struct _
     pid_t pid_yaw;
     Kinematic_t *kinematic;
     void (*setmotor_speed)(struct _ *, float *);
+    void (*setmotor_pos_vel)(struct _ *,  float *,float *);
     void (*Controller_MotorUpdate)(struct _ *, uint16_t);
 } Controller_t;
 
@@ -40,7 +43,8 @@ void Controller_KinematicAndControlUpdate(Controller_t *controller, uint16_t dt)
 void Controller_KinematicAndControlUpdateWithYaw(Controller_t *controller, uint16_t dt, float yaw);
 void Controller_StatusUpdate(Controller_t *controller, odom_t *odom_in);
 void Controller_set_vel_target(Controller_t *controller, cmd_vel_t cmd_vel_in, bool use_ground_control);
+void Controller_set_pos_vel_target(Controller_t *controller, odom_t target_pos_odom, cmd_vel_t cmd_vel_in, bool use_ground_control);
 void Controller_control_update(Controller_t *controller, odom_t *odom_in);
-SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller, const odom_t *target_odom, const odom_t *target_error, bool clearodom);
+SimpleStatus_t *Controller_SetClosePosition(Controller_t *controller,  odom_t *target_odom,  odom_t *target_error, bool clearodom);
 
 #endif

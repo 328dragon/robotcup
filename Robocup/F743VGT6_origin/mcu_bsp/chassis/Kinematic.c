@@ -84,10 +84,8 @@ void Kinematic_forward( float *current_speed, cmd_vel_t *cmd_vel_in,  Kinematic_
     float v0 = current_speed[0]; // 左上轮子速度
     float v1 = current_speed[1]; // 右上轮子速度
     float v2 = current_speed[2]; // 左下轮子速度
-    float v3 = current_speed[3]; // 右下轮子速度                                     445
+    float v3 = current_speed[3]; // 右下轮子速度                                
 	
-	
-
     // 修正后的正解算公式
     cmd_vel_in->linear_x = (v0 + v1 + v2 + v3) / 4.0;               // X轴方向速度
     cmd_vel_in->linear_y = (-v0 + v1 + v2 - v3) / 4.0;              // Y轴方向速度
