@@ -971,6 +971,11 @@
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\IMU\BMI088Middleware.c</FilePath>
             </File>
+            <File>
+              <FileName>StepMotor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\Motor\StepMotor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

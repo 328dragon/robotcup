@@ -25,16 +25,16 @@ cmd_vel_t debug_target_erro = {0.01, 0.01, 0.01};
 static Controller_t ChassisControl_instance;
 static Kinematic_t kinematic_instance;
 static Planner_t planner_instance;
-static StepMotorZDT_t stepmotor_instances[4]; // 静态实例
+static StepMotorZDT_t zdt_stepmotor_instances[4]; // 静态实例
 
 Controller_t *ChassisControl_ptr; // 控制器实例
 Kinematic_t *kinematic_ptr;       // 麦轮实例
 Planner_t *planner_ptr;           // 规划
-StepMotorZDT_t *stepmotor_ptr[4] = {
-    &stepmotor_instances[0],
-    &stepmotor_instances[1],
-    &stepmotor_instances[2],
-    &stepmotor_instances[3]};
+StepMotorZDT_t *zdt_stepmotor_ptr[4] = {
+    &zdt_stepmotor_instances[0],
+    &zdt_stepmotor_instances[1],
+    &zdt_stepmotor_instances[2],
+    &zdt_stepmotor_instances[3]};
 
 TaskHandle_t LCD_Show_handle;        // 显示
 TaskHandle_t Chassic_control_handle; // 底盘控制
@@ -44,8 +44,7 @@ TaskHandle_t IMU_read_handle;        // IMU读取
 void OnChassicControl(void *pvParameters);
 void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
-void IMU_Read_task(void *pvParameters);
-void LCD_Show_task(void *pvParameters);
+void IMU_Read_task(void *pvParameters);     void LCD_Show_task(void *pvParameters);
 
 void main_work(void)
 {
@@ -55,16 +54,16 @@ void main_work(void)
     }
 
     // 注意电机编号如下所示
-    Step_ZDT_Init(stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
-    Step_ZDT_Init(stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
+    Step_ZDT_Init(zdt_stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
     Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
-    Controller_Init(ChassisControl_ptr, stepmotor_ptr, kinematic_ptr);
+    Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
 
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 1000, NULL, 3, &Chassic_control_handle);

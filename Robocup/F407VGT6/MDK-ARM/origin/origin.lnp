@@ -51,6 +51,7 @@
 "origin\planner.o"
 "origin\bmi088driver.o"
 "origin\bmi088middleware.o"
+"origin\stepmotor.o"
 "origin\croutine.o"
 "origin\event_groups.o"
 "origin\list.o"
