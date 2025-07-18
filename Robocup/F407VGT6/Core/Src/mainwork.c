@@ -18,7 +18,8 @@
 float DEBUG = 0.0f;
 float DEBUG2 = 0.0f;
 float DEBUG3 = 0.0f;
-odom_t deubg_target_odom = {1, 1, 0};
+cmd_vel_t debug_target_vel = {0, 0, 0};
+odom_t deubg_target_odom = {0, 0, 0};
 cmd_vel_t debug_target_erro = {0.01, 0.01, 0.01};
 
 // 实例化
@@ -54,10 +55,15 @@ void main_work(void)
     }
 
     // 注意电机编号如下所示
-    Step_ZDT_Init(zdt_stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
-    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
-    Step_ZDT_Init(zdt_stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
+		   Step_ZDT_Init(zdt_stepmotor_ptr[0], 3, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 4, &huart3, 1, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 2, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 1, &huart3, 1, 0.06f, true);
+//		
+//    Step_ZDT_Init(zdt_stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
+//    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(zdt_stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -124,39 +130,78 @@ void Onmaincpp(void *pvParameters)
 {
 
     SimpleStatus_t *status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, true);
-    int target_pot = 1;
     int zero_flag = 0;
     while (1)
     {
+//速度位置式有问题
+//        Controller_set_pos_vel_target(ChassisControl_ptr, deubg_target_odom, debug_target_vel, false);
+			//纯速度式验证没问题
+//        Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
         if (SimpleStatus_t_isResolved(status))
         {
-            if (zero_flag)
-            {
-                odom_t zero_odom = {0, 0, 0};
-                status = Planner_LoactaionCloseControl(planner_ptr, &zero_odom, 0.2f, &debug_target_erro, true);
-                planner_ptr->controller->kinematic->target_odom = (odom_t){0, 0, 0};
-            }
-            else  if(zero_flag==0)
-            {
-                target_pot++;
-                if (target_pot == 2)
-                {
-                    deubg_target_odom = (odom_t){-1, -1, 0};
-                }
-                if (target_pot == 3)
-                {
-                    deubg_target_odom = (odom_t){0, 0, 0};
-                    zero_flag = 1;
-                }
+//            if (zero_flag)
+//            {
+//                odom_t zero_odom = {0, 0, 0};
+//                status = Planner_LoactaionCloseControl(planner_ptr, &zero_odom, 0.2f, &debug_target_erro, true);
+//                planner_ptr->controller->kinematic->target_odom = (odom_t){0, 0, 0};
+//            }
+//            else  if(zero_flag==0)
+//            {
+//                target_pot++;
+//                if (target_pot == 2)
+//                {
+//                    deubg_target_odom = (odom_t){-1, -1, 0};
+//                }
+//                if (target_pot == 3)
+//                {
+//                    deubg_target_odom = (odom_t){0, 0, 0};
+//                    zero_flag = 1;
+//                }
 
-                status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, true);
-            }
+//                status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, true);
+//            }
+						  
+						switch(zero_flag)
+						{
+							
+							case 0:
+							{
+										zero_flag++;
+								break;
+							}				
+							case 1:
+							{
+						   	odom_t zero_odom = {0, 0, 0};
+							  planner_ptr->controller->kinematic->target_odom = (odom_t){0, 0, 0};
+								vTaskDelay(2000);
+								zero_flag++;
+								break;
+							}
+						  case 2:
+							{
+//							deubg_target_odom = (odom_t){-1, -1, 0};
+								vTaskDelay(10000);
+								zero_flag++;
+							break;
+							}
+							case 3:
+							{
+//							deubg_target_odom = (odom_t){2, 2, 0};
+							vTaskDelay(10000);						
+							break;
+							}
+							default:break;						
+						}			
+						status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, false);
+//						
+						
         }
 
         vTaskDelay(200);
     }
 }
 
+//轨迹规划更新任务
 void OnPlannerUpdate(void *pvParameters)
 {
     uint16_t last_tick = xTaskGetTickCount();
@@ -168,7 +213,7 @@ void OnPlannerUpdate(void *pvParameters)
         vTaskDelay(50);
     }
 }
-
+//底盘更新任务
 void OnChassicControl(void *pvParameters)
 {
     uint16_t last_tick = xTaskGetTickCount();
