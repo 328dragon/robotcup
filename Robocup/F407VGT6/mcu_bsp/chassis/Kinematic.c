@@ -8,6 +8,9 @@ _Kinematic->diclass = _disclass;
 _Kinematic->current_odom.x = 0;
 _Kinematic->current_odom.y = 0;
 _Kinematic->current_odom.yaw = 0;
+_Kinematic->_odom_error.x=0.1;
+_Kinematic->_odom_error.y=0.1;
+_Kinematic->_odom_error.yaw=0.1;
 }
 
 

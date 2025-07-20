@@ -70,7 +70,7 @@ SimpleStatus_t *Planner_LoactaionOpenControl(Planner_t *self, const odom_t *targ
     float targetx, targety, targetyaw;
 
     if (!clearodom)
-    {
+    { //重读现在里程计，归零
         targetx = target_odom->x - self->controller->kinematic->current_odom.x;
         targety = target_odom->y - self->controller->kinematic->current_odom.y;
         targetyaw = target_odom->yaw - self->controller->kinematic->current_odom.yaw;

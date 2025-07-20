@@ -3,9 +3,9 @@
 <title>Static Call Graph - [origin\origin.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image origin\origin.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6220000: Last Updated: Fri Jul 18 22:04:33 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6220000: Last Updated: Mon Jul 21 01:28:27 2025
 <BR><P>
-<H3>Maximum Stack Usage =        440 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        512 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 Onmaincpp &rArr; Planner_LoactaionCloseControl &rArr; Planner_LoactaionOpenControl &rArr; CubicSpline_Init &rArr; __aeabi_d2f
 <P>
@@ -1329,7 +1329,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Controller_KinematicAndControlUpdate
 </UL>
 
-<P><STRONG><a name="[138]"></a>Kinematic_init</STRONG> (Thumb, 62 bytes, Stack size 20 bytes, kinematic.o(.text.Kinematic_init))
+<P><STRONG><a name="[138]"></a>Kinematic_init</STRONG> (Thumb, 82 bytes, Stack size 20 bytes, kinematic.o(.text.Kinematic_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = Kinematic_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main_work
@@ -1725,11 +1725,12 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> mainwork.o(.text.main_work)
 </UL>
-<P><STRONG><a name="[63]"></a>Onmaincpp</STRONG> (Thumb, 224 bytes, Stack size 48 bytes, mainwork.o(.text.Onmaincpp))
-<BR><BR>[Stack]<UL><LI>Max Depth = 440<LI>Call Chain = Onmaincpp &rArr; Planner_LoactaionCloseControl &rArr; Planner_LoactaionOpenControl &rArr; CubicSpline_Init &rArr; __aeabi_d2f
+<P><STRONG><a name="[63]"></a>Onmaincpp</STRONG> (Thumb, 434 bytes, Stack size 120 bytes, mainwork.o(.text.Onmaincpp))
+<BR><BR>[Stack]<UL><LI>Max Depth = 512<LI>Call Chain = Onmaincpp &rArr; Planner_LoactaionCloseControl &rArr; Planner_LoactaionOpenControl &rArr; CubicSpline_Init &rArr; __aeabi_d2f
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SimpleStatus_t_isResolved
 <LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Planner_LoactaionCloseControl
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SimpleStatus_t_init
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> mainwork.o(.text.main_work)
@@ -1774,8 +1775,8 @@ Global Symbols
 <P><STRONG><a name="[123]"></a>Planner_init</STRONG> (Thumb, 244 bytes, Stack size 184 bytes, planner.o(.text.Planner_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = Planner_init &rArr; CubicSpline_Init &rArr; __aeabi_d2f
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CubicSpline_Init
-<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SimpleStatus_t_init
+<BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SimpleStatus_t_init
+<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CubicSpline_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main_work
 </UL>
@@ -1803,7 +1804,8 @@ Global Symbols
 <P><STRONG><a name="[95]"></a>SimpleStatus_t_init</STRONG> (Thumb, 14 bytes, Stack size 4 bytes, lib_promise.o(.text.SimpleStatus_t_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = SimpleStatus_t_init
 </UL>
-<BR>[Called By]<UL><LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Planner_init
+<BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Onmaincpp
+<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Planner_init
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Controller_Init
 </UL>
 

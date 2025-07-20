@@ -20,7 +20,7 @@ float DEBUG2 = 0.0f;
 float DEBUG3 = 0.0f;
 cmd_vel_t debug_target_vel = {0, 0, 0};
 odom_t deubg_target_odom = {0, 0, 0};
-cmd_vel_t debug_target_erro = {0.01, 0.01, 0.01};
+odom_t debug_target_erro = {0.01, 0.01, 0.01};
 
 // 实例化
 static Controller_t ChassisControl_instance;
@@ -45,7 +45,8 @@ TaskHandle_t IMU_read_handle;        // IMU读取
 void OnChassicControl(void *pvParameters);
 void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
-void IMU_Read_task(void *pvParameters);     void LCD_Show_task(void *pvParameters);
+void IMU_Read_task(void *pvParameters);
+void LCD_Show_task(void *pvParameters);
 
 void main_work(void)
 {
@@ -55,15 +56,10 @@ void main_work(void)
     }
 
     // 注意电机编号如下所示
-		   Step_ZDT_Init(zdt_stepmotor_ptr[0], 3, &huart3, 0, 0.06f, false);
+    Step_ZDT_Init(zdt_stepmotor_ptr[0], 3, &huart3, 0, 0.06f, false);
     Step_ZDT_Init(zdt_stepmotor_ptr[1], 4, &huart3, 1, 0.06f, false);
     Step_ZDT_Init(zdt_stepmotor_ptr[2], 2, &huart3, 0, 0.06f, false);
     Step_ZDT_Init(zdt_stepmotor_ptr[3], 1, &huart3, 1, 0.06f, true);
-//		
-//    Step_ZDT_Init(zdt_stepmotor_ptr[0], 2, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 1, 0.06f, false);
-//    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(zdt_stepmotor_ptr[3], 4, &huart3, 1, 0.06f, true);
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -128,80 +124,65 @@ void IMU_Read_task(void *pvParameters)
 
 void Onmaincpp(void *pvParameters)
 {
-
-    SimpleStatus_t *status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, true);
-    int zero_flag = 0;
+    SimpleStatus_t debug_status_instance;
+    SimpleStatus_t  *debug_status=&debug_status_instance;
+    SimpleStatus_t_init(debug_status);
+    // 定义目标点和误差范围
+    odom_t target_points[2] = {
+        {1.0, 0.0, 0.0},    // 第一个目标点：x=1m
+        {-1.0, -1.0, 0.0}   // 第二个目标点：返回对角线
+    };
+    
+ debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 0);
+    int position_flag = 0;
+	int begin_flag=0;
     while (1)
     {
-//速度位置式有问题
-//        Controller_set_pos_vel_target(ChassisControl_ptr, deubg_target_odom, debug_target_vel, false);
-			//纯速度式验证没问题
-//        Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
-        if (SimpleStatus_t_isResolved(status))
+        // 速度位置式有问题
+        //             Controller_set_pos_vel_target(ChassisControl_ptr, deubg_target_odom, debug_target_vel, false);
+        // 纯速度式验证没问题
+        //    Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+			
+        if (begin_flag == 1)
         {
-//            if (zero_flag)
-//            {
-//                odom_t zero_odom = {0, 0, 0};
-//                status = Planner_LoactaionCloseControl(planner_ptr, &zero_odom, 0.2f, &debug_target_erro, true);
-//                planner_ptr->controller->kinematic->target_odom = (odom_t){0, 0, 0};
-//            }
-//            else  if(zero_flag==0)
-//            {
-//                target_pot++;
-//                if (target_pot == 2)
-//                {
-//                    deubg_target_odom = (odom_t){-1, -1, 0};
-//                }
-//                if (target_pot == 3)
-//                {
-//                    deubg_target_odom = (odom_t){0, 0, 0};
-//                    zero_flag = 1;
-//                }
+					switch (position_flag)
+            {
+            case 0:
+            {
+                // 位置控制
+                if (SimpleStatus_t_isResolved(debug_status))
+                {
+                    deubg_target_odom = (odom_t){1, 1, 0};
+                    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
+                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
+                    debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 1);
+                    position_flag++;
+                }
+                break;
+            }
+            case 1:
+            {
+                // 速度控制
+                if (SimpleStatus_t_isResolved(debug_status))
+                {
+                    deubg_target_odom = (odom_t){-1, -1, 0};
+                    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
+                    debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 0);
+                    position_flag++;
+                }
+                break;
+            }
 
-//                status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, true);
-//            }
-						  
-						switch(zero_flag)
-						{
-							
-							case 0:
-							{
-										zero_flag++;
-								break;
-							}				
-							case 1:
-							{
-						   	odom_t zero_odom = {0, 0, 0};
-							  planner_ptr->controller->kinematic->target_odom = (odom_t){0, 0, 0};
-								vTaskDelay(2000);
-								zero_flag++;
-								break;
-							}
-						  case 2:
-							{
-//							deubg_target_odom = (odom_t){-1, -1, 0};
-								vTaskDelay(10000);
-								zero_flag++;
-							break;
-							}
-							case 3:
-							{
-//							deubg_target_odom = (odom_t){2, 2, 0};
-							vTaskDelay(10000);						
-							break;
-							}
-							default:break;						
-						}			
-						status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.2f, &debug_target_erro, false);
-//						
-						
+            default:
+                break;
+            }
         }
 
         vTaskDelay(200);
     }
 }
 
-//轨迹规划更新任务
+// 轨迹规划更新任务
 void OnPlannerUpdate(void *pvParameters)
 {
     uint16_t last_tick = xTaskGetTickCount();
@@ -213,7 +194,7 @@ void OnPlannerUpdate(void *pvParameters)
         vTaskDelay(50);
     }
 }
-//底盘更新任务
+// 底盘更新任务,包括执行层
 void OnChassicControl(void *pvParameters)
 {
     uint16_t last_tick = xTaskGetTickCount();
@@ -221,9 +202,8 @@ void OnChassicControl(void *pvParameters)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
-        //
         Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
-        // 步进不需要速度环，此处仅为了读取电机速度
+        // // 步进不需要速度环，此处仅为了读取电机速度
         ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
         vTaskDelay(10);
     }
