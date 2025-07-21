@@ -133,12 +133,15 @@ void Controller_control_update(Controller_t *controller, odom_t *odom_in)
         }
 
         odom_t *target_odom = &controller->kinematic->target_odom;
-        float vx = pid_calc(&controller->pid_x, target_odom->x, odom_in->x) + controller->kinematic->target_val.linear_x;
-        float vy = pid_calc(&controller->pid_y, target_odom->y, odom_in->y) + controller->kinematic->target_val.linear_y;
-        float v_yaw = pid_calc(&controller->pid_yaw, target_odom->yaw, odom_in->yaw) + controller->kinematic->target_val.angular_z;
+				        float vx = pid_calc(&controller->pid_x,odom_in->x, target_odom->x) + controller->kinematic->target_val.linear_x;
+        float vy = pid_calc(&controller->pid_y, odom_in->y,target_odom->y) + controller->kinematic->target_val.linear_y;
+        float v_yaw = pid_calc(&controller->pid_yaw, odom_in->yaw, target_odom->yaw) + controller->kinematic->target_val.angular_z;
+//        float vx = pid_calc(&controller->pid_x, target_odom->x, odom_in->x) + controller->kinematic->target_val.linear_x;
+//        float vy = pid_calc(&controller->pid_y, target_odom->y, odom_in->y) + controller->kinematic->target_val.linear_y;
+//        float v_yaw = pid_calc(&controller->pid_yaw, target_odom->yaw, odom_in->yaw) + controller->kinematic->target_val.angular_z;
 
         cmd_vel_t vel = {vx, vy, v_yaw};
-        Kinematic_inv(&vel, controller->target_speed, controller->kinematic);
+             Kinematic_inv_global(&vel, controller->target_speed, odom_in,controller->kinematic);//换算给四个电机具体速度
         break;
     }
 
