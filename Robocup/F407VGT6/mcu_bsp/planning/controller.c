@@ -173,7 +173,7 @@ void Controller_KinematicAndControlUpdate(Controller_t *controller, uint16_t dt)
 {
     Kinematic_forward(controller->current_speed, &controller->kinematic->current_vel, controller->kinematic);//从当前车身的速度推算底盘的速度
     Kinematic_CalculationUpdate(dt, &controller->kinematic->current_vel, &controller->kinematic->current_odom);//里程计更新函数，需要传递进dt(单位为ms)
-    Controller_control_update(controller, &controller->kinematic->current_odom);
+    Controller_control_update(controller, &controller->kinematic->current_odom);//控制更新
     Controller_StatusUpdate(controller, &controller->kinematic->current_odom);//状态更新（更新完成与否）
     // 这个函数根据电机随机应变
     controller->setmotor_speed(controller, controller->target_speed);

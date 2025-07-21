@@ -35,18 +35,19 @@ void Kinematic_inv( cmd_vel_t *cmd_vel_in, float *speed_control,  Kinematic_t *_
 
         // x型
         case X_shape:
-            // 左上 (0) 轮：受 linear_x、linear_y、angular_z 的影响
-            speed_control[0] = cmd_vel_in->linear_x - cmd_vel_in->linear_y - cmd_vel_in->angular_z * (a + b);
+					
+				            // 左上 (0) 轮：受 linear_x、linear_y、angular_z 的影响
+            speed_control[0] = cmd_vel_in->linear_x +cmd_vel_in->linear_y - cmd_vel_in->angular_z * (a + b);
 
             // 右上 (1) 轮：受 linear_x、linear_y、angular_z 的影响
-            speed_control[1] = cmd_vel_in->linear_x + cmd_vel_in->linear_y + cmd_vel_in->angular_z * (a + b);
+            speed_control[1] = cmd_vel_in->linear_x - cmd_vel_in->linear_y + cmd_vel_in->angular_z * (a + b);
 
             // 左下 (2) 轮：受 linear_x、linear_y、angular_z 的影响
-            speed_control[2] = cmd_vel_in->linear_x + cmd_vel_in->linear_y - cmd_vel_in->angular_z * (a + b);
+            speed_control[2] = cmd_vel_in->linear_x - cmd_vel_in->linear_y - cmd_vel_in->angular_z * (a + b);
 
             // 右下 (3) 轮：受 linear_x、linear_y、angular_z 的影响
-            speed_control[3] = cmd_vel_in->linear_x - cmd_vel_in->linear_y + cmd_vel_in->angular_z * (a + b);
-            break;
+            speed_control[3] = cmd_vel_in->linear_x + cmd_vel_in->linear_y + cmd_vel_in->angular_z * (a + b);
+
 
         default:
             break;
@@ -91,7 +92,7 @@ void Kinematic_forward( float *current_speed, cmd_vel_t *cmd_vel_in,  Kinematic_
 	
     // 修正后的正解算公式
     cmd_vel_in->linear_x = (v0 + v1 + v2 + v3) / 4.0;               // X轴方向速度
-    cmd_vel_in->linear_y = (-v0 + v1 + v2 - v3) / 4.0;              // Y轴方向速度
+    cmd_vel_in->linear_y = -(-v0 + v1 + v2 - v3) / 4.0;              // Y轴方向速度
     cmd_vel_in->angular_z = (-v0 + v1 - v2 + v3) / (4.0 * (a + b)); // 角速度
 }
 

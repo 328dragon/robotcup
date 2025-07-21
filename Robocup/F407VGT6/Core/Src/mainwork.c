@@ -56,10 +56,16 @@ void main_work(void)
     }
 
     // 注意电机编号如下所示
-    Step_ZDT_Init(zdt_stepmotor_ptr[0], 3, &huart3, 0, 0.06f, false);
-    Step_ZDT_Init(zdt_stepmotor_ptr[1], 4, &huart3, 1, 0.06f, false);
-    Step_ZDT_Init(zdt_stepmotor_ptr[2], 2, &huart3, 0, 0.06f, false);
-    Step_ZDT_Init(zdt_stepmotor_ptr[3], 1, &huart3, 1, 0.06f, true);
+		
+		Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false);//左上
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false);//右上
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false);//左下
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);//右下
+//		
+//    Step_ZDT_Init(zdt_stepmotor_ptr[0], 3, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(zdt_stepmotor_ptr[1], 4, &huart3, 1, 0.06f, false);
+//    Step_ZDT_Init(zdt_stepmotor_ptr[2], 2, &huart3, 0, 0.06f, false);
+//    Step_ZDT_Init(zdt_stepmotor_ptr[3], 1, &huart3, 1, 0.06f, true);
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -124,60 +130,59 @@ void IMU_Read_task(void *pvParameters)
 
 void Onmaincpp(void *pvParameters)
 {
-    SimpleStatus_t debug_status_instance;
-    SimpleStatus_t  *debug_status=&debug_status_instance;
-    SimpleStatus_t_init(debug_status);
-    // 定义目标点和误差范围
-    odom_t target_points[2] = {
-        {1.0, 0.0, 0.0},    // 第一个目标点：x=1m
-        {-1.0, -1.0, 0.0}   // 第二个目标点：返回对角线
-    };
-    
- debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 0);
-    int position_flag = 0;
+   SimpleStatus_t debug_status_instance;
+   SimpleStatus_t  *debug_status=&debug_status_instance;
+   SimpleStatus_t_init(debug_status);
+   // 定义目标点和误差范围
+   odom_t target_points[2] = {
+       {1.0, 0.0, 0.0},    // 第一个目标点：x=1m
+       {-1.0, -1.0, 0.0}   // 第二个目标点：返回对角线
+   };
+   
+debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 1);
+   int position_flag = 0;
 	int begin_flag=0;
     while (1)
     {
         // 速度位置式有问题
         //             Controller_set_pos_vel_target(ChassisControl_ptr, deubg_target_odom, debug_target_vel, false);
         // 纯速度式验证没问题
-        //    Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+//           Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
 			
-        if (begin_flag == 1)
-        {
+       if (begin_flag == 1)
+       {
 					switch (position_flag)
-            {
-            case 0:
-            {
-                // 位置控制
-                if (SimpleStatus_t_isResolved(debug_status))
-                {
-                    deubg_target_odom = (odom_t){1, 1, 0};
-                    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
-                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
-                    debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 1);
-                    position_flag++;
-                }
-                break;
-            }
-            case 1:
-            {
-                // 速度控制
-                if (SimpleStatus_t_isResolved(debug_status))
-                {
-                    deubg_target_odom = (odom_t){-1, -1, 0};
-                    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
-                    debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 0);
-                    position_flag++;
-                }
-                break;
-            }
+           {
+           case 0:
+           {              
+               if (SimpleStatus_t_isResolved(debug_status))
+               {
+                   deubg_target_odom = (odom_t){1, 1, 0};
+                   debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
+                   debug_target_erro = (odom_t){0.01, 0.01, 0.01};
+                      position_flag++;
+									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 1);   
+               }
+               break;
+           }
+           case 1:
+           {
+             
+               if (SimpleStatus_t_isResolved(debug_status))
+               {
+                   deubg_target_odom = (odom_t){-1, -1, 0};
+                   debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
+                   position_flag++;
+									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 1);   
+               }
+               break;
+           }
 
-            default:
-                break;
-            }
-        }
-
+           default:
+               break;
+           }
+       }
+         
         vTaskDelay(200);
     }
 }
@@ -190,7 +195,7 @@ void OnPlannerUpdate(void *pvParameters)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
-        Planner_update(planner_ptr, dt); // 轨迹规划
+		Planner_update(planner_ptr, dt); // 轨迹规划
         vTaskDelay(50);
     }
 }
