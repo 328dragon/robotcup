@@ -18,6 +18,8 @@
 float DEBUG = 0.0f;
 float DEBUG2 = 0.0f;
 float DEBUG3 = 0.0f;
+   int position_flag = 0;
+	int begin_flag=0;
 cmd_vel_t debug_target_vel = {0, 0, 0};
 odom_t deubg_target_odom = {0, 0, 0};
 odom_t debug_target_erro = {0.01, 0.01, 0.01};
@@ -140,8 +142,7 @@ void Onmaincpp(void *pvParameters)
    };
    
 debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 1);
-   int position_flag = 0;
-	int begin_flag=0;
+
     while (1)
     {
         // 速度位置式有问题
