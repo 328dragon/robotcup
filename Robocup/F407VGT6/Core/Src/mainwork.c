@@ -132,7 +132,7 @@ void IMU_Read_task(void *pvParameters)
 
 void Onmaincpp(void *pvParameters)
 {   
-Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);
+//Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);
 
     while (1)
     {
