@@ -136,7 +136,7 @@ void Onmaincpp(void *pvParameters)
    SimpleStatus_t  *debug_status=&debug_status_instance;
    SimpleStatus_t_init(debug_status);
    
-debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 0);
+debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);
 
     while (1)
     {
@@ -151,25 +151,26 @@ debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2,
            {
            case 0:
            {              
-               if (SimpleStatus_t_isResolved(debug_status))
+               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                {
-                   deubg_target_odom = (odom_t){2, 0, 0};
+
+                   deubg_target_odom = (odom_t){0.5, 0, 0};
                 //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
                       position_flag++;
-									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
+									  Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
                }
                break;
            }
            case 1:
            {
              
-               if (SimpleStatus_t_isResolved(debug_status))
+               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                {
-                   deubg_target_odom = (odom_t){-1, -1, 0};
+                   deubg_target_odom = (odom_t){-0.5, -0.5, 0};
                 //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    position_flag++;
-									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
+									Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
                }
                break;
            }

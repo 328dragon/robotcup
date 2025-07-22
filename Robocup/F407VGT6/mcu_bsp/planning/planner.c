@@ -48,7 +48,7 @@ void Planner_update(Planner_t *self, uint16_t dt)
                 //判断是否到达目标位置
             odom_t *error = &self->controller->kinematic->_odom_error;
             odom_t *current = &self->controller->kinematic->current_odom;
-
+						
             if (fabs(self->target_odom.x - current->x) < error->x &&
                 fabs(self->target_odom.y - current->y) < error->y &&
                 fabs(self->target_odom.yaw - current->yaw) < error->yaw)
