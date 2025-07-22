@@ -22,7 +22,7 @@ float DEBUG3 = 0.0f;
 	int begin_flag=0;
 cmd_vel_t debug_target_vel = {0, 0, 0};
 odom_t deubg_target_odom = {0, 0, 0};
-odom_t debug_target_erro = {0.01, 0.01, 0.01};
+odom_t debug_target_erro = {0.05, 0.05, 0.05};
 
 // 实例化
 static Controller_t ChassisControl_instance;
@@ -135,20 +135,15 @@ void Onmaincpp(void *pvParameters)
    SimpleStatus_t debug_status_instance;
    SimpleStatus_t  *debug_status=&debug_status_instance;
    SimpleStatus_t_init(debug_status);
-   // 定义目标点和误差范围
-   odom_t target_points[2] = {
-       {1.0, 0.0, 0.0},    // 第一个目标点：x=1m
-       {-1.0, -1.0, 0.0}   // 第二个目标点：返回对角线
-   };
    
-debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 1);
+debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2, &debug_target_erro, 0);
 
     while (1)
     {
         // 速度位置式有问题
         //             Controller_set_pos_vel_target(ChassisControl_ptr, deubg_target_odom, debug_target_vel, false);
         // 纯速度式验证没问题
-//           Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+//        Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
 			
        if (begin_flag == 1)
        {
@@ -158,11 +153,11 @@ debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2,
            {              
                if (SimpleStatus_t_isResolved(debug_status))
                {
-                   deubg_target_odom = (odom_t){1, 1, 0};
-                   debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
+                   deubg_target_odom = (odom_t){2, 0, 0};
+                //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
                       position_flag++;
-									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 1);   
+									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
                }
                break;
            }
@@ -172,9 +167,9 @@ debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 2,
                if (SimpleStatus_t_isResolved(debug_status))
                {
                    deubg_target_odom = (odom_t){-1, -1, 0};
-                   debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
+                //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    position_flag++;
-									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.5, &debug_target_erro, 1);   
+									  debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
                }
                break;
            }
@@ -210,7 +205,7 @@ void OnChassicControl(void *pvParameters)
         last_tick = xTaskGetTickCount();
         Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
         // // 步进不需要速度环，此处仅为了读取电机速度
-        ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
+         ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
         vTaskDelay(10);
     }
 }

@@ -44,8 +44,8 @@ void Planner_update(Planner_t *self, uint16_t dt)
                 CubicSpline_Eval(&self->cub_spline[1], t) + self->start_odom.y,
                 CubicSpline_Eval(&self->cub_spline[2], t) + self->start_odom.yaw};
 
-            Controller_SetClosePosition(self->controller, &position, &self->controller->kinematic->_odom_error, false);
-
+            Controller_SetClosePosition(self->controller, &position, &self->controller->kinematic->_odom_error, false);//插值，并且规划target_odom正确
+                //判断是否到达目标位置
             odom_t *error = &self->controller->kinematic->_odom_error;
             odom_t *current = &self->controller->kinematic->current_odom;
 
@@ -70,7 +70,7 @@ SimpleStatus_t *Planner_LoactaionOpenControl(Planner_t *self, const odom_t *targ
     float targetx, targety, targetyaw;
 
     if (!clearodom)
-    { //重读现在里程计，归零
+    { 
         targetx = target_odom->x - self->controller->kinematic->current_odom.x;
         targety = target_odom->y - self->controller->kinematic->current_odom.y;
         targetyaw = target_odom->yaw - self->controller->kinematic->current_odom.yaw;
@@ -106,11 +106,12 @@ SimpleStatus_t *Planner_LoactaionOpenControl(Planner_t *self, const odom_t *targ
 
 SimpleStatus_t *Planner_LoactaionCloseControl(Planner_t *self, const odom_t *target_odom, float max_v, const odom_t *target_error, bool clearodom)
 {
+  
     Planner_LoactaionOpenControl(self, target_odom, max_v, &(cmd_vel_t){0, 0, 0}, clearodom);
 
     self->controller->kinematic->_odom_error = *target_error;
     self->control_mode = PLANNER_MODE_CLOSE_CONTROL;
     self->target_odom = *target_odom;
-    self->start_odom = self->controller->kinematic->current_odom;
+      self->start_odom = self->controller->kinematic->current_odom;
     return &self->promise;
 }

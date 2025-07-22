@@ -172,5 +172,5 @@ float get_linear_speed(StepMotorZDT_t *zdt_motor)
 {
     // 返回电机的线速度
     // return _target_speed * 3.14 * _wheel_diameter / 60; // 转化为米每秒
-    return zdt_motor->_target_rpm * 3.14 * zdt_motor->_wheel_diameter / 60; // 转化为米每秒
+    return zdt_motor->_target_rpm * 3.14 * zdt_motor->_wheel_diameter / 60.0f; // 转化为米每秒
 }

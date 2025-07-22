@@ -94,7 +94,6 @@ float pid_calc(pid_t *pid, float get, float set)
     pid->set[LAST] = pid->set[NOW];
     pid->out = pid->pid_mode == POSITION_PID ? pid->pos_out : pid->delta_out;
     return pid->pid_mode == POSITION_PID ? pid->pos_out : pid->delta_out;
-    //
 }
 
 /**
