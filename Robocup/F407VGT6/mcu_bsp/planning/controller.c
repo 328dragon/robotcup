@@ -49,11 +49,11 @@ void Controller_Init(Controller_t *controller, StepMotorZDT_t **_zdt_motor, Kine
     controller->setmotor_pos_vel = Controller_setMotor_Targetpos_vel;
     uint32_t init_x_maxout = 2;
     uint32_t init_y_maxout = 2;
-    uint32_t init_yaw_maxout = 2;
+    uint32_t init_yaw_maxout = 3;
     // 初始化PID控制器
-    PID_struct_init(&controller->pid_x, POSITION_PID, init_x_maxout, 0.4f, 0.25f, 0.02f, 0);
-    PID_struct_init(&controller->pid_y, POSITION_PID, init_y_maxout, 0.4f, 0.25f, 0.02f, 0);
-    PID_struct_init(&controller->pid_yaw, POSITION_PID, init_yaw_maxout, 0.6f, 0.05f, 0.01f, 0);
+    PID_struct_init(&controller->pid_x, POSITION_PID, init_x_maxout, 0.4f, 0.3f, 0.03f, 0);
+    PID_struct_init(&controller->pid_y, POSITION_PID, init_y_maxout, 0.4f, 0.25f, 0.03f, 0);
+    PID_struct_init(&controller->pid_yaw, POSITION_PID, init_yaw_maxout, 0.6f, 0.2f, 0.02f, 0);
 
     // 初始化状态
     SimpleStatus_t_init(&controller->status);

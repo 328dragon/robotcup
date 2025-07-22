@@ -21,7 +21,7 @@ float DEBUG3 = 0.0f;
    int position_flag = 0;
 	int begin_flag=0;
 cmd_vel_t debug_target_vel = {0, 0, 0};
-odom_t deubg_target_odom = {0, 0, 0};
+odom_t debug_target_odom = {0, 0, 0};
 odom_t debug_target_erro = {0.05, 0.05, 0.05};
 
 // 实例化
@@ -131,12 +131,8 @@ void IMU_Read_task(void *pvParameters)
 }
 
 void Onmaincpp(void *pvParameters)
-{
-   SimpleStatus_t debug_status_instance;
-   SimpleStatus_t  *debug_status=&debug_status_instance;
-   SimpleStatus_t_init(debug_status);
-   
-debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);
+{   
+Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);
 
     while (1)
     {
@@ -154,11 +150,11 @@ debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.
                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                {
 
-                   deubg_target_odom = (odom_t){0.5, 0, 0};
+                   debug_target_odom = (odom_t){0.5, 0, 0};
                 //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
                       position_flag++;
-									  Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
+									  Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);   
                }
                break;
            }
@@ -167,10 +163,10 @@ debug_status = Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.
              
                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                {
-                   deubg_target_odom = (odom_t){-0.5, -0.5, 0};
+                   debug_target_odom = (odom_t){-0.5, -0.5, 0};
                 //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    position_flag++;
-									Planner_LoactaionCloseControl(planner_ptr, &deubg_target_odom, 0.3, &debug_target_erro, 0);   
+									Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);   
                }
                break;
            }
