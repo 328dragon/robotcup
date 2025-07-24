@@ -139,7 +139,7 @@ int safe_count=0;
         // 纯速度式验证没问题
 //      Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
 			safe_count++;
-			if(safe_count>=30)
+			if(safe_count>=3)
 			{
 			       if (begin_flag == 1)
        {
