@@ -35,7 +35,7 @@ void Kinematic_inv( cmd_vel_t *cmd_vel_in, float *speed_control,  Kinematic_t *_
 
         // x型
         case X_shape:
-					
+			{
 				            // 左上 (0) 轮：受 linear_x、linear_y、angular_z 的影响
             speed_control[0] = cmd_vel_in->linear_x +cmd_vel_in->linear_y - cmd_vel_in->angular_z * (a + b);
 
@@ -47,6 +47,11 @@ void Kinematic_inv( cmd_vel_t *cmd_vel_in, float *speed_control,  Kinematic_t *_
 
             // 右下 (3) 轮：受 linear_x、linear_y、angular_z 的影响
             speed_control[3] = cmd_vel_in->linear_x + cmd_vel_in->linear_y + cmd_vel_in->angular_z * (a + b);
+
+break;
+
+            }		
+
 
 
         default:

@@ -19,8 +19,9 @@ float DEBUG = 0.0f;
 float DEBUG2 = 0.0f;
 float DEBUG3 = 0.0f;
    int position_flag = 0;
-	int begin_flag=0;
-cmd_vel_t debug_target_vel = {0, 0, 0};
+	int begin_flag=1;
+	int safe_guard=0;
+cmd_vel_t debug_target_vel = {0.2, 0, 0};
 odom_t debug_target_odom = {0, 0, 0};
 odom_t debug_target_erro = {0.05, 0.05, 0.05};
 
@@ -63,11 +64,7 @@ void main_work(void)
     Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false);//右上
     Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false);//左下
     Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);//右下
-//		
-//    Step_ZDT_Init(zdt_stepmotor_ptr[0], 3, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(zdt_stepmotor_ptr[1], 4, &huart3, 1, 0.06f, false);
-//    Step_ZDT_Init(zdt_stepmotor_ptr[2], 2, &huart3, 0, 0.06f, false);
-//    Step_ZDT_Init(zdt_stepmotor_ptr[3], 1, &huart3, 1, 0.06f, true);
+
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -89,6 +86,7 @@ void main_work(void)
             // uart_printf("create task failed\n");
         }
     }
+		
 }
 
 void LCD_Show_task(void *pvParameters)
@@ -133,16 +131,19 @@ void IMU_Read_task(void *pvParameters)
 void Onmaincpp(void *pvParameters)
 {   
 //Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);
-
+int safe_count=0;
     while (1)
     {
         // 速度位置式有问题
         //             Controller_set_pos_vel_target(ChassisControl_ptr, deubg_target_odom, debug_target_vel, false);
         // 纯速度式验证没问题
-//        Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
-			
-       if (begin_flag == 1)
+//      Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+			safe_count++;
+			if(safe_count>=30)
+			{
+			       if (begin_flag == 1)
        {
+				safe_guard=1;
 					switch (position_flag)
            {
            case 0:
@@ -154,7 +155,7 @@ void Onmaincpp(void *pvParameters)
                 //    debug_target_vel = (cmd_vel_t){0.1, 0.1, 0.1};
                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
                       position_flag++;
-									  Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.3, &debug_target_erro, 0);   
+					 Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 0);   
                }
                break;
            }
@@ -175,6 +176,8 @@ void Onmaincpp(void *pvParameters)
                break;
            }
        }
+			}
+
          
         vTaskDelay(200);
     }
@@ -196,13 +199,21 @@ void OnPlannerUpdate(void *pvParameters)
 void OnChassicControl(void *pvParameters)
 {
     uint16_t last_tick = xTaskGetTickCount();
+	
     while (1)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
-        Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
+			if(safe_guard)
+			{
+			        Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
         // // 步进不需要速度环，此处仅为了读取电机速度
-         ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
+         ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);		
+			}
+			else {
+			float zero_speed[4] = {0, 0, 0, 0};
+			 ChassisControl_ptr->setmotor_speed(ChassisControl_ptr, zero_speed);
+			}
         vTaskDelay(10);
     }
 }
