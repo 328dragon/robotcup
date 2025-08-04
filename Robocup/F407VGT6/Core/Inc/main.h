@@ -57,8 +57,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define servos_6_Pin GPIO_PIN_5
+#define servos_6_GPIO_Port GPIOE
+#define servos_7_Pin GPIO_PIN_6
+#define servos_7_GPIO_Port GPIOE
+#define servos_5_Pin GPIO_PIN_2
+#define servos_5_GPIO_Port GPIOA
+#define servos_4_Pin GPIO_PIN_3
+#define servos_4_GPIO_Port GPIOA
 #define SPI1_CS_Pin GPIO_PIN_4
 #define SPI1_CS_GPIO_Port GPIOA
+#define servos_1_Pin GPIO_PIN_0
+#define servos_1_GPIO_Port GPIOB
+#define servos_2_Pin GPIO_PIN_1
+#define servos_2_GPIO_Port GPIOB
+#define BUZZER_Pin GPIO_PIN_10
+#define BUZZER_GPIO_Port GPIOE
 #define LCD_RS_Pin GPIO_PIN_12
 #define LCD_RS_GPIO_Port GPIOB
 #define LCD_SCK_Pin GPIO_PIN_13
@@ -83,6 +97,8 @@ void Error_Handler(void);
 #define CS1_GYRO_GPIO_Port GPIOD
 #define CS1_ACCEL_Pin GPIO_PIN_7
 #define CS1_ACCEL_GPIO_Port GPIOD
+#define servos_3_Pin GPIO_PIN_4
+#define servos_3_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

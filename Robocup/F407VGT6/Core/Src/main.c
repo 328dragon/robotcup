@@ -122,21 +122,25 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, 0);
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, 0);
-
+	//pwm配置
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_2);
+	//这时候板子的pwm还是上一版                   
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,0);//大转盘，950刚好一个对齐屁股，
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,1800);//1800卡住，2500松开，左小蓝机
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,1800);//1800卡住，900松开，右小蓝机	
+	__HAL_TIM_SET_COMPARE(&htim5,TIM_CHANNEL_4 ,0);//小转盘，2000为里，600为外
+//		__HAL_TIM_SET_COMPARE(&htim5,TIM_CHANNEL_3 ,2000);//抬升，500最低，800中间，1800最高
+//		__HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1 ,1300);//夹爪，1800紧，1500松
+//		__HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_2 ,1900);//夹爪1100锁紧，1500松
+	
+	//
   main_work();
-
-  // uint8_t data[8]={1,2,3,4,5,6,7,8};
-
-  //
-  //		  DM_4310_Register(&hcan2, 0x01, 0x00, pos_vel_mode);
-  //			DM_4310_Register(&hcan2, 0x02, 0x03, pos_vel_mode);
-  //  Enable_DM(DM_J4310_instnce[0]);
-  //	HAL_Delay(10);
-  //	  Enable_DM(DM_J4310_instnce[1]);
-  //	 DM_J4310_instnce[0]->dm_controller_instance.P_des=0;
-  //	 DM_J4310_instnce[0]->dm_controller_instance.V_des=6;
-  //	 	 DM_J4310_instnce[1]->dm_controller_instance.P_des=0;
-  //	 DM_J4310_instnce[1]->dm_controller_instance.V_des=6;
 
   /* USER CODE END 2 */
 
@@ -156,11 +160,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    //		HAL_UART_Transmit(&huart3,data,8,HAL_MAX_DELAY);
-    //    HAL_Delay(10);
-    //		Control_DM( DM_J4310_instnce[0]);
-    //		Control_DM( DM_J4310_instnce[1]);
-    //    HAL_Delay(10);
+
   }
   /* USER CODE END 3 */
 }
@@ -228,8 +228,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

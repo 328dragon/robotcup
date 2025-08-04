@@ -191,7 +191,7 @@
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../mcu_bsp/planning;../mcu_bsp/system_controller;../Lib;../mcu_bsp/IMU;../mcu_bsp/LCD</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../mcu_bsp/planning;../mcu_bsp/system_controller;../Lib;../mcu_bsp/IMU;../mcu_bsp/LCD;../mcu_bsp/uart;../Device</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -975,6 +975,16 @@
               <FileName>StepMotor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\Motor\StepMotor.c</FilePath>
+            </File>
+            <File>
+              <FileName>WIT_IMU.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\IMU\WIT_IMU.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\uart\bsp_usart.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1644,6 +1654,21 @@
               <FileName>lcd_init.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\LCD\lcd_init.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>DEVICE</GroupName>
+          <Files>
+            <File>
+              <FileName>gray.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Device\gray.c</FilePath>
+            </File>
+            <File>
+              <FileName>tcs230.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Device\tcs230.c</FilePath>
             </File>
           </Files>
         </Group>

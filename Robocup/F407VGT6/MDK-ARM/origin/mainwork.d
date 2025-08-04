@@ -52,4 +52,6 @@ origin/mainwork.o: ..\Core\Src\mainwork.c ..\Core\Inc\mainwork.h \
   ..\Lib\Lib_pormise.h ..\mcu_bsp\system_controller\pid.h \
   ..\mcu_bsp\planning\planner.h ..\Lib\Lib_Math.h ..\Core\Inc\usart.h \
   ..\mcu_bsp\IMU\BMI088driver.h ..\mcu_bsp\IMU\BMI_struct_typedef.h \
-  ..\mcu_bsp\LCD\lcd.h ..\mcu_bsp\LCD\lcd_init.h ..\mcu_bsp\LCD\pic.h
+  ..\mcu_bsp\LCD\lcd.h ..\mcu_bsp\LCD\lcd_init.h ..\mcu_bsp\LCD\pic.h \
+  ..\mcu_bsp\uart\bsp_usart.h ..\Core\Inc\tim.h ..\Device\tcs230.h \
+  ..\Device\gray.h ..\Core\Inc\i2c.h ..\Device\gw_grayscale_sensor.h
