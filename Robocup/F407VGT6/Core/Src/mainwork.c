@@ -20,6 +20,7 @@
 #include "tim.h"
 #include "tcs230.h"
 #include "gray.h"
+#include "ch040.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 // 主函数状态机
@@ -29,12 +30,15 @@ int motor_mode = 0;
 
 // 灰度
 gray_state real_time_gray_state = orgin_gray; // 主灰度状态
-// 后面灰度
+// 前面灰度
+float gray_front_p = 0.01f; // 前面灰度传感器的神秘小参数
+uint8_t gray_data_front_middle = 0;
+uint8_t gray_data_front_middle_temp = 0;
 uint8_t digital_gray_data_front[8];
-int sensor_weights_back[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
-unsigned char Digtal_gray_back;
-unsigned char Anolog_gray_bcak[8] = {0};
-unsigned char Normal_back[8] = {0};
+int sensor_weights_front[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
+unsigned char Digtal_gray_front;
+unsigned char Anolog_gray_front[8] = {0};
+unsigned char Normal_front[8] = {0};
 // 侧边灰度
 uint8_t digital_gray_data_side[8];
 int sensor_weights_side[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
@@ -48,6 +52,10 @@ int safe_flag = 0;
 USARTInstance uart6 = {0};
 void usart6_callback(void)
 {
+    if (uart6.recv_buff[0] == 0x5A && uart6.recv_buff[1] == 0xA5)
+    {
+        ch040_get_data(uart6.recv_buff);
+    }
 }
 USART_Init_Config_s uart6_cfg = {
     .recv_buff_size = 90,
@@ -133,11 +141,10 @@ void main_work(void)
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 800, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 300, NULL, 4, &Planner_update_handle);
-    BaseType_t ok5 = xTaskCreate(IMU_Read_task, "IMU_Read_task", 200, NULL, 4, &IMU_read_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 300, NULL, 1, &LCD_Show_handle);
     BaseType_t ok7 = xTaskCreate(tcs230_read_task, "tcs230_read_task", 100, NULL, 2, &tcs230_read_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 100, NULL, 2, &gray_read_handle);
-    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok5 != pdPASS || ok7 != pdPASS)
+    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok7 != pdPASS)
     {
         // 任务创建失败，进入死循环
         while (1)
@@ -166,16 +173,16 @@ void gray_read_task(void *pvParameters)
     while (1)
     {
         // 读取灰度传感器数据
-        Digtal_gray_back = IIC_Get_Digtal(back);
+        Digtal_gray_front = IIC_Get_Digtal(back);
         Digtal_gray_side = IIC_Get_Digtal(side);
         for (int i = 0; i < 8; i++)
         {
-            digital_gray_data_front[i] = 1 - ((Digtal_gray_back >> i) & 0x01); // 读取后边数字灰度传感器数据
-            digital_gray_data_side[i] = 1 - ((Digtal_gray_side >> i) & 0x01); // 读取侧边数字灰度传感器数据
+            digital_gray_data_front[i] = 1 - ((Digtal_gray_front >> i) & 0x01); // 读取后边数字灰度传感器数据
+            digital_gray_data_side[i] = 1 - ((Digtal_gray_side >> i) & 0x01);   // 读取侧边数字灰度传感器数据
         }
 
         // 获取传感器模拟量结果
-        if (IIC_Get_Anolog(Anolog_gray_bcak, 8, back) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
+        if (IIC_Get_Anolog(Anolog_gray_front, 8, back) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
         {
         }
 
@@ -183,12 +190,29 @@ void gray_read_task(void *pvParameters)
         IIC_Anolog_Normalize(0xff, back); // 所有通道归一化都打开
         IIC_Anolog_Normalize(0xff, side); // 所有通道归一化都打开
         vTaskDelay(10);                   // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
-        if (IIC_Get_Anolog(Normal_back, 8, back) && IIC_Get_Anolog(Normal_back, 8, side))
+        if (IIC_Get_Anolog(Normal_front, 8, back) && IIC_Get_Anolog(Normal_front, 8, side))
         {
         }
         IIC_Anolog_Normalize(0xff, back); // 为了下一次循环是非归一化，所以清零
         IIC_Anolog_Normalize(0xff, side);
-        vTaskDelay(10);                   // 延时10ms
+        if (digital_gray_data_front[0] == 1 && digital_gray_data_front[1] == 1 && digital_gray_data_front[2] == 1 && digital_gray_data_front[3] == 1 && digital_gray_data_front[4] == 1 && digital_gray_data_front[5] == 1 && digital_gray_data_front[6] == 1 && digital_gray_data_front[7] == 1)
+        {
+
+            real_time_gray_state = all_black;
+            BUZZER_ON;
+        }
+        else
+        {
+
+            real_time_gray_state = orgin_gray;
+        }
+        for (int i = 0; i < 8; i++)
+        {
+            gray_data_front_middle_temp += digital_gray_data_front[i] * sensor_weights_front[i] * gray_front_p; // 计算前面灰度传感器的中间值
+        }
+        gray_data_front_middle = gray_data_front_middle_temp;
+        gray_data_front_middle_temp = 0;
+        vTaskDelay(10); // 延时10ms
     }
 }
 void LCD_Show_task(void *pvParameters)
@@ -198,35 +222,26 @@ void LCD_Show_task(void *pvParameters)
     LCD_Fill(0, 0, LCD_W, LCD_H, WHITE);
     while (1)
     {
-        // 显示
-        // 陀螺仪
-        LCD_ShowFloatNum1(0, 20, gyro[0], 4, RED, WHITE, 16);
-        LCD_ShowString(48, 20, ",", RED, WHITE, 16, 0);
-        LCD_ShowFloatNum1(58, 20, gyro[1], 4, RED, WHITE, 16);
-        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
-        LCD_ShowFloatNum1(116, 20, gyro[2], 4, RED, WHITE, 16);
-        // 加速度
-        LCD_ShowFloatNum1(0, 40, accel[0], 4, RED, WHITE, 16);
-        LCD_ShowString(48, 40, ",", RED, WHITE, 16, 0);
-        LCD_ShowFloatNum1(58, 40, accel[1], 4, RED, WHITE, 16);
-        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
-        LCD_ShowFloatNum1(116, 40, accel[2], 4, RED, WHITE, 16);
-        // 显示temp
-        LCD_ShowFloatNum1(10, 60, temp, 4, RED, WHITE, 16);
-        LCD_ShowString(52, 60, ",", RED, WHITE, 16, 0);
-        LCD_ShowString(62, 60, "gyro", RED, WHITE, 16, 0);
-        LCD_ShowString(100, 60, ",", RED, WHITE, 16, 0);
-        LCD_ShowString(106, 60, "accel", RED, WHITE, 16, 0);
+        //        // 显示
+        //        // 陀螺仪
+        //        LCD_ShowFloatNum1(0, 20, gyro[0], 4, RED, WHITE, 16);
+        //        LCD_ShowString(48, 20, ",", RED, WHITE, 16, 0);
+        //        LCD_ShowFloatNum1(58, 20, gyro[1], 4, RED, WHITE, 16);
+        //        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
+        //        LCD_ShowFloatNum1(116, 20, gyro[2], 4, RED, WHITE, 16);
+        //        // 加速度
+        //        LCD_ShowFloatNum1(0, 40, accel[0], 4, RED, WHITE, 16);
+        //        LCD_ShowString(48, 40, ",", RED, WHITE, 16, 0);
+        //        LCD_ShowFloatNum1(58, 40, accel[1], 4, RED, WHITE, 16);
+        //        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
+        //        LCD_ShowFloatNum1(116, 40, accel[2], 4, RED, WHITE, 16);
+        //        // 显示temp
+        //        LCD_ShowFloatNum1(10, 60, temp, 4, RED, WHITE, 16);
+        //        LCD_ShowString(52, 60, ",", RED, WHITE, 16, 0);
+        //        LCD_ShowString(62, 60, "gyro", RED, WHITE, 16, 0);
+        //        LCD_ShowString(100, 60, ",", RED, WHITE, 16, 0);
+        //        LCD_ShowString(106, 60, "accel", RED, WHITE, 16, 0);
         vTaskDelay(100);
-    }
-}
-
-void IMU_Read_task(void *pvParameters)
-{
-    while (1)
-    {
-        //        BMI088_read(gyro, accel, &temp);
-        vTaskDelay(10);
     }
 }
 
@@ -246,6 +261,17 @@ void Onmaincpp(void *pvParameters)
             {
             case 0:
             {
+                motor_mode = 0;
+                debug_target_vel = (cmd_vel_t){0.2, gray_data_front_middle, 0};
+                if (real_time_gray_state == all_black)
+                {
+                    main_state++;
+                }
+                break;
+            }
+						
+            case 1:
+            {
                 motor_mode = 1;
                 debug_target_odom = (odom_t){0.3, 0, 0};
                 debug_target_erro = (odom_t){0.01, 0.01, 0.01};
@@ -254,7 +280,7 @@ void Onmaincpp(void *pvParameters)
                 main_state++;
                 break;
             }
-            case 1:
+            case 2:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -267,7 +293,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 2:
+            case 3:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {

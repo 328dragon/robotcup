@@ -986,6 +986,11 @@
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\uart\bsp_usart.c</FilePath>
             </File>
+            <File>
+              <FileName>ch040.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\IMU\ch040.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

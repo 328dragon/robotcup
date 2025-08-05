@@ -54,6 +54,7 @@
 "origin\stepmotor.o"
 "origin\wit_imu.o"
 "origin\bsp_usart.o"
+"origin\ch040.o"
 "origin\croutine.o"
 "origin\event_groups.o"
 "origin\list.o"
