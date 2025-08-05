@@ -1,15 +1,64 @@
-*** Using Compiler 'V6.22', folder: 'D:\keil\MDK\ARM\ARMCLANG\Bin'
+*** Using Compiler 'V6.22', folder: 'D:\keil\core\ARM\ARMCLANG\Bin'
 Build target 'origin'
-../mcu_bsp/planning/controller.c(1): warning: In file included from...../mcu_bsp/planning\controller.h(4): error: 'Lib_pormise.h' file not found
-    4 | #include "Lib_pormise.h"
-      |          ^~~~~~~~~~~~~~~
-1 error generated.
-compiling controller.c...
-../mcu_bsp/planning/planner.c(1): warning: In file included from...../mcu_bsp/planning\planner.h(4): error: 'Lib_Math.h' file not found
-    4 | #include "Lib_Math.h"
-      |          ^~~~~~~~~~~~
-1 error generated.
-compiling planner.c...
-"origin\origin.axf" - 2 Error(s), 0 Warning(s).
-Target not created.
-Build Time Elapsed:  00:00:02
+compiling gray.c...
+../Core/Src/mainwork.c(14): warning: In file included from...../mcu_bsp/IMU\BMI088driver.h(49): warning: 'packed' attribute ignored [-Wignored-attributes]
+   49 | typedef __packed struct BMI088_RAW_DATA
+      |         ^
+../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_def.h(116): note: expanded from macro '__packed'
+  116 |     #define __packed  __attribute__((packed))
+      |                                      ^
+../Core/Src/mainwork.c(259): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  259 |         LCD_ShowString(48, 20, ",", RED, WHITE, 16, 0);
+      |                                ^~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(261): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  261 |         LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
+      |                                 ^~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(265): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  265 |         LCD_ShowString(48, 40, ",", RED, WHITE, 16, 0);
+      |                                ^~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(267): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  267 |         LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
+      |                                 ^~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(271): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  271 |         LCD_ShowString(52, 60, ",", RED, WHITE, 16, 0);
+      |                                ^~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(272): warning: passing 'char[5]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  272 |         LCD_ShowString(62, 60, "gyro", RED, WHITE, 16, 0);
+      |                                ^~~~~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(273): warning: passing 'char[2]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  273 |         LCD_ShowString(100, 60, ",", RED, WHITE, 16, 0);
+      |                                 ^~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+../Core/Src/mainwork.c(274): warning: passing 'char[6]' to parameter of type 'const uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+  274 |         LCD_ShowString(106, 60, "accel", RED, WHITE, 16, 0);
+      |                                 ^~~~~~~
+../mcu_bsp/LCD\lcd.h(20): note: passing argument to parameter 'p' here
+   20 | void LCD_ShowString(uint16_t x,uint16_t y,const uint8_t *p,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode);//显示字符串
+      |                                                          ^
+9 warnings generated.
+compiling mainwork.c...
+linking...
+Program Size: Code=40976 RO-data=14188 RW-data=84 ZI-data=22932  
+FromELF: creating hex file...
+"origin\origin.axf" - 0 Error(s), 9 Warning(s).
+Build Time Elapsed:  00:00:01

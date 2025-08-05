@@ -1,67 +1,88 @@
 #include "gray.h"
 
-
-unsigned char IIC_ReadByte(unsigned char Salve_Adress,int ordinal )
+// 底层
+unsigned char IIC_ReadByte(unsigned char Salve_Adress, int ordinal)
 {
 	unsigned char dat;
-		HAL_I2C_Master_Receive(&hi2c3,Salve_Adress<<1,&dat,1,1000);
+	HAL_I2C_Master_Receive(&hi2c3, Salve_Adress << 1, &dat, 1, 1000);
 	return dat;
 }
 
-unsigned char IIC_ReadBytes(unsigned char Salve_Adress,unsigned char Reg_Address,unsigned char *Result,unsigned char len)
+unsigned char IIC_ReadBytes(unsigned char Salve_Adress, unsigned char Reg_Address, unsigned char *Result, unsigned char len)
 {
-		return HAL_I2C_Mem_Read(&hi2c3,Salve_Adress,Reg_Address,I2C_MEMADD_SIZE_8BIT,Result,len,1000)==HAL_OK;
-
+	return HAL_I2C_Mem_Read(&hi2c3, Salve_Adress, Reg_Address, I2C_MEMADD_SIZE_8BIT, Result, len, 1000) == HAL_OK;
 }
 
-unsigned char IIC_WriteByte(unsigned char Salve_Adress,unsigned char Reg_Address,unsigned char data)
+unsigned char IIC_WriteByte(unsigned char Salve_Adress, unsigned char Reg_Address, unsigned char data)
 {
-	unsigned char dat[2]={Reg_Address,data};
-		return HAL_I2C_Master_Transmit(&hi2c3,Salve_Adress,dat,2,1000)==HAL_OK;
-
-
+	unsigned char dat[2] = {Reg_Address, data};
+	return HAL_I2C_Master_Transmit(&hi2c3, Salve_Adress, dat, 2, 1000) == HAL_OK;
 }
-unsigned char IIC_WriteBytes(unsigned char Salve_Adress,unsigned char Reg_Address,unsigned char *data,unsigned char len)
+unsigned char IIC_WriteBytes(unsigned char Salve_Adress, unsigned char Reg_Address, unsigned char *data, unsigned char len)
 {
 
-	return HAL_I2C_Mem_Write(&hi2c3,Salve_Adress,Reg_Address,I2C_MEMADD_SIZE_8BIT,data,len, 1000)==HAL_OK;
-
+	return HAL_I2C_Mem_Write(&hi2c3, Salve_Adress, Reg_Address, I2C_MEMADD_SIZE_8BIT, data, len, 1000) == HAL_OK;
 }
-
+// 接口
 unsigned char Ping(void)
 {
 	unsigned char dat_f;
-	IIC_ReadBytes(GW_GRAY_ADDR_DEF<<1,GW_GRAY_PING,&dat_f,1);
-	if((dat_f==GW_GRAY_PING_OK))
+	unsigned char dat_s;
+	IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_PING, &dat_f, 1);
+	IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_PING, &dat_s, 1);
+	if ((dat_f == GW_GRAY_PING_OK) && (dat_s == GW_GRAY_PING_OK))
 	{
+		return 0;
+	}
+	else
+		return 1;
+}
+unsigned char IIC_Get_Digtal(int ordinal)
+{
+	unsigned char dat;
+	if (ordinal == back)
+		IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_DIGITAL_MODE, &dat, 1);
+	else if (ordinal == side)
+		IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_DIGITAL_MODE, &dat, 1);
+	return dat;
+}
+unsigned char IIC_Get_Anolog(unsigned char *Result, unsigned char len, int ordinal)
+{
+	if (ordinal == back)
+	{
+				if (IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_ANALOG_BASE_, Result, len))
+			return 1;
+	}
+	else if (ordinal == side)
+	{
+			if (IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_ANALOG_BASE_, Result, len))
+			return 1;
+	}
+		else
 			return 0;
-	}	
-	else return 1;
 }
-unsigned char IIC_Get_Digtal()
+unsigned char IIC_Get_Single_Anolog(unsigned char Channel, int ordinal)
 {
 	unsigned char dat;
-IIC_ReadBytes(GW_GRAY_ADDR_DEF<<1,GW_GRAY_DIGITAL_MODE,&dat,1);
+	if (ordinal == back)
+		IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_ANALOG(Channel), &dat, 1);
+	else if (ordinal == side)
+		IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_ANALOG(Channel), &dat, 1);
 	return dat;
 }
-unsigned char IIC_Get_Anolog(unsigned char * Result,unsigned char len)
+unsigned char IIC_Anolog_Normalize(uint8_t Normalize_channel, int ordinal)
 {
-		if(IIC_ReadBytes(GW_GRAY_ADDR_DEF<<1,GW_GRAY_ANALOG_BASE_,Result,len))return 1;
-	else return 0;
+	if (ordinal == back)
+		return IIC_WriteByte(GW_GRAY_ADDR_DEF << 1, GW_GRAY_ANALOG_NORMALIZE, Normalize_channel);
+	else if (ordinal == side)
+		return IIC_WriteByte(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_ANALOG_NORMALIZE, Normalize_channel);
 }
-unsigned char IIC_Get_Single_Anolog(unsigned char Channel)
+unsigned short IIC_Get_Offset(int ordinal)
 {
-	unsigned char dat;
-	IIC_ReadBytes(GW_GRAY_ADDR_DEF<<1,GW_GRAY_ANALOG(Channel),&dat,1);
-	return dat;
-}
-unsigned char IIC_Anolog_Normalize(uint8_t Normalize_channel )
-{
-	return IIC_WriteBytes(GW_GRAY_ADDR_DEF<<1,0xCF,&Normalize_channel,1);
-}
-unsigned short IIC_Get_Offset( )
-{
-	unsigned char dat[2]={0};
-	IIC_ReadBytes(GW_GRAY_ADDR_DEF<<1,Offset,dat,2);
-	return (unsigned short)dat[0]|(unsigned short)dat[1]<<8;
+	unsigned char dat[2] = {0};
+	if (ordinal == back)
+		IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, Offset, dat, 2);
+	else if (ordinal == side)
+		IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, Offset, dat, 2);
+	return (unsigned short)dat[0] | (unsigned short)dat[1] << 8;
 }
