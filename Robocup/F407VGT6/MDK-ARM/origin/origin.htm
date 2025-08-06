@@ -3,7 +3,11 @@
 <title>Static Call Graph - [origin\origin.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image origin\origin.axf</H1><HR>
+<<<<<<< HEAD
 <BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6220000: Last Updated: Wed Aug  6 12:52:10 2025
+=======
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6220000: Last Updated: Wed Aug  6 14:59:09 2025
+>>>>>>> 3800235 (back改成front,读值没问题)
 <BR><P>
 <H3>Maximum Stack Usage =        392 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -141,7 +145,7 @@ Function Pointers
  <LI><a href="#[73]">prvIdleTask</a> from tasks.o(.text.prvIdleTask) referenced 2 times from tasks.o(.text.vTaskStartScheduler)
  <LI><a href="#[72]">prvTaskExitError</a> from port.o(.text.prvTaskExitError) referenced 2 times from port.o(.text.pxPortInitialiseStack)
  <LI><a href="#[70]">tcs230_read_task</a> from mainwork.o(.text.tcs230_read_task) referenced 2 times from mainwork.o(.text.main_work)
- <LI><a href="#[74]">usart6_callback</a> from mainwork.o(.text.usart6_callback) referenced from mainwork.o(.data.uart6_cfg)
+ <LI><a href="#[74]">usart6_callfront</a> from mainwork.o(.text.usart6_callfront) referenced from mainwork.o(.data.uart6_cfg)
 </UL>
 <P>
 <H3>
@@ -1726,7 +1730,11 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> mainwork.o(.text.main_work)
 </UL>
+<<<<<<< HEAD
 <P><STRONG><a name="[6d]"></a>Onmaincpp</STRONG> (Thumb, 366 bytes, Stack size 0 bytes, mainwork.o(.text.Onmaincpp))
+=======
+<P><STRONG><a name="[6d]"></a>Onmaincpp</STRONG> (Thumb, 310 bytes, Stack size 0 bytes, mainwork.o(.text.Onmaincpp))
+>>>>>>> 3800235 (back改成front,读值没问题)
 <BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = Onmaincpp &rArr; Planner_LoactaionCloseControl &rArr; Planner_LoactaionOpenControl &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Controller_set_vel_target
@@ -1955,7 +1963,7 @@ Global Symbols
 <P><STRONG><a name="[138]"></a>ch040_get_data</STRONG> (Thumb, 192 bytes, Stack size 8 bytes, ch040.o(.text.ch040_get_data))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = ch040_get_data
 </UL>
-<BR>[Called By]<UL><LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart6_callback
+<BR>[Called By]<UL><LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usart6_callfront
 </UL>
 
 <P><STRONG><a name="[124]"></a>fputc</STRONG> (Thumb, 32 bytes, Stack size 16 bytes, usart.o(.text.fputc))
@@ -1978,7 +1986,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ZDTController_MotorUpdate
 </UL>
 
+<<<<<<< HEAD
 <P><STRONG><a name="[71]"></a>gray_read_task</STRONG> (Thumb, 392 bytes, Stack size 0 bytes, mainwork.o(.text.gray_read_task))
+=======
+<P><STRONG><a name="[71]"></a>gray_read_task</STRONG> (Thumb, 408 bytes, Stack size 0 bytes, mainwork.o(.text.gray_read_task))
+>>>>>>> 3800235 (back改成front,读值没问题)
 <BR><BR>[Stack]<UL><LI>Max Depth = 160 + In Cycle
 <LI>Call Chain = gray_read_task &rArr;  gray_read_task (Cycle)
 </UL>
@@ -2129,8 +2141,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> mainwork.o(.text.main_work)
 </UL>
-<P><STRONG><a name="[74]"></a>usart6_callback</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, mainwork.o(.text.usart6_callback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = usart6_callback &rArr; ch040_get_data
+<P><STRONG><a name="[74]"></a>usart6_callfront</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, mainwork.o(.text.usart6_callfront))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = usart6_callfront &rArr; ch040_get_data
 </UL>
 <BR>[Calls]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ch040_get_data
 </UL>

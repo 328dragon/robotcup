@@ -50,7 +50,7 @@ int debug_pwm = 0;
 int close_flag = 0;
 int safe_flag = 0;
 USARTInstance uart6 = {0};
-void usart6_callback(void)
+void usart6_callfront(void)
 {
     if (uart6.recv_buff[0] == 0x5A && uart6.recv_buff[1] == 0xA5)
     {
@@ -60,7 +60,7 @@ void usart6_callback(void)
 USART_Init_Config_s uart6_cfg = {
     .recv_buff_size = 90,
     .usart_handle = &huart6,
-    .module_callback = usart6_callback,
+    .module_callback = usart6_callfront,
 };
 //
 float DEBUG = 0.0f;
@@ -184,6 +184,7 @@ void gray_read_task(void *pvParameters)
         // 获取传感器模拟量结果
         if (IIC_Get_Anolog(Anolog_gray_front, 8, front) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
         {
+					
         }
 
         // 获取传感器归一化结果
@@ -192,6 +193,7 @@ void gray_read_task(void *pvParameters)
         vTaskDelay(10);                   // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
         if (IIC_Get_Anolog(Normal_front, 8, front) && IIC_Get_Anolog(Normal_front, 8, side))
         {
+					
         }
         IIC_Anolog_Normalize(0xff, front); // 为了下一次循环是非归一化，所以清零
         IIC_Anolog_Normalize(0xff, side);
@@ -268,10 +270,9 @@ void Onmaincpp(void *pvParameters)
 //                {
 //                    main_state++;
 //                }
-
                 break;
             }
-
+						
             case 1:
             {
 

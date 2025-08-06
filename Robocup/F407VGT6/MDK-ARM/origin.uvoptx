@@ -259,6 +259,19 @@
           <WinNumber>1</WinNumber>
           <ItemText>digital_gray_data_side</ItemText>
         </Ww>
+<<<<<<< HEAD
+=======
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>main_state,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>planner_ptr</ItemText>
+        </Ww>
+>>>>>>> 3800235 (back改成front,读值没问题)
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
