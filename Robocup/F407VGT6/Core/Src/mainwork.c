@@ -32,8 +32,8 @@ int motor_mode = 0;
 gray_state real_time_gray_state = orgin_gray; // 主灰度状态
 // 前面灰度
 float gray_front_p = 0.01f; // 前面灰度传感器的神秘小参数
-uint8_t gray_data_front_middle = 0;
-uint8_t gray_data_front_middle_temp = 0;
+float gray_data_front_middle = 0;
+float gray_data_front_middle_temp = 0;
 uint8_t digital_gray_data_front[8];
 int sensor_weights_front[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
 unsigned char Digtal_gray_front;
@@ -126,10 +126,10 @@ void main_work(void)
     //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
     //    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 
-    Step_ZDT_Init(zdt_stepmotor_ptr[0], 4, &huart3, 1, 0.08f, false); // 左上
-    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 0, 0.08f, false); // 右上
-    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 1, 0.08f, false); // 左下
-    Step_ZDT_Init(zdt_stepmotor_ptr[3], 2, &huart3, 0, 0.08f, true);  // 右下
+    Step_ZDT_Init(zdt_stepmotor_ptr[0], 4, &huart3, 0, 0.08f, false); // 左上
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 1, 0.08f, false); // 右上
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 0, 0.08f, false); // 左下
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 2, &huart3, 1, 0.08f, true);  // 右下
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -143,7 +143,7 @@ void main_work(void)
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 300, NULL, 4, &Planner_update_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 300, NULL, 1, &LCD_Show_handle);
     BaseType_t ok7 = xTaskCreate(tcs230_read_task, "tcs230_read_task", 100, NULL, 2, &tcs230_read_handle);
-    BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 100, NULL, 2, &gray_read_handle);
+    BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 200, NULL, 2, &gray_read_handle);
     if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok7 != pdPASS)
     {
         // 任务创建失败，进入死循环
@@ -263,24 +263,46 @@ void Onmaincpp(void *pvParameters)
             {
                 motor_mode = 0;
                 debug_target_vel = (cmd_vel_t){0.2, gray_data_front_middle, 0};
-                if (real_time_gray_state == all_black)
-                {
-                    main_state++;
-                }
+								main_state++;
+//                if (real_time_gray_state == all_black)
+//                {
+//                    main_state++;
+//                }
+
                 break;
             }
-						
+
             case 1:
             {
-                motor_mode = 1;
-                debug_target_odom = (odom_t){0.3, 0, 0};
+
+								                motor_mode=1;
+                debug_target_odom = (odom_t){0.2, 0, 0};
                 debug_target_erro = (odom_t){0.01, 0.01, 0.01};
                 position_flag++;
                 Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
                 main_state++;
+
+
                 break;
             }
-            case 2:
+						
+						case 2:
+						{
+							   if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+															motor_mode=0;
+							 debug_target_vel = (cmd_vel_t){0.2, 0,0};
+						if(real_time_gray_state==all_black)
+						{
+						   debug_target_vel = (cmd_vel_t){0, 0, 0};
+        main_state++;
+								}
+						break;
+
+						}
+						
+						}
+            case 3:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -293,7 +315,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 3:
+            case 4:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -306,18 +328,20 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
 
-            switch (motor_mode)
-            {
-            case 0:
-            {
-                Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
-            }
-            case 1:
-            {
-            }
-            default:
-                break;
-            }
+        switch (motor_mode)
+        {
+        case 0:
+        {
+            Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+					break;
+        }
+        case 1:
+        {
+					break;
+        }
+        default:
+            break;
+        }
         }
 
         vTaskDelay(100);
