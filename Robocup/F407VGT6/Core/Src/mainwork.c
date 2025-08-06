@@ -21,15 +21,19 @@
 #include "tcs230.h"
 #include "gray.h"
 #include "ch040.h"
+#include "gw_color_iic.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 // 主函数状态机
 int main_state = 0;
 int motor_mode = 0;
-// 颜色传感器 状态机
-
+// 颜色传感器 
+int goods_color=-1;
+unsigned char RGB[3] = {0};
+unsigned char HSL[3] = {0};
 // 灰度
-gray_state real_time_gray_state = orgin_gray; // 主灰度状态
+gray_state real_time_gray_state = orgin_gray;      // 主灰度状态
+gray_state real_time_gray_state_side = orgin_gray; // 侧边灰度
 // 前面灰度
 float gray_front_p = 0.01f; // 前面灰度传感器的神秘小参数
 float gray_data_front_middle = 0;
@@ -40,6 +44,9 @@ unsigned char Digtal_gray_front;
 unsigned char Anolog_gray_front[8] = {0};
 unsigned char Normal_front[8] = {0};
 // 侧边灰度
+float gray_side_p = 0.01f;
+float gray_data_side_middle = 0;
+float gray_data_side_middle_temp = 0;
 uint8_t digital_gray_data_side[8];
 int sensor_weights_side[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
 unsigned char Digtal_gray_side;
@@ -126,10 +133,10 @@ void main_work(void)
     //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
     //    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 
-    Step_ZDT_Init(zdt_stepmotor_ptr[0], 4, &huart3, 0, 0.08f, false); // 左上
-    Step_ZDT_Init(zdt_stepmotor_ptr[1], 1, &huart3, 1, 0.08f, false); // 右上
-    Step_ZDT_Init(zdt_stepmotor_ptr[2], 3, &huart3, 0, 0.08f, false); // 左下
-    Step_ZDT_Init(zdt_stepmotor_ptr[3], 2, &huart3, 1, 0.08f, true);  // 右下
+    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 1, 0.08f, false); // 左上
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 0, 0.08f, false); // 右上
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.08f, false); // 左下
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.08f, true);  // 右下
 
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -142,9 +149,8 @@ void main_work(void)
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 300, NULL, 4, &Planner_update_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 300, NULL, 1, &LCD_Show_handle);
-    BaseType_t ok7 = xTaskCreate(tcs230_read_task, "tcs230_read_task", 100, NULL, 2, &tcs230_read_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 200, NULL, 2, &gray_read_handle);
-    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok7 != pdPASS)
+    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS)
     {
         // 任务创建失败，进入死循环
         while (1)
@@ -154,24 +160,23 @@ void main_work(void)
     }
 }
 
-void tcs230_read_task(void *pvParameters)
-{
-
-    while (1)
-    {
-
-        // 读取颜色传感器数据
-        vTaskDelay(100); // 延时200ms
-    }
-}
 void gray_read_task(void *pvParameters)
 {
-    while (Ping())
+    while (Ping() || Ping_color())
     {
         vTaskDelay(5);
     }
+
     while (1)
     {
+
+        if (IIC_Get_RGB(RGB, 3))
+        {
+				goods_color=	Get_GW_Color(RGB);
+        }
+        if (IIC_Get_HSL(HSL, 3))
+        {
+        }
         // 读取灰度传感器数据
         Digtal_gray_front = IIC_Get_Digtal(front);
         Digtal_gray_side = IIC_Get_Digtal(side);
@@ -184,16 +189,14 @@ void gray_read_task(void *pvParameters)
         // 获取传感器模拟量结果
         if (IIC_Get_Anolog(Anolog_gray_front, 8, front) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
         {
-					
         }
 
         // 获取传感器归一化结果
         IIC_Anolog_Normalize(0xff, front); // 所有通道归一化都打开
-        IIC_Anolog_Normalize(0xff, side); // 所有通道归一化都打开
-        vTaskDelay(10);                   // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
+        IIC_Anolog_Normalize(0xff, side);  // 所有通道归一化都打开
+        vTaskDelay(10);                    // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
         if (IIC_Get_Anolog(Normal_front, 8, front) && IIC_Get_Anolog(Normal_front, 8, side))
         {
-					
         }
         IIC_Anolog_Normalize(0xff, front); // 为了下一次循环是非归一化，所以清零
         IIC_Anolog_Normalize(0xff, side);
@@ -201,19 +204,34 @@ void gray_read_task(void *pvParameters)
         {
 
             real_time_gray_state = all_black;
+        }
+        else
+        {
+            real_time_gray_state = orgin_gray;
+        }
+
+        if (digital_gray_data_side[1] == 1 && digital_gray_data_side[2] == 1 && digital_gray_data_side[3] == 1 && digital_gray_data_side[4] == 1 && digital_gray_data_side[5] == 1 && digital_gray_data_side[6] == 1)
+        {
+
+            real_time_gray_state_side = all_black;
             BUZZER_ON;
         }
         else
         {
-
-            real_time_gray_state = orgin_gray;
+            real_time_gray_state_side = orgin_gray;
+            BUZZER_OFF;
         }
+
         for (int i = 0; i < 8; i++)
         {
             gray_data_front_middle_temp += digital_gray_data_front[i] * sensor_weights_front[i] * gray_front_p; // 计算前面灰度传感器的中间值
+            gray_data_side_middle_temp += digital_gray_data_side[i] * sensor_weights_side[i] * gray_side_p;
         }
+        gray_data_side_middle = gray_data_side_middle_temp;
         gray_data_front_middle = gray_data_front_middle_temp;
         gray_data_front_middle_temp = 0;
+        gray_data_side_middle_temp = 0;
+
         vTaskDelay(10); // 延时10ms
     }
 }
@@ -261,59 +279,43 @@ void Onmaincpp(void *pvParameters)
             safe_guard = 1; // 保护锁打开
             switch (main_state)
             {
+
             case 0:
             {
-                motor_mode = 0;
-                debug_target_vel = (cmd_vel_t){0.2, gray_data_front_middle, 0};
-								main_state++;
-//                if (real_time_gray_state == all_black)
-//                {
-//                    main_state++;
-//                }
-                break;
-            }
-						
-            case 1:
-            {
 
-								                motor_mode=1;
-                debug_target_odom = (odom_t){0.2, 0, 0};
+                motor_mode = 1;
+                debug_target_odom = (odom_t){0.3, 0, 0};
                 debug_target_erro = (odom_t){0.01, 0.01, 0.01};
-                position_flag++;
                 Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
                 main_state++;
 
-
                 break;
             }
-						
-						case 2:
-						{
-							   if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-                {
-															motor_mode=0;
-							 debug_target_vel = (cmd_vel_t){0.2, 0,0};
-						if(real_time_gray_state==all_black)
-						{
-						   debug_target_vel = (cmd_vel_t){0, 0, 0};
-        main_state++;
-								}
-						break;
 
-						}
-						
-						}
-            case 3:
+            case 1:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-                    motor_mode = 1;
-                    debug_target_odom = (odom_t){0, 0.2, 0};
-                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
-                    position_flag++;
-                    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
-                    main_state++;
+                    motor_mode = 0;
+                    debug_target_vel = (cmd_vel_t){0, 0.2, 0};
+                    if (real_time_gray_state_side == all_black)
+                    {
+                        debug_target_vel = (cmd_vel_t){0, 0, 0};
+                        main_state++;
+                    }
+                    break;
                 }
+            }
+            case 2:
+            {
+
+                //                    motor_mode = 1;
+                //                    debug_target_odom = (odom_t){0, 0, 0};
+                //                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
+                //                    position_flag++;
+                //                    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
+                //                    main_state++;
+
                 break;
             }
             case 4:
@@ -329,20 +331,20 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
 
-        switch (motor_mode)
-        {
-        case 0:
-        {
-            Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
-					break;
-        }
-        case 1:
-        {
-					break;
-        }
-        default:
-            break;
-        }
+            switch (motor_mode)
+            {
+            case 0:
+            {
+                Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+                break;
+            }
+            case 1:
+            {
+                break;
+            }
+            default:
+                break;
+            }
         }
 
         vTaskDelay(100);

@@ -20,6 +20,7 @@
         "stdint.h": "c",
         "wit_imu.h": "c",
         "bmi088driver.h": "c",
-        "gray.h": "c"
+        "gray.h": "c",
+        "gw_color_iic.h": "c"
     }
 }

@@ -55,4 +55,5 @@ origin/mainwork.o: ..\Core\Src\mainwork.c ..\Core\Inc\mainwork.h \
   ..\mcu_bsp\LCD\lcd.h ..\mcu_bsp\LCD\lcd_init.h ..\mcu_bsp\LCD\pic.h \
   ..\mcu_bsp\uart\bsp_usart.h ..\Core\Inc\tim.h ..\Device\tcs230.h \
   ..\Device\gray.h ..\Core\Inc\i2c.h ..\Device\gw_grayscale_sensor.h \
-  ..\mcu_bsp\IMU\ch040.h
+  ..\mcu_bsp\IMU\ch040.h ..\Device\gw_color_iic.h \
+  ..\Device\gw_color_sensor.h

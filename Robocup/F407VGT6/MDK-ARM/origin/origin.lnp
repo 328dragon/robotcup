@@ -72,6 +72,7 @@
 "origin\lcd_init.o"
 "origin\gray.o"
 "origin\tcs230.o"
+"origin\gtw_color_iic.o"
 --library_type=microlib --strict --scatter "origin\origin.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
