@@ -40,7 +40,7 @@ unsigned char Ping(void)
 unsigned char IIC_Get_Digtal(int ordinal)
 {
 	unsigned char dat;
-	if (ordinal == back)
+	if (ordinal == front)
 		IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_DIGITAL_MODE, &dat, 1);
 	else if (ordinal == side)
 		IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_DIGITAL_MODE, &dat, 1);
@@ -48,7 +48,7 @@ unsigned char IIC_Get_Digtal(int ordinal)
 }
 unsigned char IIC_Get_Anolog(unsigned char *Result, unsigned char len, int ordinal)
 {
-	if (ordinal == back)
+	if (ordinal == front)
 	{
 				if (IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_ANALOG_BASE_, Result, len))
 			return 1;
@@ -64,7 +64,7 @@ unsigned char IIC_Get_Anolog(unsigned char *Result, unsigned char len, int ordin
 unsigned char IIC_Get_Single_Anolog(unsigned char Channel, int ordinal)
 {
 	unsigned char dat;
-	if (ordinal == back)
+	if (ordinal == front)
 		IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_ANALOG(Channel), &dat, 1);
 	else if (ordinal == side)
 		IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_ANALOG(Channel), &dat, 1);
@@ -72,7 +72,7 @@ unsigned char IIC_Get_Single_Anolog(unsigned char Channel, int ordinal)
 }
 unsigned char IIC_Anolog_Normalize(uint8_t Normalize_channel, int ordinal)
 {
-	if (ordinal == back)
+	if (ordinal == front)
 		return IIC_WriteByte(GW_GRAY_ADDR_DEF << 1, GW_GRAY_ANALOG_NORMALIZE, Normalize_channel);
 	else if (ordinal == side)
 		return IIC_WriteByte(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_ANALOG_NORMALIZE, Normalize_channel);
@@ -80,7 +80,7 @@ unsigned char IIC_Anolog_Normalize(uint8_t Normalize_channel, int ordinal)
 unsigned short IIC_Get_Offset(int ordinal)
 {
 	unsigned char dat[2] = {0};
-	if (ordinal == back)
+	if (ordinal == front)
 		IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, Offset, dat, 2);
 	else if (ordinal == side)
 		IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, Offset, dat, 2);

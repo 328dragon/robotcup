@@ -173,7 +173,7 @@ void gray_read_task(void *pvParameters)
     while (1)
     {
         // 读取灰度传感器数据
-        Digtal_gray_front = IIC_Get_Digtal(back);
+        Digtal_gray_front = IIC_Get_Digtal(front);
         Digtal_gray_side = IIC_Get_Digtal(side);
         for (int i = 0; i < 8; i++)
         {
@@ -182,18 +182,18 @@ void gray_read_task(void *pvParameters)
         }
 
         // 获取传感器模拟量结果
-        if (IIC_Get_Anolog(Anolog_gray_front, 8, back) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
+        if (IIC_Get_Anolog(Anolog_gray_front, 8, front) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
         {
         }
 
         // 获取传感器归一化结果
-        IIC_Anolog_Normalize(0xff, back); // 所有通道归一化都打开
+        IIC_Anolog_Normalize(0xff, front); // 所有通道归一化都打开
         IIC_Anolog_Normalize(0xff, side); // 所有通道归一化都打开
         vTaskDelay(10);                   // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
-        if (IIC_Get_Anolog(Normal_front, 8, back) && IIC_Get_Anolog(Normal_front, 8, side))
+        if (IIC_Get_Anolog(Normal_front, 8, front) && IIC_Get_Anolog(Normal_front, 8, side))
         {
         }
-        IIC_Anolog_Normalize(0xff, back); // 为了下一次循环是非归一化，所以清零
+        IIC_Anolog_Normalize(0xff, front); // 为了下一次循环是非归一化，所以清零
         IIC_Anolog_Normalize(0xff, side);
         if (digital_gray_data_front[0] == 1 && digital_gray_data_front[1] == 1 && digital_gray_data_front[2] == 1 && digital_gray_data_front[3] == 1 && digital_gray_data_front[4] == 1 && digital_gray_data_front[5] == 1 && digital_gray_data_front[6] == 1 && digital_gray_data_front[7] == 1)
         {
