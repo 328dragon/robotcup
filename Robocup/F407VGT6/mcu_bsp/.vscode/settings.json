@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "mecanum.h": "c",
+        "zdtstepmotor.h": "c"
+    }
+}

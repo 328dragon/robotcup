@@ -1,0 +1,34 @@
+#Ignore Keil specific backup and configuration files
+# User-specific uVision files
+*.opt
+*.uvopt
+*.uvoptx
+*.uvgui
+*.uvgui.*
+*.uvguix.*
+*.uvgui.*      
+*.uvoptx.bak   
+*.uvprojx.bak  
+
+# Ignore build and output files
+*.lst
+*.crf
+*.map
+**/*.o
+*.axf
+*.hex
+*.sct
+*.d  
+*.htm
+*.iex
+*.dep
+# Ignore user-specific temporary files
+*.bak
+*.log
+*.tmp
+MDK-ARM/.vscode/c_cpp_properties.json
+MDK-ARM/.vscode/uv4.log.lock
+# 忽略编译生成的文件
+*.bin
+*.elf
+
