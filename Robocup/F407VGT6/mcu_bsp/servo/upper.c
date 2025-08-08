@@ -43,17 +43,17 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
     if(*CurrentColorLoop<=5)
         if (*upperflag == PICKINGIN)
         {
-            Servo_SetAngle(&servos[0], PICK_LEFT);
-            Servo_SetAngle(&servos[1], PICK_DOWN);
+            Servo_SetAngle(&servos[0], PICK_LEFT,180);
+            Servo_SetAngle(&servos[1], PICK_DOWN,180);
             vTaskDelay(1000); // 等待舵机转动完成，需要实测
 
             // 此处还需加入吸盘启动
 
             vTaskDelay(500);
-            Servo_SetAngle(&servos[0], FIND_PLATE);
-            Servo_SetAngle(&servos[1], UP);
+            Servo_SetAngle(&servos[0], FIND_PLATE,180);
+            Servo_SetAngle(&servos[1], UP,180);
             vTaskDelay(500);
-            Servo_SetAngle(&servos[1], COLORTASKHEIGHT);
+            Servo_SetAngle(&servos[1], COLORTASKHEIGHT,180);
             vTaskDelay(500);
             *upperflag = GETCOLORIN;
         }
@@ -62,12 +62,13 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
             plate_things[*CurrentColorLoop]._color = *current_color_ptr;
             plate_things[*CurrentColorLoop]._angle = THING_GIMBAL_ORIGIN_ANGLE + *CurrentColorLoop*THING_GIMBAL_FIXED_DELTA;
             plate_things[*CurrentColorLoop]._number = *CurrentColorLoop;
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop]._angle,360);
             (*CurrentColorLoop)++;
             *upperflag = PUTINGIN;
         }
         if (*upperflag == PUTINGIN)
         {
-            Servo_SetAngle(&servos[1], PUT_DOWN);
+            Servo_SetAngle(&servos[1], PUT_DOWN,180);
             vTaskDelay(500);
 
             // 此处还需加入吸盘关闭
@@ -87,23 +88,23 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
             {
                 if (plate_things[i]._color == color_task[*PutGoalLoop])   
                 {
-                    Servo_SetAngle(&servos[2], plate_things[i]._angle);
+                    Servo_SetAngle(&servos[2], plate_things[i]._angle,360);
                 }
             }
-            Servo_SetAngle(&servos[0], FIND_PLATE);
-            Servo_SetAngle(&servos[1], PUT_DOWN);
+            Servo_SetAngle(&servos[0], FIND_PLATE,180);
+            Servo_SetAngle(&servos[1], PUT_DOWN,180);
             vTaskDelay(1000); // 等待舵机转动完成，需要实测
 
             // 此处还需加入吸盘启动
 
-            Servo_SetAngle(&servos[1], UP);
+            Servo_SetAngle(&servos[1], UP,180);
         }
 
         // 此处还需等待底盘移动到目标位置
 
         if(*upperflag == PUTTINGOUT)
         {
-            Servo_SetAngle(&servos[0], GOAL);
+            Servo_SetAngle(&servos[0], GOAL,180);
 
             // 此处还需加入吸盘关闭
 
