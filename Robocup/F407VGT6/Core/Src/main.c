@@ -132,13 +132,13 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_2);
   
 	//这时候板子的pwm还是上一版                   
-	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,600);//大转盘，950刚好一个对齐屁股，
-	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,1500);//1800卡住，2500松开，左小蓝机
-	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,1800);//1800卡住，900松开，右小蓝机	
-	__HAL_TIM_SET_COMPARE(&htim5,TIM_CHANNEL_4 ,1500);//小转盘，2000为里，600为外
-	__HAL_TIM_SET_COMPARE(&htim5,TIM_CHANNEL_3 ,2000);//抬升，500最低，800中间，1800最高
-	__HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1 ,1300);//夹爪，1800紧，1500松
-	__HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_2 ,1000);//夹爪1100锁紧，1500松
+	// __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,600);//大转盘，950刚好一个对齐屁股，
+	// __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,1500);//1800卡住，2500松开，左小蓝机
+	// __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,1800);//1800卡住，900松开，右小蓝机	
+	// __HAL_TIM_SET_COMPARE(&htim5,TIM_CHANNEL_4 ,1500);//小转盘，2000为里，600为外
+	// __HAL_TIM_SET_COMPARE(&htim5,TIM_CHANNEL_3 ,2000);//抬升，500最低，800中间，1800最高
+	// __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_1 ,1300);//夹爪，1800紧，1500松
+	// __HAL_TIM_SET_COMPARE(&htim9,TIM_CHANNEL_2 ,1000);//夹爪1100锁紧，1500松
 	
 	//
   main_work();

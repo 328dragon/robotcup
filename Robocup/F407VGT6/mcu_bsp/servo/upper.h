@@ -2,10 +2,11 @@
  * @Author: Nagisa 2964793117@qq.com
  * @Date: 2025-08-07 22:06:30
  * @LastEditors: Nagisa 2964793117@qq.com
- * @LastEditTime: 2025-08-08 15:55:10
+ * @LastEditTime: 2025-08-09 00:24:46
  * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\mcu_bsp\servo\upper.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
+
 #ifndef _UPPER_H_
 #define _UPPER_H_
 /*
@@ -17,7 +18,7 @@
 #include "task.h"
 //所有舵机的常量或枚举常量
 #define THING_GIMBAL_FIXED_DELTA 60
-#define THING_GIMBAL_ORIGIN_ANGLE 60
+#define THING_GIMBAL_ORIGIN_ANGLE 0
 // #define ASS_SERVO_OPEN
 // #define ASS_SERVO_CLOSE
 
@@ -26,30 +27,30 @@
 */
 typedef enum
 {
-    PICK_LEFT,
-    FIND_PLATE,
-    GOAL
+    PICK_LEFT = 50,
+    FIND_PLATE = 218,
+    GOAL = 39
 } GimbalArm_Servoangle_t;
 /*
     * @brief 抬升舵机枚举常量
 */
 typedef enum
 {
-    PICK_DOWN,
-    UP,
-    COLORTASKHEIGHT,
-    PUT_DOWN
+    PICK_DOWN =40,
+    UP = 0,
+    COLORTASKHEIGHT = 20,
+    PUT_DOWN = 30
 } Lift_Servoangle_t;
 /*
     * @brief 物块颜色枚举常量
 */
 typedef enum
 {
-    RED,
-    GREEN,
-    BLUE,
-    BLACK,
-    WHITE
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_BLUE,
+    COLOR_BLACK,
+    COLOR_WHITE
 } Color_t;
 
 /*

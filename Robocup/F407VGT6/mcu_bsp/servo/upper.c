@@ -6,23 +6,25 @@ void GetColorTask(Color_t* color_task, int* color_task_index)
 {
     // 创建颜色映射表，使用Color_t枚举
     static const Color_t colorMap[16][5] = {
-        /* 1  */ {BLACK, WHITE, RED, GREEN, BLUE},
-        /* 2  */ {WHITE, BLACK, RED, GREEN, BLUE},
-        /* 3  */ {WHITE, BLACK, GREEN, RED, BLUE},
-        /* 4  */ {BLUE, WHITE, BLACK, RED, GREEN},
-        /* 5  */ {WHITE, RED, BLUE, BLACK, GREEN},
-        /* 6  */ {BLACK, RED, BLUE, WHITE, GREEN},
-        /* 7  */ {BLUE, GREEN, BLACK, WHITE, RED},
-        /* 8  */ {GREEN, WHITE, BLUE, BLACK, RED},
-        /* 9  */ {WHITE, GREEN, BLACK, BLUE, RED},
-        /* 10 */ {BLACK, RED, BLUE, GREEN, WHITE},
-        /* 11 */ {RED, BLUE, GREEN, BLACK, WHITE},
-        /* 12 */ {GREEN, RED, BLACK, BLUE, WHITE},
-        /* 13 */ {WHITE, RED, BLUE, GREEN, BLACK},
-        /* 14 */ {RED, GREEN, WHITE, BLUE, BLACK},
-        /* 15 */ {BLUE, WHITE, GREEN, RED, BLACK},
-        /* 16 */ {GREEN, BLUE, RED, WHITE, BLACK}
+        /* 1  */ {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
+        /* 2  */ {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
+        /* 3  */ {COLOR_WHITE, COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_BLUE},
+        /* 4  */ {COLOR_BLUE, COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN},
+        /* 5  */ {COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_GREEN},
+        /* 6  */ {COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_WHITE, COLOR_GREEN},
+        /* 7  */ {COLOR_BLUE, COLOR_GREEN, COLOR_BLACK, COLOR_WHITE, COLOR_RED},
+        /* 8  */ {COLOR_GREEN, COLOR_WHITE, COLOR_BLUE, COLOR_BLACK, COLOR_RED},
+        /* 9  */ {COLOR_WHITE, COLOR_GREEN, COLOR_BLACK, COLOR_BLUE, COLOR_RED},
+        /* 10 */ {COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_WHITE},
+        /* 11 */ {COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_BLACK, COLOR_WHITE},
+        /* 12 */ {COLOR_GREEN, COLOR_RED, COLOR_BLACK, COLOR_BLUE, COLOR_WHITE},
+        /* 13 */ {COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_BLACK},
+        /* 14 */ {COLOR_RED, COLOR_GREEN, COLOR_WHITE, COLOR_BLUE, COLOR_BLACK},
+        /* 15 */ {COLOR_BLUE, COLOR_WHITE, COLOR_GREEN, COLOR_RED, COLOR_BLACK},
+        /* 16 */ {COLOR_GREEN, COLOR_BLUE, COLOR_RED, COLOR_WHITE, COLOR_BLACK}
     };
+
+
 
     // 检查输入数字是否有效
     if (*color_task_index >= 1 && *color_task_index <= 16) 
@@ -43,14 +45,14 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
     if(*CurrentColorLoop<=5)
         if (*upperflag == PICKINGIN)
         {
-            Servo_SetAngle(&servos[0], PICK_LEFT,180);
+            Servo_SetAngle(&servos[0], PICK_LEFT,270);
             Servo_SetAngle(&servos[1], PICK_DOWN,180);
             vTaskDelay(1000); // 等待舵机转动完成，需要实测
 
             // 此处还需加入吸盘启动
 
             vTaskDelay(500);
-            Servo_SetAngle(&servos[0], FIND_PLATE,180);
+            Servo_SetAngle(&servos[0], FIND_PLATE,270);
             Servo_SetAngle(&servos[1], UP,180);
             vTaskDelay(500);
             Servo_SetAngle(&servos[1], COLORTASKHEIGHT,180);

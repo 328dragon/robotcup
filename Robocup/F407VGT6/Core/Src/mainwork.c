@@ -22,8 +22,23 @@
 #include "gray.h"
 #include "ch040.h"
 #include "gw_color_iic.h"
+#include "servo.h"
+#include "upper.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
+
+Servo_t servo[3]= {
+    {&htim9, TIM_CHANNEL_2, 0, 0},
+    {&htim9, TIM_CHANNEL_1, 0, 0},
+    {&htim5, TIM_CHANNEL_3, 0, 0}
+};
+UpperTaskFlag upperflag = IDLE; // 上层机构状态机
+UpperTaskFlag* upperflag_ptr = &upperflag;
+ThingStore_t plate_things[6] = {0}; // 料盘槽数组
+Color_t current_color = COLOR_BLACK; // 当前颜色
+Color_t* current_color_ptr = &current_color;
+int CurrentColorLoop = 0;
+
 // 主函数状态机
 int main_state = 0;
 int motor_mode = 0;
@@ -162,7 +177,8 @@ void main_work(void)
 
 void gray_read_task(void *pvParameters)
 {
-    while (Ping() || Ping_color())
+    // while (Ping() || Ping_color())
+	  while ( Ping_color())
     {
         vTaskDelay(5);
     }
@@ -240,8 +256,10 @@ void LCD_Show_task(void *pvParameters)
     // 屏幕
     LCD_Init();
     LCD_Fill(0, 0, LCD_W, LCD_H, WHITE);
+    DistributionLoop(servo, plate_things, current_color_ptr, upperflag_ptr, &CurrentColorLoop);
     while (1)
-    {
+    {   
+       
         //        // 显示
         //        // 陀螺仪
         //        LCD_ShowFloatNum1(0, 20, gyro[0], 4, RED, WHITE, 16);

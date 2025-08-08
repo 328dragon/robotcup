@@ -25,7 +25,6 @@ typedef struct
 // 25kg舵机对应时钟通道PSC为84-1, ARR为20000-1，APB1时钟线（TIM3/5），为84MHz
 // 蓝色小舵机对应时钟通道PSC为168-1, ARR为20000-1，APB2时钟线（TIM9），为168MHz
 // 故25kg舵机的CCR的范围为
-void Servo_Init(Servo_t *servo, TIM_HandleTypeDef *htim, uint32_t channel);
 void Servo_SetAngle(Servo_t *servo, float angle,float max_angle);
 
 
