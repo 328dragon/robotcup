@@ -4,7 +4,8 @@
     "servo.h": "c",
     "upper.h": "c",
     "zdtstepmotor.h": "c",
-    "motor_def.h": "c"
+    "motor_def.h": "c",
+    "task.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvarsall.bat"
 }
