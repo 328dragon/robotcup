@@ -16,6 +16,7 @@
 #include "servo.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "stdbool.h"
 //所有舵机的常量或枚举常量
 #define THING_GIMBAL_FIXED_DELTA 60
 #define THING_GIMBAL_ORIGIN_ANGLE 0
@@ -35,8 +36,8 @@ typedef enum
 	BLUE_PICK=198,
 	GREEN_PICK=234,
 	RED_PICK=265,
-	WHITE_PICK=300,
-	BLACK_PICK=324
+	WHITE_PICK=305,
+	BLACK_PICK=330
  
 } GimbalArm_Servoangle_t;
 
@@ -74,6 +75,16 @@ typedef enum
     PUTTINGOUT,
     IDLE
 } UpperTaskFlag;
+
+
+typedef enum 
+{
+down_location=0,
+middle_location=1,
+up_location=2	,
+pick_middle_location=3
+}upper_location;
+
 // 打算servo数组一共3个舵机，第一个舵机控制前云台，第二个控制升降，第三个控制转盘
 
 // 用全局数组存储记忆内容，功能函数全部使用指针操作
@@ -91,5 +102,6 @@ typedef enum
 void GetColorTask(Color_t* color_task, int* color_task_index);
 void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* current_color_ptr, UpperTaskFlag* upperflag,int* CurrentColorLoop);
 void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, UpperTaskFlag* upperflag,int* PutGoalLoop);
-
+void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t acc, uint32_t clk, bool raF, bool snF);
+ void upper_to_target(upper_location target_position);
 #endif

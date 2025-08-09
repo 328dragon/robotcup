@@ -1,7 +1,8 @@
 #include "upper.h"
 #include "mainwork.h"
+#include "usart.h"
 // 1980中间960前面
-
+extern upper_location now_upper_loacation;
 extern upper_location target_upper_loacation;
 /*
  * @brief 获得颜色任务
@@ -44,16 +45,17 @@ void GetColorTask(Color_t *color_task, int *color_task_index)
  */
 void DistributionLoop(Servo_t *servos, ThingStore_t *plate_things, Color_t *current_color_ptr, UpperTaskFlag *upperflag, int *CurrentColorLoop)
 {
-    plate_things[0]._color = 135;//黑
-    plate_things[1]._color = 45;//白
-    plate_things[2]._color = 90;
-    plate_things[3]._color = 0;
-    plate_things[4]._color = 180;
-		plate_things[0]._angle=BLACK_PICK;
-		plate_things[1]._angle=WHITE_PICK;
-		plate_things[2]._angle=RED_PICK;
-		plate_things[3]._angle=GREEN_PICK;
-		plate_things[4]._angle=BLUE_PICK;
+	//绑定
+	plate_things[0]._color = 135;//黑
+	plate_things[1]._color = 45;//白
+	plate_things[2]._color = 90;
+	plate_things[3]._color = 0;
+	plate_things[4]._color = 180;
+	plate_things[0]._angle=BLACK_PICK;
+	plate_things[1]._angle=WHITE_PICK;
+	plate_things[2]._angle=RED_PICK;
+	plate_things[3]._angle=GREEN_PICK;
+	plate_things[4]._angle=BLUE_PICK;
     if (*CurrentColorLoop <= 5)
     {
         if (*upperflag == PICKINGIN)
@@ -122,7 +124,7 @@ void DistributionLoop(Servo_t *servos, ThingStore_t *plate_things, Color_t *curr
             PUMP_OFF;
             vTaskDelay(2000);
             target_upper_loacation = up_location; // 上升到中间防止冲突
-					 vTaskDelay(4000);
+					 vTaskDelay(3000);
 					  Servo_SetAngle(&servos[0], FIND_PLATE, 360); // 等待抓取
             *upperflag = IDLE;
         }
@@ -168,4 +170,126 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
             vTaskDelay(500);
         }
     }
+}
+
+ void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t acc, uint32_t clk, bool raF, bool snF)
+{
+  uint8_t cmd[16] = {0};
+
+  // 装载命令
+  cmd[0]  =  addr;                      // 地址
+  cmd[1]  =  0xFD;                      // 功能码
+  cmd[2]  =  dir;                       // 方向
+  cmd[3]  =  (uint8_t)(vel >> 8);       // 速度(RPM)高8位字节
+  cmd[4]  =  (uint8_t)(vel >> 0);       // 速度(RPM)低8位字节 
+  cmd[5]  =  acc;                       // 加速度，注意：0是直接启动
+  cmd[6]  =  (uint8_t)(clk >> 24);      // 脉冲数(bit24 - bit31)
+  cmd[7]  =  (uint8_t)(clk >> 16);      // 脉冲数(bit16 - bit23)
+  cmd[8]  =  (uint8_t)(clk >> 8);       // 脉冲数(bit8  - bit15)
+  cmd[9]  =  (uint8_t)(clk >> 0);       // 脉冲数(bit0  - bit7 )
+	
+  cmd[10] =  raF;                       // 相位/绝对标志，false为相对运动，true为绝对值运动
+  cmd[11] =  snF;                       // 多机同步运动标志，false为不启用，true为启用
+  cmd[12] =  0x6B;                      // 校验字节
+  
+  // 发送命令
+  HAL_UART_Transmit(&huart3, (uint8_t *)cmd, 13,1000);
+	vTaskDelay(10);
+}
+static void upper_move_location(upper_location now_location,upper_location target_position )
+{
+//origin-- down--pick_middle--middle--up
+int origin_pulse=0;
+int down_pulse=300;
+int pick_middle_pulse=4400;
+int middle_pulse=5000;
+int up_pulse=7800;
+    switch (now_location)
+    {
+    case down_location:
+        if (target_position == middle_location)
+        {
+            upper_move_distance(5, 0, 300, 0.02, middle_pulse-down_pulse, 0, 0); // 上升到中间位置
+            now_upper_loacation = middle_location;
+        }
+        else if (target_position == up_location)
+        {
+            upper_move_distance(5, 0, 300, 0.02, up_pulse-down_pulse, 0, 0); // 上升到最高位置
+            now_upper_loacation = up_location;
+        }else if(target_position==pick_middle_location)
+        {
+					upper_move_distance(5, 0, 300, 0.02, pick_middle_pulse-down_pulse, 0, 0); // 上升到分拣位置
+            now_upper_loacation = pick_middle_location;
+        }
+        break;
+
+        case pick_middle_location:
+        {
+            if(target_position=down_location)
+            {
+                upper_move_distance(5, 1, 300, 0.02, pick_middle_pulse-down_pulse, 0, 0); // 降落到最低位置
+                now_upper_loacation = down_location;
+            }
+            else if(target_position==middle_location)
+            {
+							upper_move_distance(5, 0, 300, 0.02, middle_pulse-pick_middle_pulse, 0, 0); // 上升到中间位置
+                now_upper_loacation = middle_location;
+            }else if(target_position==up_location)
+            {
+							upper_move_distance(5, 0, 300, 0.02, up_pulse-pick_middle_pulse, 0, 0); // 上升到最高位置
+                now_upper_loacation = up_location;
+            }
+
+            break;
+        }
+
+
+    case middle_location:
+    {
+        if (target_position == down_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, middle_pulse-down_pulse, 0, 0); // 降落到最低位置
+            now_upper_loacation = down_location;
+        }
+        else if (target_position == up_location)
+        {
+            upper_move_distance(5, 0, 300, 0.02, up_pulse-middle_pulse, 0, 0); // 上升到最高位置
+            now_upper_loacation = up_location;
+        }else if(target_position == pick_middle_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, middle_pulse-pick_middle_pulse, 0, 0); // 下降到分拣位置
+            now_upper_loacation = middle_location;
+        }
+        break;
+
+    }
+    case up_location:
+    {
+        if (target_position == down_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, up_pulse-down_pulse, 0, 0); // 降落到最低位置
+            now_upper_loacation = down_location;
+        }
+        else if (target_position == middle_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, up_pulse-middle_pulse, 0, 0); // 降落到中间位置
+            now_upper_loacation = middle_location;
+        }else if(target_position==pick_middle_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, up_pulse-pick_middle_pulse, 0, 0); // 降落到分拣位置
+            now_upper_loacation = pick_middle_location;
+        }
+        break;
+
+    }
+
+    
+    default:
+        break;
+    }
+}
+
+ void upper_to_target(upper_location target_position)
+{
+upper_move_location(now_upper_loacation,target_position);
 }

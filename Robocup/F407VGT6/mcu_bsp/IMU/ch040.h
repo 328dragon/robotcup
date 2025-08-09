@@ -8,7 +8,7 @@ extern  float ch040_gyr[3];
 extern float ch040_mag[3];
 extern  float ch040_imu[3];
 extern float ch040_quat[4] ;
-void ch040_get_data(uint8_t *data);
-
+float ch040_get_data(uint8_t *data);
+void setYawZero();
 extern float ch040_yaw;
 #endif

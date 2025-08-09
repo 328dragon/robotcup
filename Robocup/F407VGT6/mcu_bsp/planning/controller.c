@@ -189,7 +189,7 @@ void Controller_KinematicAndControlUpdate(Controller_t *controller, uint16_t dt)
 void Controller_KinematicAndControlUpdateWithYaw(Controller_t *controller, uint16_t dt, float yaw)
 {
     Kinematic_forward(controller->current_speed, &controller->kinematic->current_vel, controller->kinematic);
-    Kinematic_CalculationUpdateWithYaw(dt, &controller->kinematic->current_vel, &controller->kinematic->current_odom, yaw);
+    Kinematic_CalculationUpdateWithYaw(dt,controller->kinematic, &controller->kinematic->current_vel, &controller->kinematic->current_odom, yaw);
     Controller_control_update(controller, &controller->kinematic->current_odom);
     Controller_StatusUpdate(controller, &controller->kinematic->current_odom);
     // 这个函数随电机改变
