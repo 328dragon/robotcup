@@ -54,38 +54,31 @@ unsigned char R=RGB[0];
 	unsigned char B=RGB[2];
 	if (R > 150 &&G > 150 && B > 150)
 	{
-
-		// return 135;
 		return gw_white_color;
-	} // 白色
-	  //  if(B-R>=20&&B-G>=20&&B>=60)
-//	if (B - R >= 20 && B - G >= 0 && B >= 60)
+	} //白色45
 	if((B > R) && (B > G) && (B > 1.7 * R))
 
 	{
 
-		// return 0;
 		return gw_blue_color;
-	} // 蓝色
+	} // 蓝色180
 	if (G > B && G > R && G >= 20)
-	//   if(G>R&&G>=20)
-
 	{
 
-		// return 180;
+
 		return gw_green_color;
-	} // 绿色
+	} // 绿色0
 	if (R - B >= 40 && R - G >= 40 && R >= 80)
 	{
 
 		return gw_red_color;
-	} // 红色
+	} // 红色90
 	if (R <= 50 && G <= 50 && B <= 50)
 	{
 
-		// return 45;
+
 		return gw_black_color;
-	} // 黑色
+	} // 黑色135
 
 	return -1;
 }
@@ -96,27 +89,26 @@ unsigned char H=HSL[0];
 	unsigned char L=HSL[2];
 	if(L>210)
 	{
-	return gw_white_color;
+	return gw_white_color;//45
 	}
 	if(L<60)
 	{
-	return gw_black_color;
+	return gw_black_color;//135
 	}
-	
 	
 if(L<210&&L>60)//红绿蓝
 {
 if(H>200||H<10)
 {
-return gw_red_color;
+return gw_red_color;//90
 }
 if(H>20&&H<100)
 {
-	return gw_green_color;
+	return gw_green_color;//0
 }
 if(H>100&&H<200)
 {
-	return gw_blue_color;
+	return gw_blue_color;//180
 }
 }	
 return -1;
