@@ -28,15 +28,13 @@
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 #define get_little_yellow_state			HAL_GPIO_ReadPin(little_yellow_GPIO_Port,little_yellow_Pin)
 
-Servo_t servo[3]= {
-    {&htim9, TIM_CHANNEL_2, 0, 0},
-    {&htim9, TIM_CHANNEL_1, 0, 0},
-    {&htim5, TIM_CHANNEL_3, 0, 0}
+Servo_t servo[1]= {
+    {&htim3, TIM_CHANNEL_4, 83, 0}
 };
-
+int pick_goods_flag=0;
 UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag* upperflag_ptr = &upperflag;
-ThingStore_t plate_things[6] = {0}; // 料盘槽数组
+ThingStore_t plate_things[5] = {0}; // 料盘槽数组
 Color_t current_color = COLOR_BLACK; // 当前颜色
 Color_t* current_color_ptr = &current_color;
 int CurrentColorLoop = 0;
@@ -80,16 +78,12 @@ USARTInstance uart6 = {0};
 int get_yellow_flag=0;
 int yellow_state=0;
 //上升控制
-typedef enum 
-{
-down_location=0,
-middle_location=1,
-up_location=2	
-}upper_location;
+int first_upper_flag=1;
 upper_location now_upper_loacation=0;
 upper_location target_upper_loacation=0;
 int upper_flag=0;
 int upper_rotate_pwm=960;
+int pump_flag=0;
 //读陀螺仪
 void usart6_callfront(void)
 {
@@ -162,7 +156,7 @@ void main_work(void)
     Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.08f, false); // 左下
     Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.08f, true);  // 右下
 		
-		
+
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
@@ -202,8 +196,9 @@ while(1)
 	if (IIC_Get_HSL(HSL, 3))
         {
 					goods_color_HSL=Get_GW_Color_HSL(HSL);
+					*current_color_ptr=goods_color_HSL;
         }
-vTaskDelay(400);
+vTaskDelay(200);
 
 }
 
@@ -213,8 +208,15 @@ void UPPER_control_task(void *pvParameters)
 
 while (1)
 {
-
+if(pick_goods_flag==1)
+{
+*upperflag_ptr=PICKINGIN;
+pick_goods_flag=0;
+}
     
+DistributionLoop(servo,plate_things,current_color_ptr, upperflag_ptr, &CurrentColorLoop);
+PutGoal()
+
   vTaskDelay(100);
 }
 
@@ -239,9 +241,7 @@ void gray_read_task(void *pvParameters)
 	yellow_state=-1;
 	}
 
-
-				
-				
+	
         // 读取灰度传感器数据
         Digtal_gray_front = IIC_Get_Digtal(front);
         Digtal_gray_side = IIC_Get_Digtal(side);
@@ -453,47 +453,94 @@ static void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t
 }
 static void upper_move_location(upper_location now_location,upper_location target_position )
 {
+//origin-- down--pick_middle--middle--up
+int origin_pulse=0;
+int down_pulse=300;
+int pick_middle_pulse=4400;
+int middle_pulse=5000;
+int up_pulse=7800;
     switch (now_location)
     {
     case down_location:
         if (target_position == middle_location)
         {
-            upper_move_distance(5, 0, 500, 0.1, 4000, 0, 0); // 上升到中间位置
+            upper_move_distance(5, 0, 300, 0.02, middle_pulse-down_pulse, 0, 0); // 上升到中间位置
             now_upper_loacation = middle_location;
         }
         else if (target_position == up_location)
         {
-            upper_move_distance(5, 0, 500, 0.1, 7600, 0, 0); // 上升到最高位置
+            upper_move_distance(5, 0, 300, 0.02, up_pulse-down_pulse, 0, 0); // 上升到最高位置
             now_upper_loacation = up_location;
+        }else if(target_position==pick_middle_location)
+        {
+					upper_move_distance(5, 0, 300, 0.02, pick_middle_pulse-down_pulse, 0, 0); // 上升到分拣位置
+            now_upper_loacation = pick_middle_location;
         }
         break;
 
+        case pick_middle_location:
+        {
+            if(target_position=down_location)
+            {
+                upper_move_distance(5, 1, 300, 0.02, pick_middle_pulse-down_pulse, 0, 0); // 降落到最低位置
+                now_upper_loacation = down_location;
+            }
+            else if(target_position==middle_location)
+            {
+							upper_move_distance(5, 0, 300, 0.02, middle_pulse-pick_middle_pulse, 0, 0); // 上升到中间位置
+                now_upper_loacation = middle_location;
+            }else if(target_position==up_location)
+            {
+							upper_move_distance(5, 0, 300, 0.02, up_pulse-pick_middle_pulse, 0, 0); // 上升到最高位置
+                now_upper_loacation = up_location;
+            }
+
+            break;
+        }
+
+
     case middle_location:
+    {
         if (target_position == down_location)
         {
-            upper_move_distance(5, 1, 500, 0.1, 4000, 0, 0); // 降落到最低位置
+            upper_move_distance(5, 1, 300, 0.02, middle_pulse-down_pulse, 0, 0); // 降落到最低位置
             now_upper_loacation = down_location;
         }
         else if (target_position == up_location)
         {
-            upper_move_distance(5, 0, 500, 0.1, 4000, 0, 0); // 上升到最高位置
+            upper_move_distance(5, 0, 300, 0.02, up_pulse-middle_pulse, 0, 0); // 上升到最高位置
             now_upper_loacation = up_location;
+        }else if(target_position == pick_middle_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, middle_pulse-pick_middle_pulse, 0, 0); // 下降到分拣位置
+            now_upper_loacation = middle_location;
         }
         break;
 
+    }
+
+
     case up_location:
+    {
         if (target_position == down_location)
         {
-            upper_move_distance(5, 1, 500, 0.1, 7600, 0, 0); // 降落到最低位置
+            upper_move_distance(5, 1, 300, 0.02, up_pulse-down_pulse, 0, 0); // 降落到最低位置
             now_upper_loacation = down_location;
         }
         else if (target_position == middle_location)
         {
-            upper_move_distance(5, 1, 500, 0.1, 4000, 0, 0); // 降落到中间位置
+            upper_move_distance(5, 1, 300, 0.02, up_pulse-middle_pulse, 0, 0); // 降落到中间位置
             now_upper_loacation = middle_location;
+        }else if(target_position==pick_middle_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, up_pulse-pick_middle_pulse, 0, 0); // 降落到分拣位置
+            now_upper_loacation = pick_middle_location;
         }
         break;
 
+    }
+
+    
     default:
         break;
     }
@@ -507,21 +554,23 @@ upper_move_location(now_upper_loacation,target_position);
 // 底盘更新任务,包括执行层
 void OnChassicControl(void *pvParameters)
 {
+	int safe_upper_count=0;
     uint16_t last_tick = xTaskGetTickCount();
 
     while (1)
     {
+			safe_upper_count++;
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
         if (safe_guard)
         {
-__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,upper_rotate_pwm);//初始965
-					if(upper_flag==1)
+					if(safe_upper_count>=20&&first_upper_flag==1)
 					{
-					upper_to_target(target_upper_loacation);
-						
-					upper_flag=0;
-					}				
+					upper_move_distance(5, 0, 300, 0.02, 300, 0, 0); // 上升到中间位置
+						first_upper_flag=0;
+					}
+					 
+					upper_to_target(target_upper_loacation);		
             Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
             // // 步进不需要速度环，此处仅为了读取电机速度
             ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);

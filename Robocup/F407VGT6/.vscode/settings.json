@@ -22,6 +22,7 @@
         "bmi088driver.h": "c",
         "gray.h": "c",
         "gw_color_iic.h": "c",
-        "upper.h": "c"
+        "upper.h": "c",
+        "freertos.h": "c"
     }
 }

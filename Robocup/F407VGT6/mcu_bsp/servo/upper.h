@@ -19,28 +19,27 @@
 //所有舵机的常量或枚举常量
 #define THING_GIMBAL_FIXED_DELTA 60
 #define THING_GIMBAL_ORIGIN_ANGLE 0
-// #define ASS_SERVO_OPEN
-// #define ASS_SERVO_CLOSE
+#define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
+#define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
 
 /*
     * @brief 前云台枚举常量
 */
 typedef enum
 {
-    PICK_LEFT = 50,
-    FIND_PLATE = 218,
-    GOAL = 39
+    //跟逻辑有关
+	GOAL_PLACE=83,	
+	FIND_PLATE =108,
+	CENTER_PICK=265,
+    //跟颜色有关
+	BLUE_PICK=198,
+	GREEN_PICK=234,
+	RED_PICK=265,
+	WHITE_PICK=300,
+	BLACK_PICK=324
+ 
 } GimbalArm_Servoangle_t;
-/*
-    * @brief 抬升舵机枚举常量
-*/
-typedef enum
-{
-    PICK_DOWN =40,
-    UP = 0,
-    COLORTASKHEIGHT = 20,
-    PUT_DOWN = 30
-} Lift_Servoangle_t;
+
 /*
     * @brief 物块颜色枚举常量
 */
