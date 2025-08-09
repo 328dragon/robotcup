@@ -46,7 +46,7 @@ unsigned char IIC_Get_HSL(unsigned char * Result,unsigned char len)
 	else return 0;
 }
 
-int Get_GW_Color(unsigned char *RGB)
+int Get_GW_Color_RGB(unsigned char *RGB)
 {
 
 unsigned char R=RGB[0];
@@ -89,4 +89,35 @@ unsigned char R=RGB[0];
 
 	return -1;
 }
-
+int Get_GW_Color_HSL(unsigned char *HSL)
+{
+unsigned char H=HSL[0];
+	unsigned char S=HSL[1];
+	unsigned char L=HSL[2];
+	if(L>210)
+	{
+	return gw_white_color;
+	}
+	if(L<60)
+	{
+	return gw_black_color;
+	}
+	
+	
+if(L<210&&L>60)//红绿蓝
+{
+if(H>200||H<10)
+{
+return gw_red_color;
+}
+if(H>20&&H<100)
+{
+	return gw_green_color;
+}
+if(H>100&&H<200)
+{
+	return gw_blue_color;
+}
+}	
+return -1;
+}
