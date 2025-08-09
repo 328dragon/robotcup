@@ -450,44 +450,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  //串口1作为颜色传感器的接收
- if (huart->Instance == UART4)
-    {
 
-        static uint8_t i = 0;
-        static uint8_t j = 0; //
-        HAL_UART_Receive_IT(&huart4 ,&RxData, 1);
-        if (RxData == '+')
-            j = 1;
-        if (RxData == '\r')
-        {
-            tcs_string[i] = '\0';
-            i = 0;
-            //length=0;
-            j = 0;
-
-            sscanf(tcs_string + 8, "R:%d G:%d B:%d", &red, &green, &blue);
-            {
-                R = red;
-                G = green;
-                B = blue;
-            }
-
-            RX_Flag = 1;
-        }
-        else
-        {
-            if (j)
-            {
-                tcs_string[i] = RxData;
-                i++;
-            }
-        }
-    }
-
-}
 
 int fputc(int ch, FILE *f)
 {

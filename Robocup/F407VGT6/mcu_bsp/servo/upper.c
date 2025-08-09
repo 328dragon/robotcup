@@ -1,4 +1,9 @@
 #include "upper.h"
+#define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
+#define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
+//1980中间960前面
+
+
 /*
     * @brief 获得颜色任务
 */
@@ -38,7 +43,7 @@ void GetColorTask(Color_t* color_task, int* color_task_index)
 }
 
 /*
-    * @brief 绑定料盘槽的信息
+    * @brief 绑定料盘槽的信息并且抓取
 */
 void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* current_color_ptr, UpperTaskFlag* upperflag, int* CurrentColorLoop)
 {
@@ -50,7 +55,7 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
             vTaskDelay(1000); // 等待舵机转动完成，需要实测
 
             // 此处还需加入吸盘启动
-
+            PUMP_ON;
             vTaskDelay(500);
             Servo_SetAngle(&servos[0], FIND_PLATE,270);
             Servo_SetAngle(&servos[1], UP,180);
@@ -74,7 +79,7 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
             vTaskDelay(500);
 
             // 此处还需加入吸盘关闭
-
+            PUMP_OFF;
             *upperflag = IDLE;
         }
 }
@@ -83,7 +88,7 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
 {
     if(*PutGoalLoop<=5)
     {   
-        if (*upperflag == PICKINGOUT)
+        if (*upperflag == PICKINGOUT)//将物块分拣到对应料盘
          // 按顺序筛选对应颜色任务的料盘
         {
             for (int i = 0; i < 6; i++) 
@@ -98,18 +103,17 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
             vTaskDelay(1000); // 等待舵机转动完成，需要实测
 
             // 此处还需加入吸盘启动
-
+             PUMP_ON;
             Servo_SetAngle(&servos[1], UP,180);
         }
 
         // 此处还需等待底盘移动到目标位置
-
-        if(*upperflag == PUTTINGOUT)
+        if(*upperflag == PUTTINGOUT)//放置物块到目标位置
         {
             Servo_SetAngle(&servos[0], GOAL,180);
 
             // 此处还需加入吸盘关闭
-
+							PUMP_OFF;
             vTaskDelay(500);
         }
 

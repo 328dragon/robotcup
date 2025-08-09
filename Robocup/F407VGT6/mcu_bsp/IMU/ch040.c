@@ -29,4 +29,5 @@ __NOINLINE void ch040_get_data(uint8_t *data)
 	{
 		ch040_yaw = ch040_imu[2];
 	}
+	
 }

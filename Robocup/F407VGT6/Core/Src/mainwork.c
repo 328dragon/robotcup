@@ -26,8 +26,6 @@
 #include "upper.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
-#define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
-#define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
 #define get_little_yellow_state			HAL_GPIO_ReadPin(little_yellow_GPIO_Port,little_yellow_Pin)
 
 Servo_t servo[3]= {
@@ -35,13 +33,13 @@ Servo_t servo[3]= {
     {&htim9, TIM_CHANNEL_1, 0, 0},
     {&htim5, TIM_CHANNEL_3, 0, 0}
 };
+
 UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag* upperflag_ptr = &upperflag;
 ThingStore_t plate_things[6] = {0}; // 料盘槽数组
 Color_t current_color = COLOR_BLACK; // 当前颜色
 Color_t* current_color_ptr = &current_color;
 int CurrentColorLoop = 0;
-
 // 主函数状态机
 int main_state = 0;
 int motor_mode = 0;
@@ -79,16 +77,20 @@ int close_flag = 0;
 int safe_flag = 0;
 USARTInstance uart6 = {0};
 //气泵
-int pump_flag=0;
 int get_yellow_flag=0;
 int yellow_state=0;
 //上升控制
-int now_upper_loacation=0;
-int target_upper_loacation=0;
-float target_distance=0;
-float upper_target_vel=0;
+typedef enum 
+{
+down_location=0,
+middle_location=1,
+up_location=2	
+}upper_location;
+upper_location now_upper_loacation=0;
+upper_location target_upper_loacation=0;
 int upper_flag=0;
-
+int upper_rotate_pwm=960;
+//读陀螺仪
 void usart6_callfront(void)
 {
     if (uart6.recv_buff[0] == 0x5A && uart6.recv_buff[1] == 0xA5)
@@ -129,10 +131,6 @@ StepMotorZDT_t *zdt_stepmotor_ptr[4] = {
     &zdt_stepmotor_instances[3],
 };
 
-StepMotorZDT_t *upper_stepmotor_ptr[1]=
-{
- &upper_stepmotor_instance[0],
-};
 TaskHandle_t LCD_Show_handle;        // 显示
 TaskHandle_t Chassic_control_handle; // 底盘控制
 TaskHandle_t main_cpp_handle;        // 主函数
@@ -144,24 +142,12 @@ TaskHandle_t Get_Color_handle;       // 颜色传感器
 void OnChassicControl(void *pvParameters);
 void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
-void IMU_Read_task(void *pvParameters);
 void LCD_Show_task(void *pvParameters);
-void tcs230_read_task(void *pvParameters);
 void gray_read_task(void *pvParameters);
 void GwGet_color_task(void *pvParameters);
+void UPPER_control_task(void *pvParameters);
 void main_work(void)
 {
-    HAL_UART_Receive_IT(&huart4, &RxData, 1);
-    printf("AT+LIGHT+ON\r\n");
-    printf("AT+LIGHT+ON\r\n");
-    printf("AT+LIGHT+ON\r\n");
-    printf("AT+LIGHT+ON\r\n");
-    printf("AT+LIGHT+ON\r\n");
-    printf("AT+LIGHT+ON\r\n");
-
-
-			__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,965);//初始965
-	
     USARTRegister(&uart6, &uart6_cfg);
     memset(uart6.recv_buff, 0, uart6.recv_buff_size);
     // 注意电机编号如下所示
@@ -176,7 +162,6 @@ void main_work(void)
     Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.08f, false); // 左下
     Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.08f, true);  // 右下
 		
-	 Step_ZDT_Init(upper_stepmotor_ptr[0], 5, &huart3, 1, 0.005, true); // 抬升
 		
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -187,9 +172,10 @@ void main_work(void)
 
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 300, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
-    BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 300, NULL, 4, &Planner_update_handle);
+    BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 200, NULL, 4, &Planner_update_handle);
 		  BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 200, NULL, 3, &Get_Color_handle);
-    BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 400, NULL, 1, &LCD_Show_handle);
+    BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 200, NULL, 1, &LCD_Show_handle);
+		   BaseType_t ok7 = xTaskCreate(UPPER_control_task, "UPPER_control_task", 200, NULL, 1, &LCD_Show_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 300, NULL, 2, &gray_read_handle);
     if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS||ok5!=pdPASS)
     {
@@ -212,14 +198,24 @@ void GwGet_color_task(void *pvParameters)
 	
 while(1)
 {
-	
-			        if (IIC_Get_HSL(HSL, 3))
+
+	if (IIC_Get_HSL(HSL, 3))
         {
 					goods_color_HSL=Get_GW_Color_HSL(HSL);
         }
+vTaskDelay(400);
 
-vTaskDelay(20);
+}
 
+}
+void UPPER_control_task(void *pvParameters)
+{
+
+while (1)
+{
+
+    
+  vTaskDelay(100);
 }
 
 
@@ -227,20 +223,13 @@ vTaskDelay(20);
 
 void gray_read_task(void *pvParameters)
 {
-    while (Ping() || Ping_color())
+    while (Ping())
     {
         vTaskDelay(5);
     }
 
     while (1)
     {
-	if(pump_flag)
-	{
-	PUMP_ON
-	}else 
-	{
-	PUMP_OFF
-	}
 	if(get_yellow_flag)
 	{
 	yellow_state=get_little_yellow_state;
@@ -327,8 +316,8 @@ void LCD_Show_task(void *pvParameters)
         //        LCD_ShowFloatNum1(58, 20, gyro[1], 4, RED, WHITE, 16);
         //        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
               LCD_ShowFloatNum1(0, 20, HSL[0], 8, RED, WHITE, 16);
-			LCD_ShowFloatNum1(0, 40, goods_color_HSL, 8, RED, WHITE, 16);
-						LCD_ShowFloatNum1(0, 60, HSL[2], 8, RED, WHITE, 16);
+							LCD_ShowFloatNum1(0, 40, goods_color_HSL, 8, RED, WHITE, 16);
+							LCD_ShowFloatNum1(0, 60, HSL[2], 8, RED, WHITE, 16);
         //        // 加速度
         //        LCD_ShowFloatNum1(0, 40, accel[0], 4, RED, WHITE, 16);
         //        LCD_ShowString(48, 40, ",", RED, WHITE, 16, 0);
@@ -437,6 +426,84 @@ void OnPlannerUpdate(void *pvParameters)
         vTaskDelay(50);
     }
 }
+
+static void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t acc, uint32_t clk, bool raF, bool snF)
+{
+  uint8_t cmd[16] = {0};
+
+  // 装载命令
+  cmd[0]  =  addr;                      // 地址
+  cmd[1]  =  0xFD;                      // 功能码
+  cmd[2]  =  dir;                       // 方向
+  cmd[3]  =  (uint8_t)(vel >> 8);       // 速度(RPM)高8位字节
+  cmd[4]  =  (uint8_t)(vel >> 0);       // 速度(RPM)低8位字节 
+  cmd[5]  =  acc;                       // 加速度，注意：0是直接启动
+  cmd[6]  =  (uint8_t)(clk >> 24);      // 脉冲数(bit24 - bit31)
+  cmd[7]  =  (uint8_t)(clk >> 16);      // 脉冲数(bit16 - bit23)
+  cmd[8]  =  (uint8_t)(clk >> 8);       // 脉冲数(bit8  - bit15)
+  cmd[9]  =  (uint8_t)(clk >> 0);       // 脉冲数(bit0  - bit7 )
+	
+  cmd[10] =  raF;                       // 相位/绝对标志，false为相对运动，true为绝对值运动
+  cmd[11] =  snF;                       // 多机同步运动标志，false为不启用，true为启用
+  cmd[12] =  0x6B;                      // 校验字节
+  
+  // 发送命令
+  HAL_UART_Transmit(&huart3, (uint8_t *)cmd, 13,1000);
+	vTaskDelay(10);
+}
+static void upper_move_location(upper_location now_location,upper_location target_position )
+{
+    switch (now_location)
+    {
+    case down_location:
+        if (target_position == middle_location)
+        {
+            upper_move_distance(5, 0, 500, 0.1, 4000, 0, 0); // 上升到中间位置
+            now_upper_loacation = middle_location;
+        }
+        else if (target_position == up_location)
+        {
+            upper_move_distance(5, 0, 500, 0.1, 7600, 0, 0); // 上升到最高位置
+            now_upper_loacation = up_location;
+        }
+        break;
+
+    case middle_location:
+        if (target_position == down_location)
+        {
+            upper_move_distance(5, 1, 500, 0.1, 4000, 0, 0); // 降落到最低位置
+            now_upper_loacation = down_location;
+        }
+        else if (target_position == up_location)
+        {
+            upper_move_distance(5, 0, 500, 0.1, 4000, 0, 0); // 上升到最高位置
+            now_upper_loacation = up_location;
+        }
+        break;
+
+    case up_location:
+        if (target_position == down_location)
+        {
+            upper_move_distance(5, 1, 500, 0.1, 7600, 0, 0); // 降落到最低位置
+            now_upper_loacation = down_location;
+        }
+        else if (target_position == middle_location)
+        {
+            upper_move_distance(5, 1, 500, 0.1, 4000, 0, 0); // 降落到中间位置
+            now_upper_loacation = middle_location;
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+static void upper_to_target(upper_location target_position)
+{
+upper_move_location(now_upper_loacation,target_position);
+}
+
 // 底盘更新任务,包括执行层
 void OnChassicControl(void *pvParameters)
 {
@@ -448,13 +515,13 @@ void OnChassicControl(void *pvParameters)
         last_tick = xTaskGetTickCount();
         if (safe_guard)
         {
-
+__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,upper_rotate_pwm);//初始965
 					if(upper_flag==1)
 					{
-					upper_move_distance(upper_stepmotor_ptr[0],upper_target_vel,target_distance);
+					upper_to_target(target_upper_loacation);
+						
 					upper_flag=0;
-					}
-					
+					}				
             Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
             // // 步进不需要速度环，此处仅为了读取电机速度
             ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);

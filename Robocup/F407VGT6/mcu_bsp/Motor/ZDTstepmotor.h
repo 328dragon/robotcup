@@ -22,6 +22,5 @@ void Step_ZDT_Init(StepMotorZDT_t *zdt_mot,  uint32_t id ,UART_HandleTypeDef *_U
 void set_speed_target(StepMotorZDT_t *zdt_motor, float target);
 void set_speed_pos_target(StepMotorZDT_t *zdt_motor, float target_speed, float target_pos);
 float get_linear_speed(StepMotorZDT_t* zdt_motor);
-void upper_move_distance(StepMotorZDT_t *zdt_motor, float target_speed, float target_pos);
 
 #endif
