@@ -150,7 +150,7 @@ void set_speed_pos_target(StepMotorZDT_t *zdt_motor, float target_speed, float t
                           0, // 加速度设为0直接启动
                           target_pulses, 
                           true, // 使用绝对位置模式
-                          true); // 不使用同步
+                          false); // 不使用同步
     
     HAL_UART_Transmit(zdt_motor->_USART, zdt_motor->_cmd_buffer, len, 1000);
     HAL_Delay(1);
@@ -167,6 +167,36 @@ void set_speed_pos_target(StepMotorZDT_t *zdt_motor, float target_speed, float t
     zdt_motor->motor_controller_t.set.velocity = target_speed;
     zdt_motor->motor_controller_t.set.deg_pos = target_pos;
 }
+
+void upper_move_distance(StepMotorZDT_t *zdt_motor, float target_speed, float target_pos)
+{
+    zdt_motor->_target_rpm = target_speed;
+    uint32_t target_pulses = target_pos;
+    uint8_t len;
+    uint8_t dir = zdt_motor->_dir;
+    
+    // 处理方向
+    if (zdt_motor->_target_rpm < 0)
+    {
+        // 反转时调整方向
+        dir = (zdt_motor->_dir == 0) ? 1 : 0;
+        zdt_motor->_target_rpm = -zdt_motor->_target_rpm;
+    }
+    
+    // 发送位置控制命令
+    len = Step_Pos_Control(zdt_motor->_cmd_buffer, 
+                          zdt_motor->motor_controller_t.id, 
+                          dir, 
+                          (uint16_t)zdt_motor->_target_rpm, 
+                          0, // 加速度设为0直接启动
+                          target_pulses, 
+                          false, 
+                          false);
+    
+    HAL_UART_Transmit(zdt_motor->_USART, zdt_motor->_cmd_buffer, len, 1000);
+    HAL_Delay(1);    
+}
+
 
 float get_linear_speed(StepMotorZDT_t *zdt_motor)
 {

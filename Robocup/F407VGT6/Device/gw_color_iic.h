@@ -12,5 +12,6 @@ gw_blue_color=180
 unsigned char Ping_color(void);
 unsigned char IIC_Get_HSL(unsigned char * Result,unsigned char len);
 unsigned char IIC_Get_RGB(unsigned char * Result,unsigned char len);
-int Get_GW_Color(unsigned char *RGB);
+int Get_GW_Color_RGB(unsigned char *RGB);
+int Get_GW_Color_HSL(unsigned char *HSL);
 

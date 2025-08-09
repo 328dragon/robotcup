@@ -26,6 +26,9 @@
 #include "upper.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
+#define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
+#define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
+#define get_little_yellow_state			HAL_GPIO_ReadPin(little_yellow_GPIO_Port,little_yellow_Pin)
 
 Servo_t servo[3]= {
     {&htim9, TIM_CHANNEL_2, 0, 0},
@@ -43,7 +46,10 @@ int CurrentColorLoop = 0;
 int main_state = 0;
 int motor_mode = 0;
 // 颜色传感器 
-int goods_color=-1;
+int GET_RGB_FLAG=0;
+int GET_HSL_FLAG=0;
+int goods_color_RGB=-1;
+int goods_color_HSL=-1;
 unsigned char RGB[3] = {0};
 unsigned char HSL[3] = {0};
 // 灰度
@@ -72,6 +78,17 @@ int debug_pwm = 0;
 int close_flag = 0;
 int safe_flag = 0;
 USARTInstance uart6 = {0};
+//气泵
+int pump_flag=0;
+int get_yellow_flag=0;
+int yellow_state=0;
+//上升控制
+int now_upper_loacation=0;
+int target_upper_loacation=0;
+float target_distance=0;
+float upper_target_vel=0;
+int upper_flag=0;
+
 void usart6_callfront(void)
 {
     if (uart6.recv_buff[0] == 0x5A && uart6.recv_buff[1] == 0xA5)
@@ -100,6 +117,7 @@ static Controller_t ChassisControl_instance;
 static Kinematic_t kinematic_instance;
 static Planner_t planner_instance;
 static StepMotorZDT_t zdt_stepmotor_instances[4]; // 静态实例
+static StepMotorZDT_t upper_stepmotor_instance[1];
 
 Controller_t *ChassisControl_ptr; // 控制器实例
 Kinematic_t *kinematic_ptr;       // 麦轮实例
@@ -108,8 +126,13 @@ StepMotorZDT_t *zdt_stepmotor_ptr[4] = {
     &zdt_stepmotor_instances[0],
     &zdt_stepmotor_instances[1],
     &zdt_stepmotor_instances[2],
-    &zdt_stepmotor_instances[3]};
+    &zdt_stepmotor_instances[3],
+};
 
+StepMotorZDT_t *upper_stepmotor_ptr[1]=
+{
+ &upper_stepmotor_instance[0],
+};
 TaskHandle_t LCD_Show_handle;        // 显示
 TaskHandle_t Chassic_control_handle; // 底盘控制
 TaskHandle_t main_cpp_handle;        // 主函数
@@ -117,6 +140,7 @@ TaskHandle_t Planner_update_handle;  // 轨迹规划
 TaskHandle_t IMU_read_handle;        // IMU读取
 TaskHandle_t tcs230_read_handle;     // tcs230颜色传感器读取
 TaskHandle_t gray_read_handle;       // 灰度传感器
+TaskHandle_t Get_Color_handle;       // 颜色传感器	
 void OnChassicControl(void *pvParameters);
 void OnPlannerUpdate(void *pvParameters);
 void Onmaincpp(void *pvParameters);
@@ -124,7 +148,7 @@ void IMU_Read_task(void *pvParameters);
 void LCD_Show_task(void *pvParameters);
 void tcs230_read_task(void *pvParameters);
 void gray_read_task(void *pvParameters);
-
+void GwGet_color_task(void *pvParameters);
 void main_work(void)
 {
     HAL_UART_Receive_IT(&huart4, &RxData, 1);
@@ -135,10 +159,9 @@ void main_work(void)
     printf("AT+LIGHT+ON\r\n");
     printf("AT+LIGHT+ON\r\n");
 
-    //    while (BMI088_init())
-    //    {
-    //        ;
-    //    }
+
+			__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,965);//初始965
+	
     USARTRegister(&uart6, &uart6_cfg);
     memset(uart6.recv_buff, 0, uart6.recv_buff_size);
     // 注意电机编号如下所示
@@ -152,7 +175,9 @@ void main_work(void)
     Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 0, 0.08f, false); // 右上
     Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.08f, false); // 左下
     Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.08f, true);  // 右下
-
+		
+	 Step_ZDT_Init(upper_stepmotor_ptr[0], 5, &huart3, 1, 0.005, true); // 抬升
+		
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
@@ -160,12 +185,13 @@ void main_work(void)
     Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
 
-    BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 800, NULL, 3, &Chassic_control_handle);
+    BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 300, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 300, NULL, 4, &Planner_update_handle);
-    BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 300, NULL, 1, &LCD_Show_handle);
-    BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 200, NULL, 2, &gray_read_handle);
-    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS)
+		  BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 200, NULL, 3, &Get_Color_handle);
+    BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 400, NULL, 1, &LCD_Show_handle);
+    BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 300, NULL, 2, &gray_read_handle);
+    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS||ok5!=pdPASS)
     {
         // 任务创建失败，进入死循环
         while (1)
@@ -175,24 +201,58 @@ void main_work(void)
     }
 }
 
+
+void GwGet_color_task(void *pvParameters)
+{
+	while(Ping_color())
+	{
+	vTaskDelay(5);
+	
+	}
+	
+while(1)
+{
+	
+			        if (IIC_Get_HSL(HSL, 3))
+        {
+					goods_color_HSL=Get_GW_Color_HSL(HSL);
+        }
+
+vTaskDelay(20);
+
+}
+
+
+}
+
 void gray_read_task(void *pvParameters)
 {
-    // while (Ping() || Ping_color())
-	  while ( Ping_color())
+    while (Ping() || Ping_color())
     {
         vTaskDelay(5);
     }
 
     while (1)
     {
+	if(pump_flag)
+	{
+	PUMP_ON
+	}else 
+	{
+	PUMP_OFF
+	}
+	if(get_yellow_flag)
+	{
+	yellow_state=get_little_yellow_state;
+	}
+	else 
+	{
+	yellow_state=-1;
+	}
 
-        if (IIC_Get_RGB(RGB, 3))
-        {
-				goods_color=	Get_GW_Color(RGB);
-        }
-        if (IIC_Get_HSL(HSL, 3))
-        {
-        }
+
+				
+				
         // 读取灰度传感器数据
         Digtal_gray_front = IIC_Get_Digtal(front);
         Digtal_gray_side = IIC_Get_Digtal(side);
@@ -266,7 +326,9 @@ void LCD_Show_task(void *pvParameters)
         //        LCD_ShowString(48, 20, ",", RED, WHITE, 16, 0);
         //        LCD_ShowFloatNum1(58, 20, gyro[1], 4, RED, WHITE, 16);
         //        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
-        //        LCD_ShowFloatNum1(116, 20, gyro[2], 4, RED, WHITE, 16);
+              LCD_ShowFloatNum1(0, 20, HSL[0], 8, RED, WHITE, 16);
+			LCD_ShowFloatNum1(0, 40, goods_color_HSL, 8, RED, WHITE, 16);
+						LCD_ShowFloatNum1(0, 60, HSL[2], 8, RED, WHITE, 16);
         //        // 加速度
         //        LCD_ShowFloatNum1(0, 40, accel[0], 4, RED, WHITE, 16);
         //        LCD_ShowString(48, 40, ",", RED, WHITE, 16, 0);
@@ -295,59 +357,53 @@ void Onmaincpp(void *pvParameters)
         if (safe_count >= 3)
         {
             safe_guard = 1; // 保护锁打开
-            switch (main_state)
-            {
+//            switch (main_state)
+//            {
 
-            case 0:
-            {
+//            case 0:
+//            {
 
-                motor_mode = 1;
-                debug_target_odom = (odom_t){0.3, 0, 0};
-                debug_target_erro = (odom_t){0.01, 0.01, 0.01};
-                Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
-                main_state++;
+//                motor_mode = 1;
+//                debug_target_odom = (odom_t){0.3, 0, 0};
+//                debug_target_erro = (odom_t){0.01, 0.01, 0.01};
+//                Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
+//                main_state++;
 
-                break;
-            }
+//                break;
+//            }
 
-            case 1:
-            {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-                {
-                    motor_mode = 0;
-                    debug_target_vel = (cmd_vel_t){0, 0.2, 0};
-                    if (real_time_gray_state_side == all_black)
-                    {
-                        debug_target_vel = (cmd_vel_t){0, 0, 0};
-                        main_state++;
-                    }
-                    break;
-                }
-            }
-            case 2:
-            {
+//            case 1:
+//            {
+//                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+//                {
+//                    motor_mode = 0;
+//                    debug_target_vel = (cmd_vel_t){0, 0.2, 0};
+//                    if (real_time_gray_state_side == all_black)
+//                    {
+//                        debug_target_vel = (cmd_vel_t){0, 0, 0};
+//                        main_state++;
+//                    }
+//                    break;
+//                }
+//            }
+//            case 2:
+//            {
 
-                //                    motor_mode = 1;
-                //                    debug_target_odom = (odom_t){0, 0, 0};
-                //                    debug_target_erro = (odom_t){0.01, 0.01, 0.01};
-                //                    position_flag++;
-                //                    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
-                //                    main_state++;
 
-                break;
-            }
-            case 4:
-            {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-                {
-                    motor_mode = 0;
-                }
+//                break;
+//            }
+//            case 4:
+//            {
+//                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+//                {
+//                    motor_mode = 0;
+//                }
 
-                break;
-            }
-            default:
-                break;
-            }
+//                break;
+//            }
+//            default:
+//                break;
+//            }
 
             switch (motor_mode)
             {
@@ -392,6 +448,13 @@ void OnChassicControl(void *pvParameters)
         last_tick = xTaskGetTickCount();
         if (safe_guard)
         {
+
+					if(upper_flag==1)
+					{
+					upper_move_distance(upper_stepmotor_ptr[0],upper_target_vel,target_distance);
+					upper_flag=0;
+					}
+					
             Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
             // // 步进不需要速度环，此处仅为了读取电机速度
             ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
