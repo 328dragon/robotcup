@@ -2,7 +2,7 @@
  * @Author: Nagisa 2964793117@qq.com
  * @Date: 2025-08-07 22:06:30
  * @LastEditors: Nagisa 2964793117@qq.com
- * @LastEditTime: 2025-08-09 00:24:46
+ * @LastEditTime: 2025-08-09 21:14:03
  * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\mcu_bsp\servo\upper.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -17,8 +17,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 //所有舵机的常量或枚举常量
+#define PUMP_ON HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, 1);
+#define PUMP_OFF HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, 0);
 #define THING_GIMBAL_FIXED_DELTA 60
-#define THING_GIMBAL_ORIGIN_ANGLE 0
+#define THING_GIMBAL_ORIGIN_ANGLE 33
 // #define ASS_SERVO_OPEN
 // #define ASS_SERVO_CLOSE
 
@@ -28,7 +30,8 @@
 typedef enum
 {
     PICK_LEFT = 50,
-    FIND_PLATE = 218,
+    FIND_PLATE = 200,
+    COLORTASKHEIGHT = 218,
     GOAL = 39
 } GimbalArm_Servoangle_t;
 /*
@@ -36,21 +39,20 @@ typedef enum
 */
 typedef enum
 {
-    PICK_DOWN =40,
-    UP = 0,
-    COLORTASKHEIGHT = 20,
-    PUT_DOWN = 30
+    PICK_DOWN =52,
+    UP = 0,// 颜色传感器识别时和UP类似
+    PUT_DOWN = 35
 } Lift_Servoangle_t;
 /*
     * @brief 物块颜色枚举常量
 */
 typedef enum
 {
-    COLOR_RED,
-    COLOR_GREEN,
-    COLOR_BLUE,
-    COLOR_BLACK,
-    COLOR_WHITE
+    COLOR_RED=90,
+    COLOR_GREEN=0,
+    COLOR_BLUE=180,
+    COLOR_BLACK=135,
+    COLOR_WHITE=45
 } Color_t;
 
 /*

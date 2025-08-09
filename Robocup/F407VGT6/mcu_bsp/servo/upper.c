@@ -5,7 +5,8 @@
 void GetColorTask(Color_t* color_task, int* color_task_index)
 {
     // 创建颜色映射表，使用Color_t枚举
-    static const Color_t colorMap[16][5] = {
+    static const Color_t colorMap[16][5] = 
+    {
         /* 1  */ {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
         /* 2  */ {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
         /* 3  */ {COLOR_WHITE, COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_BLUE},
@@ -42,41 +43,56 @@ void GetColorTask(Color_t* color_task, int* color_task_index)
 */
 void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* current_color_ptr, UpperTaskFlag* upperflag, int* CurrentColorLoop)
 {
-    if(*CurrentColorLoop<=5)
+    if(*CurrentColorLoop<5)
+    {
         if (*upperflag == PICKINGIN)
         {
+            Servo_SetAngle(&servos[1], UP,180);
             Servo_SetAngle(&servos[0], PICK_LEFT,270);
             Servo_SetAngle(&servos[1], PICK_DOWN,180);
-            vTaskDelay(1000); // 等待舵机转动完成，需要实测
 
-            // 此处还需加入吸盘启动
+            vTaskDelay(2000); // 等待舵机转动完成，需要实测
 
-            vTaskDelay(500);
-            Servo_SetAngle(&servos[0], FIND_PLATE,270);
+            PUMP_ON;
+            vTaskDelay(2000);
+
             Servo_SetAngle(&servos[1], UP,180);
-            vTaskDelay(500);
-            Servo_SetAngle(&servos[1], COLORTASKHEIGHT,180);
-            vTaskDelay(500);
+            Servo_SetAngle(&servos[0], COLORTASKHEIGHT,270);
+            vTaskDelay(2000);
+
             *upperflag = GETCOLORIN;
         }
         if (*upperflag == GETCOLORIN)
         {
             plate_things[*CurrentColorLoop]._color = *current_color_ptr;
             plate_things[*CurrentColorLoop]._angle = THING_GIMBAL_ORIGIN_ANGLE + *CurrentColorLoop*THING_GIMBAL_FIXED_DELTA;
+            if(plate_things[*CurrentColorLoop]._angle>360)
+            {
+                plate_things[*CurrentColorLoop]._angle -= 360;
+            }
             plate_things[*CurrentColorLoop]._number = *CurrentColorLoop;
             Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop]._angle,360);
             (*CurrentColorLoop)++;
             *upperflag = PUTINGIN;
+            vTaskDelay(2000);
         }
         if (*upperflag == PUTINGIN)
-        {
+        {   
+            Servo_SetAngle(&servos[0], FIND_PLATE,270);
+            vTaskDelay(2000);
             Servo_SetAngle(&servos[1], PUT_DOWN,180);
+            vTaskDelay(2000);
+
+            PUMP_OFF;
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[1], UP,180);
             vTaskDelay(500);
-
-            // 此处还需加入吸盘关闭
-
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle+60,360);
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle+60,360);
             *upperflag = IDLE;
         }
+    }
 }
 
 void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, UpperTaskFlag* upperflag,int* PutGoalLoop)
@@ -85,33 +101,41 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
     {   
         if (*upperflag == PICKINGOUT)
          // 按顺序筛选对应颜色任务的料盘
-        {
-            for (int i = 0; i < 6; i++) 
+        {   
+            Servo_SetAngle(&servos[1], UP,180);
+            for (int i = 0; i < 5; i++) 
             {
                 if (plate_things[i]._color == color_task[*PutGoalLoop])   
                 {
                     Servo_SetAngle(&servos[2], plate_things[i]._angle,360);
+                    vTaskDelay(2000);
+                    (*PutGoalLoop)++;
+                    break;
                 }
             }
-            Servo_SetAngle(&servos[0], FIND_PLATE,180);
+            Servo_SetAngle(&servos[0], FIND_PLATE,270);
+            vTaskDelay(2000);
             Servo_SetAngle(&servos[1], PUT_DOWN,180);
-            vTaskDelay(1000); // 等待舵机转动完成，需要实测
+            vTaskDelay(2000); // 等待舵机转动完成，需要实测
 
-            // 此处还需加入吸盘启动
+            PUMP_ON;
+            vTaskDelay(2000);
 
             Servo_SetAngle(&servos[1], UP,180);
         }
 
         // 此处还需等待底盘移动到目标位置
 
-        if(*upperflag == PUTTINGOUT)
-        {
-            Servo_SetAngle(&servos[0], GOAL,180);
+        // if(*upperflag == PUTTINGOUT)
+        // {
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[0], GOAL,270);
+            vTaskDelay(700);
+            Servo_SetAngle(&servos[1], PICK_DOWN,270);
+            vTaskDelay(2000);
+            PUMP_OFF;
+            vTaskDelay(2000);
 
-            // 此处还需加入吸盘关闭
-
-            vTaskDelay(500);
-        }
-
+        // }
     }
 }

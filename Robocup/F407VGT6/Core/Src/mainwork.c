@@ -26,10 +26,11 @@
 #include "upper.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
-#define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
-#define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
+#define DEBUG_UPPER 0
 #define get_little_yellow_state			HAL_GPIO_ReadPin(little_yellow_GPIO_Port,little_yellow_Pin)
 
+float debug_angle[3] = {0, 0, 0}; // 调试角度
+int debug_isOpened = 0;
 Servo_t servo[3]= {
     {&htim9, TIM_CHANNEL_2, 0, 0},
     {&htim9, TIM_CHANNEL_1, 0, 0},
@@ -37,10 +38,20 @@ Servo_t servo[3]= {
 };
 UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag* upperflag_ptr = &upperflag;
-ThingStore_t plate_things[6] = {0}; // 料盘槽数组
-Color_t current_color = COLOR_BLACK; // 当前颜色
-Color_t* current_color_ptr = &current_color;
+// ThingStore_t plate_things[5] = {0}; // 料盘槽数组
+ThingStore_t plate_things[5] = {
+    {COLOR_BLACK, 33, 0},
+    {COLOR_WHITE, 93, 1},
+    {COLOR_RED, 153, 2},
+    {COLOR_BLUE, 213, 3},
+    {COLOR_GREEN, 273, 4}
+};
+Color_t color_task[5] = {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_GREEN}; // 颜色任务数组
+Color_t current_color_RGB = COLOR_BLACK; // 当前颜色
+Color_t current_color_HSL = COLOR_BLACK; // 当前颜色
+Color_t* current_color_ptr = &current_color_RGB;
 int CurrentColorLoop = 0;
+int PutGoalLoop = 0; // 目标放置循环
 
 // 主函数状态机
 int main_state = 0;
@@ -88,6 +99,7 @@ int target_upper_loacation=0;
 float target_distance=0;
 float upper_target_vel=0;
 int upper_flag=0;
+
 
 void usart6_callfront(void)
 {
@@ -206,19 +218,24 @@ void GwGet_color_task(void *pvParameters)
 {
 	while(Ping_color())
 	{
-	vTaskDelay(5);
+	    vTaskDelay(5);
 	
 	}
 	
 while(1)
 {
-	
-			        if (IIC_Get_HSL(HSL, 3))
-        {
-					goods_color_HSL=Get_GW_Color_HSL(HSL);
-        }
+	if(IIC_Get_RGB(RGB, 3))
+	{
+		goods_color_RGB=Get_GW_Color_RGB(RGB);
+        current_color_RGB = goods_color_RGB;
+	}
+	if (IIC_Get_HSL(HSL, 3))
+    {
+		goods_color_HSL=Get_GW_Color_HSL(HSL);
+        current_color_HSL = goods_color_HSL;
+    }
 
-vTaskDelay(20);
+    vTaskDelay(500);
 
 }
 
@@ -234,25 +251,22 @@ void gray_read_task(void *pvParameters)
 
     while (1)
     {
-	if(pump_flag)
+	    if(get_yellow_flag)
 	{
-	PUMP_ON
-	}else 
-	{
-	PUMP_OFF
-	}
-	if(get_yellow_flag)
-	{
-	yellow_state=get_little_yellow_state;
+	    yellow_state=get_little_yellow_state;
 	}
 	else 
 	{
-	yellow_state=-1;
+	    yellow_state=-1;
 	}
 
+        if (IIC_Get_RGB(RGB, 3))
+        {
 
-				
-				
+        }
+        if (IIC_Get_HSL(HSL, 3))
+        {
+        }
         // 读取灰度传感器数据
         Digtal_gray_front = IIC_Get_Digtal(front);
         Digtal_gray_side = IIC_Get_Digtal(side);
@@ -316,19 +330,27 @@ void LCD_Show_task(void *pvParameters)
     // 屏幕
     LCD_Init();
     LCD_Fill(0, 0, LCD_W, LCD_H, WHITE);
-    DistributionLoop(servo, plate_things, current_color_ptr, upperflag_ptr, &CurrentColorLoop);
+
     while (1)
     {   
-       
+        if( DEBUG_UPPER==1)
+        {
+            Servo_SetAngle(&servo[0], debug_angle[0], 270);
+            Servo_SetAngle(&servo[1], debug_angle[1], 180);
+            Servo_SetAngle(&servo[2], debug_angle[2], 360);
+            HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, debug_isOpened);
+        }
+        DistributionLoop(servo, plate_things, current_color_ptr, upperflag_ptr, &CurrentColorLoop);
+        PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
         //        // 显示
         //        // 陀螺仪
         //        LCD_ShowFloatNum1(0, 20, gyro[0], 4, RED, WHITE, 16);
         //        LCD_ShowString(48, 20, ",", RED, WHITE, 16, 0);
         //        LCD_ShowFloatNum1(58, 20, gyro[1], 4, RED, WHITE, 16);
         //        LCD_ShowString(106, 40, ",", RED, WHITE, 16, 0);
-              LCD_ShowFloatNum1(0, 20, HSL[0], 8, RED, WHITE, 16);
-			LCD_ShowFloatNum1(0, 40, goods_color_HSL, 8, RED, WHITE, 16);
-						LCD_ShowFloatNum1(0, 60, HSL[2], 8, RED, WHITE, 16);
+            //   LCD_ShowFloatNum1(0, 20, HSL[0], 8, RED, WHITE, 16);
+			// LCD_ShowFloatNum1(0, 40, goods_color_HSL, 8, RED, WHITE, 16);
+			// 			LCD_ShowFloatNum1(0, 60, HSL[2], 8, RED, WHITE, 16);
         //        // 加速度
         //        LCD_ShowFloatNum1(0, 40, accel[0], 4, RED, WHITE, 16);
         //        LCD_ShowString(48, 40, ",", RED, WHITE, 16, 0);
@@ -341,7 +363,7 @@ void LCD_Show_task(void *pvParameters)
         //        LCD_ShowString(62, 60, "gyro", RED, WHITE, 16, 0);
         //        LCD_ShowString(100, 60, ",", RED, WHITE, 16, 0);
         //        LCD_ShowString(106, 60, "accel", RED, WHITE, 16, 0);
-        vTaskDelay(100);
+        //vTaskDelay(100);
     }
 }
 
