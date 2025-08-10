@@ -35,7 +35,7 @@ typedef enum
     //跟颜色有关
 	BLUE_PICK=201+servo_zero,
 	GREEN_PICK=236+servo_zero,
-	RED_PICK=265+servo_zero,
+	RED_PICK=267+servo_zero,
 	WHITE_PICK=300+servo_zero,
 	BLACK_PICK=332+servo_zero
  
