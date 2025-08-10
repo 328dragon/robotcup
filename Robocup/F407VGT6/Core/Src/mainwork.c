@@ -64,7 +64,7 @@ unsigned char Digtal_gray_front;
 unsigned char Anolog_gray_front[8] = {0};
 unsigned char Normal_front[8] = {0};
 // 侧边灰度
-float gray_side_p = -0.002f;
+float gray_side_p = -0.0025f;
 float gray_data_side_middle = 0;
 float gray_data_side_middle_temp = 0;
 float gray_data_side_sum = 0;
@@ -225,7 +225,7 @@ void UPPER_control_task(void *pvParameters)
 {
 
 	vTaskDelay(1000);
-__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,1960);
+__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,2050);
     while (1)
     {
         if (pick_goods_flag == 1)
@@ -377,13 +377,13 @@ void Onmaincpp(void *pvParameters)
             }
 						case 2:
 						{
-							while(gray_data_side_middle!=0)
+							while(gray_data_side_sum<7)
 							{
 							 move_step_distance(-gray_data_side_middle, 0, 0, 1);
-								vTaskDelay(5);
+								vTaskDelay(10);
 							}
-						
-						   main_state++;
+						main_state++;
+						   
                 break;
 						}
 						
@@ -412,6 +412,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))//抓取第一个
                 {
                     pick_goods_flag = 1;
+								
 									vTaskDelay(200);
                     main_state++;
                 }
@@ -419,15 +420,26 @@ void Onmaincpp(void *pvParameters)
             }
 						case 6:
 						{
-							if(*upperflag_ptr ==IDLE)
+							if(*upperflag_ptr ==IDLE)//抓完第一个还是很正的
 							{
 								vTaskDelay(1000);
-							move_step_distance(0.4, 0.42, 0, 1);		
+							move_step_distance(0.36, 0.30, 0, 1);		
 							main_state++;
 							}
 						break;
 						}
 						case 7:
+						{
+									               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+									vTaskDelay(500);
+                   move_step_distance(0, 0.10, 0, 1);
+                    main_state++;
+                }
+						
+						
+						}
+						case 8:
 						{
 						               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -437,6 +449,67 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;					
 						}
+						case 9:
+						{
+												               if (SimpleStatus_t_isResolved(&planner_ptr->promise))//第二个物块
+                {
+							
+                 pick_goods_flag = 1;
+									
+									vTaskDelay(200);
+                    main_state++;
+                }
+							
+							break;
+						}
+						
+						
+										case 10:
+						{
+							if(*upperflag_ptr ==IDLE)//抓第二个完成
+							{
+								vTaskDelay(1000);
+							move_step_distance(0.36, 0.15, 0, 1);		
+							main_state++;
+							}
+						break;
+						}
+						case 11:
+						{
+									               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+									vTaskDelay(500);
+                   move_step_distance(0, 0.10, 0, 1);
+                    main_state++;
+                }
+						
+						
+						}
+						case 12:
+						{
+						               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+									vTaskDelay(500);
+                   move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;					
+						}
+						case 13:
+						{
+												               if (SimpleStatus_t_isResolved(&planner_ptr->promise))//第三个物块
+                {
+							
+                 pick_goods_flag = 1;
+									
+									vTaskDelay(200);
+                    main_state++;
+                }
+							
+							break;
+						}
+						
+						
 						
 						
             default:
