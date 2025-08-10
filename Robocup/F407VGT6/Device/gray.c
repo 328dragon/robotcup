@@ -30,7 +30,9 @@ unsigned char Ping(void)
 	unsigned char dat_s;
 	IIC_ReadBytes(GW_GRAY_ADDR_DEF << 1, GW_GRAY_PING, &dat_f, 1);
 	IIC_ReadBytes(GW_GRAY_ADDR_DEF_S << 1, GW_GRAY_PING, &dat_s, 1);
-	if ((dat_f == GW_GRAY_PING_OK) && (dat_s == GW_GRAY_PING_OK))
+	
+//	if ((dat_f == GW_GRAY_PING_OK) && (dat_s == GW_GRAY_PING_OK))
+	if ( (dat_s == GW_GRAY_PING_OK))
 	{
 		return 0;
 	}
