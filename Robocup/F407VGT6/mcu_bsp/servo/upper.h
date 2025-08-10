@@ -30,14 +30,14 @@ typedef enum
 {
     //跟逻辑有关
 	GOAL_PLACE=83,	
-	FIND_PLATE =80,
+	FIND_PLATE =82+servo_zero,
 	CENTER_PICK=265+servo_zero,
     //跟颜色有关
-	BLUE_PICK=198+servo_zero,
-	GREEN_PICK=234+servo_zero,
+	BLUE_PICK=201+servo_zero,
+	GREEN_PICK=236+servo_zero,
 	RED_PICK=265+servo_zero,
-	WHITE_PICK=298+servo_zero,
-	BLACK_PICK=330+servo_zero
+	WHITE_PICK=300+servo_zero,
+	BLACK_PICK=332+servo_zero
  
 } GimbalArm_Servoangle_t;
 

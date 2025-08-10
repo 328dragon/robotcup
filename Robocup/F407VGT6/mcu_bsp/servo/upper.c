@@ -200,7 +200,7 @@ static void upper_move_location(upper_location now_location,upper_location targe
 {
 //origin-- down--pick_middle--middle--up
 int origin_pulse=0;
-int down_pulse=300;
+int down_pulse=200;
 int pick_middle_pulse=4400;
 int middle_pulse=5000;
 int up_pulse=7800;
