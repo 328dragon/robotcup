@@ -26,11 +26,20 @@
 #include "upper.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
+
 #define DEBUG_UPPER 0
+#define DEBUG_CHASSIS 1
+
 #define get_little_yellow_state			HAL_GPIO_ReadPin(little_yellow_GPIO_Port,little_yellow_Pin)
 
 float debug_angle[3] = {0, 0, 0}; // 调试角度
 int debug_isOpened = 0;
+
+int debug_speed = 0;
+int debug_distance = 0; // 调试开始标志
+float debug_chassis_speed[3] = {0};
+float debug_chassis_distance[3] = {0};
+
 Servo_t servo[3]= {
     {&htim9, TIM_CHANNEL_2, 0, 0},
     {&htim9, TIM_CHANNEL_1, 0, 0},
@@ -185,10 +194,10 @@ void main_work(void)
     //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
     //    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 
-    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false); // 左上
-    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 0, 0.06f, false); // 右上
-    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.06f, false); // 左下
-    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.06f, true);  // 右下
+     Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false); // 右上
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 		
 	 Step_ZDT_Init(upper_stepmotor_ptr[0], 5, &huart3, 1, 0.005, true); // 抬升
 		
@@ -215,7 +224,19 @@ void main_work(void)
     }
 }
 
+static void move_vel(float vel_x, float vel_y, float vel_yaw)
+{
+    motor_mode = 0;
+    debug_target_vel = (cmd_vel_t){vel_x, vel_y, vel_yaw};
+}
 
+static void move_step_distance(float odom_x, float odom_y, float odom_yaw, bool clear_odom)
+{
+    motor_mode = 1;
+    debug_target_odom = (odom_t){odom_x, odom_y, odom_yaw};
+    debug_target_erro = (odom_t){0.005, 0.005, 0.005};
+    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, clear_odom);
+}
 void GwGet_color_task(void *pvParameters)
 {
 	while(Ping_color())
@@ -322,26 +343,47 @@ void Onmaincpp(void *pvParameters)
 {
 
     int safe_count = 0; // 保护锁
+	
     while (1)
     {
+
+
+
         // 纯速度式验证没问题
         //      Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
         safe_count++;
         if (safe_count >= 3)
         {
-            safe_guard = 1; // 保护锁打开
-//            switch (main_state)
-//            {
+        if (DEBUG_CHASSIS == 1)
+        {
+            if (debug_speed == 1)
+            {
+                move_vel(debug_chassis_speed[0], debug_chassis_speed[1], debug_chassis_speed[2]);
+            }
+           
+        }
+        if (DEBUG_CHASSIS == 1)
+        {
+        if( debug_distance == 1)
+        {
+            move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
+            debug_distance=0;
+        }
+        }
+        safe_guard = 1; // 保护锁打开
+        switch (main_state)
+        {
+        case 0:
+        {
+            // move_vel(0.1, 0, 0);
 
+            main_state++;
+            break;
+        }
 //            case 0:
 //            {
-
-//                motor_mode = 1;
-//                debug_target_odom = (odom_t){0.3, 0, 0};
-//                debug_target_erro = (odom_t){0.01, 0.01, 0.01};
-//                Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 0.5, &debug_target_erro, 1);
+//                move_step_distance(0.282, 0, 0, 1);
 //                main_state++;
-
 //                break;
 //            }
 
@@ -349,34 +391,44 @@ void Onmaincpp(void *pvParameters)
 //            {
 //                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 //                {
-//                    motor_mode = 0;
-//                    debug_target_vel = (cmd_vel_t){0, 0.2, 0};
+//                    move_vel(0, 0.2, 0);
 //                    if (real_time_gray_state_side == all_black)
 //                    {
-//                        debug_target_vel = (cmd_vel_t){0, 0, 0};
+//                        move_vel(0, 0, 0);
 //                        main_state++;
 //                    }
-//                    break;
 //                }
+//                break;
 //            }
-//            case 2:
+//						case 2:
+//						{
+//						 move_step_distance(-gray_data_side_middle, 0, 0, 1);
+//						
+//						}
+//						
+//            case 3:
 //            {
-
-
+//                move_step_distance(0.05, 0.32, 0, 1);
+//                main_state++;
 //                break;
 //            }
 //            case 4:
 //            {
 //                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 //                {
-//                    motor_mode = 0;
+//                    main_state++;
 //                }
-
 //                break;
 //            }
-//            default:
-//                break;
-//            }
+//						case 5:
+//						{
+//						
+//							
+//						break;
+//						}
+            default:
+                break;
+            }
 
             switch (motor_mode)
             {
@@ -394,9 +446,10 @@ void Onmaincpp(void *pvParameters)
             }
         }
 
-        vTaskDelay(100);
+        vTaskDelay(30);
     }
 }
+
 
 // 轨迹规划更新任务
 void OnPlannerUpdate(void *pvParameters)
