@@ -62,9 +62,9 @@ void DistributionLoop(Servo_t *servos, ThingStore_t *plate_things, Color_t *curr
         {
             PUMP_ON;
             target_upper_loacation = up_location;
-            vTaskDelay(2000);
+            vTaskDelay(1000);
             Servo_SetAngle(&servos[0], FIND_PLATE, 360); // 等待抓取
-            vTaskDelay(500);                             // 等待舵机转动完成，需要实测
+            vTaskDelay(1000);                             // 等待舵机转动完成，需要实测
             target_upper_loacation = down_location;
             vTaskDelay(2000);
 

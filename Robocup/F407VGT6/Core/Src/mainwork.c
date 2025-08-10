@@ -64,13 +64,13 @@ unsigned char Digtal_gray_front;
 unsigned char Anolog_gray_front[8] = {0};
 unsigned char Normal_front[8] = {0};
 // 侧边灰度
-float gray_side_p = 0.01f;
+float gray_side_p = -0.002f;
 float gray_data_side_middle = 0;
 float gray_data_side_middle_temp = 0;
 float gray_data_side_sum = 0;
 float gray_data_side_sum_temp = 0;
 uint8_t digital_gray_data_side[8];
-int sensor_weights_side[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
+int sensor_weights_side[8] = {-8, -6, -4, -2, 2, 4, 6, 8}; // 传感器权重
 unsigned char Digtal_gray_side;
 unsigned char Anolog_gray_side[8] = {0};
 unsigned char Normal_side[8] = {0};
@@ -84,8 +84,8 @@ int get_yellow_flag = 0;
 int yellow_state = 0;
 // 上升控制
 int first_upper_flag = 1;
-upper_location now_upper_loacation = 0;
-upper_location target_upper_loacation = 0;
+upper_location now_upper_loacation = up_location;
+upper_location target_upper_loacation = up_location;
 int upper_flag = 0;
 int upper_rotate_pwm = 960;
 int pump_flag = 0;
@@ -224,6 +224,8 @@ void GwGet_color_task(void *pvParameters)
 void UPPER_control_task(void *pvParameters)
 {
 
+	vTaskDelay(1000);
+__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,1960);
     while (1)
     {
         if (pick_goods_flag == 1)
@@ -276,11 +278,13 @@ void gray_read_task(void *pvParameters)
         // 获取传感器归一化结果
         IIC_Anolog_Normalize(0xff, side); // 所有通道归一化都打开
         vTaskDelay(10);                   // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
-        if (IIC_Get_Anolog(Normal_front, 8, front) && IIC_Get_Anolog(Normal_front, 8, side))
+        if ( IIC_Get_Anolog(Normal_side, 8, side))
         {
         }
         IIC_Anolog_Normalize(0xff, side);
 
+				
+				
         for (int i = 0; i < 8; i++)
         {
             gray_data_side_middle_temp += digital_gray_data_side[i] * sensor_weights_side[i] * gray_side_p;
@@ -340,6 +344,7 @@ void Onmaincpp(void *pvParameters)
 {
 
     int safe_count = 0; // 保护锁
+	
     while (1)
     {
         // 纯速度式验证没问题
@@ -372,31 +377,68 @@ void Onmaincpp(void *pvParameters)
             }
 						case 2:
 						{
-						 move_step_distance(-gray_data_side_middle, 0, 0, 1);
+							while(gray_data_side_middle!=0)
+							{
+							 move_step_distance(-gray_data_side_middle, 0, 0, 1);
+								vTaskDelay(5);
+							}
 						
+						   main_state++;
+                break;
 						}
 						
             case 3:
             {
-                move_step_distance(0.05, 0.32, 0, 1);
-                main_state++;
+							 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                { move_step_distance(-0.04, 0.44, 0, 1);
+                main_state++;	
+								}
+               
                 break;
             }
-            case 4:
+						
+						       case 4:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-                    pick_goods_flag = 1;
+									vTaskDelay(500);
+                   move_step_distance(-0.005, -0.065, 0, 1);
                     main_state++;
                 }
                 break;
             }
-						case 5:
+            case 5:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))//抓取第一个
+                {
+                    pick_goods_flag = 1;
+									vTaskDelay(200);
+                    main_state++;
+                }
+                break;
+            }
+						case 6:
 						{
-						
-							
+							if(*upperflag_ptr ==IDLE)
+							{
+								vTaskDelay(1000);
+							move_step_distance(0.4, 0.42, 0, 1);		
+							main_state++;
+							}
 						break;
 						}
+						case 7:
+						{
+						               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+									vTaskDelay(500);
+                   move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;					
+						}
+						
+						
             default:
                 break;
             }
@@ -440,6 +482,7 @@ void OnChassicControl(void *pvParameters)
     int safe_upper_count = 0;
     uint16_t last_tick = xTaskGetTickCount();
     vTaskDelay(1000);
+	
     while (1)
     {
         safe_upper_count++;
@@ -447,11 +490,11 @@ void OnChassicControl(void *pvParameters)
         last_tick = xTaskGetTickCount();
         if (safe_guard)
         {
-            if (safe_upper_count >= 50 && first_upper_flag == 1)
-            {
-                upper_move_distance(5, 0, 300, 0.02, 300, 0, 0); // 上升到中间位置
-                first_upper_flag = 0;
-            }
+//            if (safe_upper_count >= 50 && first_upper_flag == 1)
+//            {
+//                upper_move_distance(5, 0, 300, 0.02, 300, 0, 0); // 上升到中间位置
+//                first_upper_flag = 0;
+//            }
 
             upper_to_target(target_upper_loacation);
             Controller_KinematicAndControlUpdateWithYaw(ChassisControl_ptr, dt, main_yaw);
