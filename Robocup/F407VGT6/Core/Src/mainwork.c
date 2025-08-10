@@ -24,6 +24,7 @@
 #include "gw_color_iic.h"
 #include "servo.h"
 #include "upper.h"
+#include "chassislogic.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 
@@ -47,6 +48,7 @@ Servo_t servo[3]= {
 };
 UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag* upperflag_ptr = &upperflag;
+ChassisTaskFlag chassisflag = 0; // 底盘状态机
 // ThingStore_t plate_things[5] = {0}; // 料盘槽数组
 ThingStore_t plate_things[5] = {
     {COLOR_BLACK, 33, 0},
@@ -62,7 +64,7 @@ Color_t* current_color_ptr = &current_color_RGB;
 int CurrentColorLoop = 0;
 int PutGoalLoop = 0; // 目标放置循环
 float main_yaw = 0.0f; // imu存取的yaw
-
+int safe_count = 0; // 保护锁
 
 // 主函数状态机
 int main_state = 0;
@@ -116,7 +118,7 @@ void usart6_callfront(void)
 {
     if (uart6.recv_buff[0] == 0x5A && uart6.recv_buff[1] == 0xA5)
     {
-        ch040_get_data(uart6.recv_buff);
+        main_yaw = ch040_get_data(uart6.recv_buff);
     }
 }
 USART_Init_Config_s uart6_cfg = {
@@ -194,12 +196,10 @@ void main_work(void)
     //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
     //    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 
-     Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
+    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
     Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false); // 右上
     Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
     Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
-		
-	 Step_ZDT_Init(upper_stepmotor_ptr[0], 5, &huart3, 1, 0.005, true); // 抬升
 		
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
@@ -342,18 +342,9 @@ void LCD_Show_task(void *pvParameters)
 void Onmaincpp(void *pvParameters)
 {
 
-    int safe_count = 0; // 保护锁
 	
     while (1)
     {
-
-
-
-        // 纯速度式验证没问题
-        //      Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
-        safe_count++;
-        if (safe_count >= 3)
-        {
         if (DEBUG_CHASSIS == 1)
         {
             if (debug_speed == 1)
@@ -364,87 +355,16 @@ void Onmaincpp(void *pvParameters)
         }
         if (DEBUG_CHASSIS == 1)
         {
-        if( debug_distance == 1)
-        {
-            move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
-            debug_distance=0;
-        }
-        }
-        safe_guard = 1; // 保护锁打开
-        switch (main_state)
-        {
-        case 0:
-        {
-            // move_vel(0.1, 0, 0);
-
-            main_state++;
-            break;
-        }
-//            case 0:
-//            {
-//                move_step_distance(0.282, 0, 0, 1);
-//                main_state++;
-//                break;
-//            }
-
-//            case 1:
-//            {
-//                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-//                {
-//                    move_vel(0, 0.2, 0);
-//                    if (real_time_gray_state_side == all_black)
-//                    {
-//                        move_vel(0, 0, 0);
-//                        main_state++;
-//                    }
-//                }
-//                break;
-//            }
-//						case 2:
-//						{
-//						 move_step_distance(-gray_data_side_middle, 0, 0, 1);
-//						
-//						}
-//						
-//            case 3:
-//            {
-//                move_step_distance(0.05, 0.32, 0, 1);
-//                main_state++;
-//                break;
-//            }
-//            case 4:
-//            {
-//                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-//                {
-//                    main_state++;
-//                }
-//                break;
-//            }
-//						case 5:
-//						{
-//						
-//							
-//						break;
-//						}
-            default:
-                break;
-            }
-
-            switch (motor_mode)
+            if( debug_distance == 1)
             {
-            case 0:
-            {
-                Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
-                break;
-            }
-            case 1:
-            {
-                break;
-            }
-            default:
-                break;
+                move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
+                debug_distance=0;
             }
         }
+    if(chassisflag == LEAVE_HOME)
+    {
+        
+    }
 
         vTaskDelay(30);
     }
@@ -472,17 +392,17 @@ void OnChassicControl(void *pvParameters)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
-        if (safe_guard)
-        {		
-            Controller_KinematicAndControlUpdateWithYaw(ChassisControl_ptr, dt,main_yaw);
-            // // 步进不需要速度环，此处仅为了读取电机速度
-            ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
-        }
-        else
-        {
-            float zero_speed[4] = {0, 0, 0, 0};
-            ChassisControl_ptr->setmotor_speed(ChassisControl_ptr, zero_speed);
-        }
+	if(safe_count == 1)
+	{
+        Controller_KinematicAndControlUpdateWithYaw(ChassisControl_ptr, dt,main_yaw);
+        // // 步进不需要速度环，此处仅为了读取电机速度
+        ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
+	}
+    else
+    {
+        float zero_speed[4] = {0, 0, 0, 0};
+        ChassisControl_ptr->setmotor_speed(ChassisControl_ptr, zero_speed);
+    }
         vTaskDelay(10);
     }
 }

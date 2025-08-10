@@ -9,7 +9,9 @@
     "cstddef": "c",
     "limits": "c",
     "type_traits": "c",
-    "kinematic.h": "c"
+    "kinematic.h": "c",
+    "chassislogic.h": "c",
+    "ch040.h": "c"
   },
   "C_Cpp_Runner.msvcBatchPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvarsall.bat"
 }
