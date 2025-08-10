@@ -22,7 +22,7 @@
 #define THING_GIMBAL_ORIGIN_ANGLE 0
 #define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
 #define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
-
+#define servo_zero 10
 /*
     * @brief 前云台枚举常量
 */
@@ -31,13 +31,13 @@ typedef enum
     //跟逻辑有关
 	GOAL_PLACE=83,	
 	FIND_PLATE =80,
-	CENTER_PICK=265,
+	CENTER_PICK=265+servo_zero,
     //跟颜色有关
-	BLUE_PICK=198,
-	GREEN_PICK=234,
-	RED_PICK=265,
-	WHITE_PICK=298,
-	BLACK_PICK=330
+	BLUE_PICK=198+servo_zero,
+	GREEN_PICK=234+servo_zero,
+	RED_PICK=265+servo_zero,
+	WHITE_PICK=298+servo_zero,
+	BLACK_PICK=330+servo_zero
  
 } GimbalArm_Servoangle_t;
 
