@@ -1,5 +1,23 @@
+/*
+ * @Author: Nagisa 2964793117@qq.com
+ * @Date: 2025-08-07 15:49:24
+ * @LastEditors: Nagisa 2964793117@qq.com
+ * @LastEditTime: 2025-08-10 14:38:22
+ * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\mcu_bsp\chassis\Kinematic.c
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include "Kinematic.h"
 #include <math.h>
+
+
+static float normalRad(float rad) {
+  if (rad > PI) {
+    rad -= 2 * PI;
+  } else if (rad < -PI) {
+    rad += 2 * PI;
+  }
+  return rad;
+}
 void Kinematic_init(Kinematic_t *_Kinematic,float _a,float _b,chassis_t _disclass)
 {
 _Kinematic->a = _a;
@@ -11,6 +29,7 @@ _Kinematic->current_odom.yaw = 0;
 _Kinematic->_odom_error.x=0.1;
 _Kinematic->_odom_error.y=0.1;
 _Kinematic->_odom_error.yaw=0.1;
+_Kinematic->_yaw_zero=0;
 }
 
 
@@ -125,13 +144,13 @@ void Kinematic_CalculationUpdate(uint16_t dt,  cmd_vel_t *cmd_vel_in, odom_t *od
  * @param odom_in 传入被更新里程计指针
  * @param yaw 传入的yaw角度
  */
-void Kinematic_CalculationUpdateWithYaw(uint16_t dt,  cmd_vel_t *cmd_vel_in, odom_t *odom_in, float yaw) {
+void Kinematic_CalculationUpdateWithYaw(uint16_t dt,Kinematic_t *_Kinematic,cmd_vel_t *cmd_vel_in, odom_t *odom_in, float yaw) {
     float delta_t = (float)dt / 1000;
-    float dyaw = cmd_vel_in->angular_z * delta_t;
+    //积分
     float dx = cmd_vel_in->linear_x * delta_t;
     float dy = cmd_vel_in->linear_y * delta_t;
     
-    odom_in->yaw = yaw;
+    odom_in->yaw = normalRad(yaw-_Kinematic->_yaw_zero);
     odom_in->y += dx * sinf(odom_in->yaw) + dy * cosf(odom_in->yaw);
     odom_in->x += dx * cosf(odom_in->yaw) - dy * sinf(odom_in->yaw);
 }

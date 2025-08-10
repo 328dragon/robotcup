@@ -183,10 +183,10 @@ void main_work(void)
     //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
     //    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 
-    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 1, 0.08f, false); // 左上
-    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 0, 0.08f, false); // 右上
-    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.08f, false); // 左下
-    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.08f, true);  // 右下
+    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 1, 0.06f, false); // 左上
+    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 0, 0.06f, false); // 右上
+    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 1, 0.06f, false); // 左下
+    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 0, 0.06f, true);  // 右下
 		
 	 Step_ZDT_Init(upper_stepmotor_ptr[0], 5, &huart3, 1, 0.005, true); // 抬升
 		
@@ -469,14 +469,7 @@ void OnChassicControl(void *pvParameters)
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
         if (safe_guard)
-        {
-
-					if(upper_flag==1)
-					{
-					upper_move_distance(upper_stepmotor_ptr[0],upper_target_vel,target_distance);
-					upper_flag=0;
-					}
-					
+        {		
             Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
             // // 步进不需要速度环，此处仅为了读取电机速度
             ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
