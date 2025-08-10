@@ -52,6 +52,8 @@ Color_t current_color_HSL = COLOR_BLACK; // 当前颜色
 Color_t* current_color_ptr = &current_color_RGB;
 int CurrentColorLoop = 0;
 int PutGoalLoop = 0; // 目标放置循环
+float main_yaw = 0.0f; // imu存取的yaw
+
 
 // 主函数状态机
 int main_state = 0;
@@ -244,83 +246,32 @@ while(1)
 
 void gray_read_task(void *pvParameters)
 {
-    while (Ping() || Ping_color())
+    while (Ping())
     {
         vTaskDelay(5);
     }
 
     while (1)
     {
-	    if(get_yellow_flag)
-	{
-	    yellow_state=get_little_yellow_state;
-	}
-	else 
-	{
-	    yellow_state=-1;
-	}
-
-        if (IIC_Get_RGB(RGB, 3))
-        {
-
-        }
-        if (IIC_Get_HSL(HSL, 3))
-        {
-        }
-        // 读取灰度传感器数据
-        Digtal_gray_front = IIC_Get_Digtal(front);
+   // 读取灰度传感器数据
         Digtal_gray_side = IIC_Get_Digtal(side);
         for (int i = 0; i < 8; i++)
         {
-            digital_gray_data_front[i] = 1 - ((Digtal_gray_front >> i) & 0x01); // 读取后边数字灰度传感器数据
-            digital_gray_data_side[i] = 1 - ((Digtal_gray_side >> i) & 0x01);   // 读取侧边数字灰度传感器数据
+            digital_gray_data_side[i] = 1 - ((Digtal_gray_side >> i) & 0x01); // 读取侧边数字灰度传感器数据
         }
 
         // 获取传感器模拟量结果
-        if (IIC_Get_Anolog(Anolog_gray_front, 8, front) && IIC_Get_Anolog(Anolog_gray_side, 8, side))
+        if (IIC_Get_Anolog(Anolog_gray_side, 8, side))
         {
         }
 
         // 获取传感器归一化结果
-        IIC_Anolog_Normalize(0xff, front); // 所有通道归一化都打开
-        IIC_Anolog_Normalize(0xff, side);  // 所有通道归一化都打开
-        vTaskDelay(10);                    // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
-        if (IIC_Get_Anolog(Normal_front, 8, front) && IIC_Get_Anolog(Normal_front, 8, side))
+        IIC_Anolog_Normalize(0xff, side); // 所有通道归一化都打开
+        vTaskDelay(10);                   // 设置完，需要等上一会。stm8的运算速度没stm32快，等一下，让传感器把数据刷新一下。
+        if ( IIC_Get_Anolog(Normal_side, 8, side))
         {
         }
-        IIC_Anolog_Normalize(0xff, front); // 为了下一次循环是非归一化，所以清零
         IIC_Anolog_Normalize(0xff, side);
-        if (digital_gray_data_front[0] == 1 && digital_gray_data_front[1] == 1 && digital_gray_data_front[2] == 1 && digital_gray_data_front[3] == 1 && digital_gray_data_front[4] == 1 && digital_gray_data_front[5] == 1 && digital_gray_data_front[6] == 1 && digital_gray_data_front[7] == 1)
-        {
-
-            real_time_gray_state = all_black;
-        }
-        else
-        {
-            real_time_gray_state = orgin_gray;
-        }
-
-        if (digital_gray_data_side[1] == 1 && digital_gray_data_side[2] == 1 && digital_gray_data_side[3] == 1 && digital_gray_data_side[4] == 1 && digital_gray_data_side[5] == 1 && digital_gray_data_side[6] == 1)
-        {
-
-            real_time_gray_state_side = all_black;
-            BUZZER_ON;
-        }
-        else
-        {
-            real_time_gray_state_side = orgin_gray;
-            BUZZER_OFF;
-        }
-
-        for (int i = 0; i < 8; i++)
-        {
-            gray_data_front_middle_temp += digital_gray_data_front[i] * sensor_weights_front[i] * gray_front_p; // 计算前面灰度传感器的中间值
-            gray_data_side_middle_temp += digital_gray_data_side[i] * sensor_weights_side[i] * gray_side_p;
-        }
-        gray_data_side_middle = gray_data_side_middle_temp;
-        gray_data_front_middle = gray_data_front_middle_temp;
-        gray_data_front_middle_temp = 0;
-        gray_data_side_middle_temp = 0;
 
         vTaskDelay(10); // 延时10ms
     }
@@ -470,7 +421,7 @@ void OnChassicControl(void *pvParameters)
         last_tick = xTaskGetTickCount();
         if (safe_guard)
         {		
-            Controller_KinematicAndControlUpdate(ChassisControl_ptr, dt);
+            Controller_KinematicAndControlUpdateWithYaw(ChassisControl_ptr, dt,main_yaw);
             // // 步进不需要速度环，此处仅为了读取电机速度
             ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
         }
