@@ -2,7 +2,7 @@
  * @Author: Nagisa 2964793117@qq.com
  * @Date: 2025-08-07 22:06:30
  * @LastEditors: Nagisa 2964793117@qq.com
- * @LastEditTime: 2025-08-09 21:14:03
+ * @LastEditTime: 2025-08-11 12:58:59
  * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\mcu_bsp\servo\upper.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -29,7 +29,7 @@
 */
 typedef enum
 {
-    PICK_LEFT = 50,
+    PICK_LEFT = 39,
     FIND_PLATE = 200,
     COLORTASKHEIGHT = 218,
     GOAL = 39

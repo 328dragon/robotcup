@@ -1,3 +1,11 @@
+/*
+ * @Author: Nagisa 2964793117@qq.com
+ * @Date: 2025-08-07 15:49:23
+ * @LastEditors: Nagisa 2964793117@qq.com
+ * @LastEditTime: 2025-08-11 12:57:17
+ * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\Core\Src\mainwork.c
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 // ​​Planner模块​​：负责轨迹规划，提供开环和闭环两种控制模式
 // ​​Controller模块​​：负责控制算法执行和电机控制
 // ​​Kinematic模块​​：负责运动学正逆解计算和里程计更新
@@ -48,7 +56,7 @@ Servo_t servo[3]= {
 };
 UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag* upperflag_ptr = &upperflag;
-ChassisTaskFlag chassisflag = 0; // 底盘状态机
+ChassisTaskFlag chassisflag = IDLE_CHASSIS; // 底盘状态机
 // ThingStore_t plate_things[5] = {0}; // 料盘槽数组
 ThingStore_t plate_things[5] = {
     {COLOR_BLACK, 33, 0},
@@ -342,7 +350,7 @@ void LCD_Show_task(void *pvParameters)
 void Onmaincpp(void *pvParameters)
 {
 
-	
+	vTaskDelay(1000); 
     while (1)
     {
         if (DEBUG_CHASSIS == 1)
@@ -357,14 +365,41 @@ void Onmaincpp(void *pvParameters)
         {
             if( debug_distance == 1)
             {
-                move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
-                debug_distance=0;
+                if(debug_chassis_distance[0] != 0 || debug_chassis_distance[1] != 0 || debug_chassis_distance[2] != 0)
+                {
+                    safe_count = 1;
+                    move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
+                    vTaskDelay(10000);
+                    safe_count = 0;
+                    debug_chassis_distance[0] = 0;
+                    debug_chassis_distance[1] = 0;
+                    debug_chassis_distance[2] = 0;
+                }
+                vTaskDelay(10000);
             }
         }
+        
     if(chassisflag == LEAVE_HOME)
     {
-        
+        move_step_distance(0,-0.28,0, true); // 离开HOME
+        safe_count = 1;
+        // vTaskDelay(6000);
+        // safe_count = 0;
+        chassisflag = FIND_THING; // 状态机转移到寻找灰度
     }
+
+    // if(chassisflag == FIND_GRAY)此处还缺灰度纠正的部分
+
+    if(chassisflag == FIND_THING)
+    {
+        move_step_distance(1,0,0, true); // 前往第一个物块处
+        // safe_count = 1;
+        // vTaskDelay(6000);
+        // safe_count = 0;
+        upperflag = PICKINGIN; // 状态机转移到拾取物块
+        chassisflag = WAITPICK; // 底盘状态机转移到等待拾取
+    }
+
 
         vTaskDelay(30);
     }
@@ -387,7 +422,7 @@ void OnPlannerUpdate(void *pvParameters)
 void OnChassicControl(void *pvParameters)
 {
     uint16_t last_tick = xTaskGetTickCount();
-
+ 
     while (1)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
