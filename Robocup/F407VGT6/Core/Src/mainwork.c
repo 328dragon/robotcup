@@ -60,12 +60,13 @@ Color_t *current_color_ptr = &current_color;
 int CurrentColorLoop = 0;
 int PutGoalLoop = 0;
 // 主函数状态机
-//__IO int main_state = 0;
-//__IO int main_put_state = -1;
-__IO int main_state = -1;
-__IO int main_put_state = 0;
+__IO int main_state = 0;
+__IO int main_put_state = -1;
+//调试跑十字时候状态
+//__IO int main_state = -1;
+//__IO int main_put_state = 0;
 int motor_mode = 0;
-int qr_code = -1;
+int qr_code = 0;
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -134,7 +135,7 @@ void usart2_callback(void)
 {
     if (uart2.recv_buff[0] == 0x91 && uart2.recv_buff[1] == 0xCB)
     {
-        qr_code = uart2.recv_buff[2];
+//        qr_code = uart2.recv_buff[2];
     }
 }
 
@@ -143,7 +144,7 @@ void usart4_callback(void)
 {
     if (uart4.recv_buff[0] == 0x91 && uart4.recv_buff[1] == 0xCB)
     {
-        qr_code = uart4.recv_buff[2];
+//        qr_code = uart4.recv_buff[2];
     }
 }
 
@@ -250,13 +251,13 @@ void main_work(void)
     Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
     Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
-	GetColorTask(color_task,&color_task_index);
+//	GetColorTask(color_task,&color_task_index);
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 300, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 800, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 200, NULL, 4, &Planner_update_handle);
     BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 200, NULL, 3, &Get_Color_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 200, NULL, 1, &LCD_Show_handle);
-    BaseType_t ok7 = xTaskCreate(UPPER_control_task, "UPPER_control_task", 200, NULL, 1, &LCD_Show_handle);
+    BaseType_t ok7 = xTaskCreate(UPPER_control_task, "UPPER_control_task", 300, NULL, 1, &LCD_Show_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 300, NULL, 2, &gray_read_handle);
     if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok5 != pdPASS)
     {
@@ -458,24 +459,39 @@ void Onmaincpp(void *pvParameters)
                 if (gray_data_side_middle != 0)
                 {
                     vTaskDelay(100);
-								
-                    move_step_distance(-gray_data_side_middle, 0, 0, 1);
-                    main_state++;
+                    move_step_distance(-gray_data_side_middle, 0, 0, 1);                   
                 }
+								main_state++;
                 break;
             }
-                //////*********找第一个物块****//////
-            case 4:
-            {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+						
+						//找二维码
+						case 4:
+						{
+							          if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-                    move_step_distance(-0.042, 0.46, 0, 1);
+                    vTaskDelay(100);	
+                   move_step_distance(0, 0.17, 0, 1);
+									  main_state++;
+                }
+						break;
+						}
+						
+						
+                //////*********找第一个物块****//////
+            case 5:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise)&&qr_code!=0)
+                {
+									color_task_index=qr_code;
+									GetColorTask(color_task,&color_task_index);
+                    move_step_distance(-0.042, 0.29, 0, 1);
                     main_state++;
                 }
                 break;
             }
 
-            case 5:
+            case 6:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -486,7 +502,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
                 //****************抓取第一个*********///////
-            case 6:
+            case 7:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -500,7 +516,7 @@ void Onmaincpp(void *pvParameters)
 
                 // **********抓完第一个，去找第二个物块***********///
                 // 第一个到第二个是dx:346.6(mm),dy:341.136(mm)
-            case 7:
+            case 8:
             {
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
@@ -510,7 +526,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 8:
+            case 9:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -519,7 +535,7 @@ void Onmaincpp(void *pvParameters)
                     main_state++;
                 }
             }
-            case 9:
+            case 10:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -531,7 +547,7 @@ void Onmaincpp(void *pvParameters)
             }
 
                 ////********抓取第二个物块**********/////
-            case 10:
+            case 11:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -546,7 +562,7 @@ void Onmaincpp(void *pvParameters)
             }
                 // *************抓第二个完成，去找第三个物块************////
                 // 第二 个到第三个是dx:470.109(mm),dy:124.624(mm)
-            case 11:
+            case 12:
             {
                 if (*upperflag_ptr == IDLE)
                 {
@@ -556,7 +572,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 12:
+            case 13:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -565,7 +581,7 @@ void Onmaincpp(void *pvParameters)
                     main_state++;
                 }
             }
-            case 13:
+            case 14:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -576,7 +592,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
                 // *************抓第三个物块********//
-            case 14:
+            case 15:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -592,7 +608,7 @@ void Onmaincpp(void *pvParameters)
 
                 // *************抓第三个完成，去找第四个物块************////
                 // 第三 个到第四个是dx:470.109(mm),dy:124.624(mm)
-            case 15:
+            case 16:
             {
                 if (*upperflag_ptr == IDLE)
                 {
@@ -602,7 +618,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 16:
+            case 17:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -611,7 +627,7 @@ void Onmaincpp(void *pvParameters)
                     main_state++;
                 }
             }
-            case 17:
+            case 18:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -622,7 +638,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
                 // *************抓第四个物块********//
-            case 18:
+            case 19:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -638,7 +654,7 @@ void Onmaincpp(void *pvParameters)
 
                 // *************抓第四个完成，去找第五个物块************////
                 // 第四 个到第五个是dx:346.614(mm),dy:341.136(mm)
-            case 19:
+            case 20:
             {
                 if (*upperflag_ptr == IDLE)
                 {
@@ -648,7 +664,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 20:
+            case 21:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -658,7 +674,7 @@ void Onmaincpp(void *pvParameters)
                 }
             }
 
-            case 21:
+            case 22:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -667,7 +683,7 @@ void Onmaincpp(void *pvParameters)
                     main_state++;
                 }
             }
-            case 22:
+            case 23:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -678,7 +694,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
                 // *************抓第五个物块********//
-            case 23:
+            case 24:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -691,7 +707,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
 
-            case 24:
+            case 25:
             {
 							   if (*upperflag_ptr == IDLE)
                 {
@@ -709,8 +725,8 @@ void Onmaincpp(void *pvParameters)
             }
 
             //////**************************开启放置物块状态机******************************/////
-//						if(main_state>24)
-						if(1)
+						if(main_state>24)
+//						if(1)
 						{
 						            switch (main_put_state)
             {

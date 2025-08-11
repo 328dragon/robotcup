@@ -82,7 +82,8 @@ typedef enum
 down_location=0,
 middle_location=1,
 up_location=2	,
-pick_middle_location=3
+pick_middle_location=3,
+	dowm_put_lcoation=4,
 }upper_location;
 
 // 打算servo数组一共3个舵机，第一个舵机控制前云台，第二个控制升降，第三个控制转盘
