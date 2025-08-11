@@ -67,6 +67,8 @@ __IO int main_put_state = -1;
 //__IO int main_put_state = 0;
 int motor_mode = 0;
 int qr_code = 0;
+float find_circle_dx=0;
+float find_circle_dy=0;
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -121,30 +123,32 @@ void usart6_callback(void)
     }
 }
 
-// 上位机通信，接收任务一顺序
+// 上位机通信，接收二维码
 void usart1_callback(void)
 {
     if (uart1.recv_buff[0] == 0x91 && uart1.recv_buff[1] == 0xCB)
     {
-
+				
         qr_code = uart1.recv_buff[2];
     }
 }
 
+//上位机 通信，接收纠正dx,dy
 void usart2_callback(void)
 {
     if (uart2.recv_buff[0] == 0x91 && uart2.recv_buff[1] == 0xCB)
     {
-//        qr_code = uart2.recv_buff[2];
+			find_circle_dx=uart2.recv_buff[2];
+			find_circle_dy=uart2.recv_buff[3];
     }
 }
 
-// 上位机通信，接收二维码
+
 void usart4_callback(void)
 {
     if (uart4.recv_buff[0] == 0x91 && uart4.recv_buff[1] == 0xCB)
     {
-//        qr_code = uart4.recv_buff[2];
+
     }
 }
 
@@ -424,7 +428,9 @@ void Onmaincpp(void *pvParameters)
             switch (main_state)
             {
             case 0:
-            {
+            {	
+								setYawZero();
+							vTaskDelay(200);
                 move_step_distance(0.32, 0, 0, 1);
                 main_state++;
                 break;
@@ -465,7 +471,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
 						
-						//找二维码
+						//找二维码,直到找到二维码
 						case 4:
 						{
 							          if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -485,7 +491,7 @@ void Onmaincpp(void *pvParameters)
                 {
 									color_task_index=qr_code;
 									GetColorTask(color_task,&color_task_index);
-                    move_step_distance(-0.042, 0.29, 0, 1);
+                    move_step_distance(-0.02, 0.29, 0, 1);
                     main_state++;
                 }
                 break;
@@ -507,8 +513,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     pick_goods_flag = 1;
-
-                    vTaskDelay(200);
+                    vTaskDelay(1000);
                     main_state++;
                 }
                 break;
