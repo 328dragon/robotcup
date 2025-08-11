@@ -455,7 +455,166 @@ void Onmaincpp(void *pvParameters)
 						  main_state++;						 
 						 }
 						break;
-						}
+						}					
+                // **********抓完第一个，去找第二个物块***********///
+                // 第一个到第二个是dx:346.6(mm),dy:341.136(mm)
+            case 8:
+            {
+                if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
+                {
+                    vTaskDelay(1000);
+                    move_step_distance(0.05, -0.40, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 9:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0.25, 0, 0, 1);
+                    main_state++;
+                }
+            }
+
+
+                ////********抓取第二个物块**********/////
+            case 10:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                   *upperflag_ptr=PICKINGIN;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+                // *************抓第二个完成，去找第三个物块************////
+                // 第二 个到第三个是dx:470.109(mm),dy:124.624(mm)
+            case 11:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+                    move_step_distance(-0.1,-0.55, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 12:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance( 0.2,0, 0, 1);
+                    main_state++;
+                }
+            }
+                // *************抓第三个物块********//
+            case 13:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                   *upperflag_ptr=PICKINGIN;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+
+                // *************抓第三个完成，去找第四个物块************////
+                // 第三 个到第四个是dx:470.109(mm),dy:124.624(mm)
+            case 14:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+                    move_step_distance( -0.4,-0.50, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 15:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0.3, 0, 0, 1);
+                    main_state++;
+                }
+            }
+                // *************抓第四个物块********//
+            case 16:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    *upperflag_ptr=PICKINGIN;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+
+                // *************抓第四个完成，去找第五个物块************////
+                // 第四 个到第五个是dx:346.614(mm),dy:341.136(mm)
+            case 17:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+                    move_step_distance(-0.63,0 , 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+						            case 18:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, -0.40, 0, 1);
+                    main_state++;
+                }
+            }
+						
+						
+            case 19:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0.33, 0, 0, 1);
+                    main_state++;
+                }
+            }
+                // *************抓第五个物块********//
+            case 20:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    *upperflag_ptr=PICKINGIN;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+
+						
+						
+						
             default:
                 break;
             }
