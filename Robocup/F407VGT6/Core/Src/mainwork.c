@@ -2,7 +2,7 @@
  * @Author: Nagisa 2964793117@qq.com
  * @Date: 2025-08-07 15:49:23
  * @LastEditors: Nagisa 2964793117@qq.com
- * @LastEditTime: 2025-08-11 12:57:17
+ * @LastEditTime: 2025-08-11 18:47:38
  * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\Core\Src\mainwork.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -36,7 +36,7 @@
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 
-#define DEBUG_UPPER 0
+#define DEBUG_UPPER 1
 #define DEBUG_CHASSIS 1
 
 #define get_little_yellow_state			HAL_GPIO_ReadPin(little_yellow_GPIO_Port,little_yellow_Pin)
@@ -73,7 +73,7 @@ int CurrentColorLoop = 0;
 int PutGoalLoop = 0; // 目标放置循环
 float main_yaw = 0.0f; // imu存取的yaw
 int safe_count = 0; // 保护锁
-
+int qr_code =-1;
 // 主函数状态机
 int main_state = 0;
 int motor_mode = 0;
@@ -104,7 +104,12 @@ unsigned char Normal_side[8] = {0};
 int debug_pwm = 0;
 int close_flag = 0;
 int safe_flag = 0;
+
+USARTInstance uart1 = {0};
+USARTInstance uart2 = {0};
+USARTInstance uart4 = {0};
 USARTInstance uart6 = {0};
+
 //气泵
 int pump_flag=0;
 int get_yellow_flag=0;
@@ -115,20 +120,58 @@ int target_upper_loacation=0;
 float target_distance=0;
 float upper_target_vel=0;
 int upper_flag=0;
+//摄像头偏移
+void usart1_callback(void)
+{
+    if (uart1.recv_buff[0] == 0x91 && uart1.recv_buff[1] == 0xCB)
+    {
 
+    }
+}
 
-void usart6_callfront(void)
+void usart2_callback(void)
+{
+    if (uart2.recv_buff[0] == 0x5A && uart2.recv_buff[1] == 0xA5)
+    {
+
+    }
+}
+// 摄像头二维码
+void usart4_callback(void)
+{
+    if (uart4.recv_buff[0] == 0x91 && uart4.recv_buff[1] == 0xCB)
+    {
+        qr_code = uart4.recv_buff[2];
+    }
+}
+void usart6_callback(void)
 {
     if (uart6.recv_buff[0] == 0x5A && uart6.recv_buff[1] == 0xA5)
     {
         main_yaw = ch040_get_data(uart6.recv_buff);
     }
 }
-USART_Init_Config_s uart6_cfg = {
+USART_Init_Config_s uart1_cfg = {
     .recv_buff_size = 90,
-    .usart_handle = &huart6,
-    .module_callback = usart6_callfront,
+    .usart_handle = &huart1,
+    .module_callback = usart1_callback,
 };
+USART_Init_Config_s uart2_cfg = {
+    .recv_buff_size = 50,
+    .usart_handle = &huart2,
+    .module_callback = usart2_callback,
+};
+USART_Init_Config_s uart4_cfg = {
+    .recv_buff_size = 50,
+    .usart_handle = &huart4,
+    .module_callback = usart4_callback,
+};
+USART_Init_Config_s uart6_cfg = {
+    .recv_buff_size = 50,
+    .usart_handle = &huart6,
+    .module_callback = usart6_callback,
+};
+
 //
 float DEBUG = 0.0f;
 float DEBUG2 = 0.0f;
@@ -191,7 +234,14 @@ void main_work(void)
 			__HAL_TIM_SetCompare(&htim3,TIM_CHANNEL_4,965);//初始965
 	
     USARTRegister(&uart6, &uart6_cfg);
+    USARTRegister(&uart1, &uart1_cfg);
+    USARTRegister(&uart2, &uart2_cfg);
+    USARTRegister(&uart4, &uart4_cfg);
+
     memset(uart6.recv_buff, 0, uart6.recv_buff_size);
+    memset(uart1.recv_buff, 0, uart1.recv_buff_size);
+    memset(uart2.recv_buff, 0, uart2.recv_buff_size);
+    memset(uart4.recv_buff, 0, uart4.recv_buff_size);
     // 注意电机编号如下所示
 
     //    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
@@ -214,7 +264,7 @@ void main_work(void)
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 300, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 300, NULL, 4, &Planner_update_handle);
-		  BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 200, NULL, 3, &Get_Color_handle);
+	BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 200, NULL, 3, &Get_Color_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 400, NULL, 1, &LCD_Show_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 300, NULL, 2, &gray_read_handle);
     if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS||ok5!=pdPASS)
@@ -250,6 +300,7 @@ void GwGet_color_task(void *pvParameters)
 	
 while(1)
 {
+	
 	if(IIC_Get_RGB(RGB, 3))
 	{
 		goods_color_RGB=Get_GW_Color_RGB(RGB);
@@ -260,7 +311,6 @@ while(1)
 		goods_color_HSL=Get_GW_Color_HSL(HSL);
         current_color_HSL = goods_color_HSL;
     }
-
     vTaskDelay(500);
 
 }
@@ -383,37 +433,32 @@ void Onmaincpp(void *pvParameters)
             }
         		case 1:
 						{
-								    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 								{
 									vTaskDelay(100);
-											   move_step_distance(0.6, 0, 0, 1);
-                main_state++;
+									move_step_distance(0.6, 0, 0, 1);
+									main_state++;
 								}
-						
-                break;			
-							
+                break;		
 						}
 						case 2:
 						{
-														    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 								{
-									
-											move_vel(0.1,0,0);
-                main_state++;
+									move_vel(0.1,0,0);
+									main_state++;
 									vTaskDelay(100);
 								}					
                 break;		
 						}
 						case 3:
 						{
-							
-						if(  real_time_gray_state_side == aim_black)
-						{
-										move_vel(0,0,0);
-                main_state++;					
-						}
-						
-						break;
+							if(  real_time_gray_state_side == aim_black)
+							{
+								move_vel(0,0,0);
+								main_state++;					
+							}
+							break;
 						}
 							case 4:
 						{
@@ -427,22 +472,19 @@ void Onmaincpp(void *pvParameters)
 							 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 								{
 									vTaskDelay(500);
-										move_step_distance(0.3, 0.05, 0, 1);	
-                main_state++;
-									
+									move_step_distance(0.3, 0.05, 0, 1);	
+									main_state++;
 								}					
                 break;	
 						}
-						
-						
+			
 						case 6:
 						{
-													 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 								{
 									vTaskDelay(200);
-										move_step_distance(0.15, 0, 0, 1);	
-                main_state++;
-									
+									move_step_distance(0.15, 0, 0, 1);	
+									main_state++;
 								}					
                 break;	
 						
