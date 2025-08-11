@@ -349,56 +349,103 @@ void LCD_Show_task(void *pvParameters)
 
 void Onmaincpp(void *pvParameters)
 {
-
-	vTaskDelay(1000); 
+  int safe_count = 0; // 保护锁
     while (1)
     {
-        if (DEBUG_CHASSIS == 1)
+			
+			    safe_count++;
+        if (safe_count >= 3)
         {
-            if (debug_speed == 1)
+            safe_guard = 1; // 保护锁打开
+            switch (main_state)
             {
-                move_vel(debug_chassis_speed[0], debug_chassis_speed[1], debug_chassis_speed[2]);
-            }
-           
-        }
-        if (DEBUG_CHASSIS == 1)
-        {
-            if( debug_distance == 1)
+            case 0:
             {
-                if(debug_chassis_distance[0] != 0 || debug_chassis_distance[1] != 0 || debug_chassis_distance[2] != 0)
-                {
-                    safe_count = 1;
-                    move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
-                    vTaskDelay(10000);
-                    safe_count = 0;
-                    debug_chassis_distance[0] = 0;
-                    debug_chassis_distance[1] = 0;
-                    debug_chassis_distance[2] = 0;
-                }
-                vTaskDelay(10000);
+                move_step_distance(0, -0.3, 0, 1);
+                main_state++;
+                break;
+            }
+        		case 1:
+						{
+								    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								{
+											   move_step_distance(0.6, 0, 0, 1);
+                main_state++;
+								}
+						
+                break;
+							
+							
+						}
+            default:
+                break;
+            }
+
+            switch (motor_mode)
+            {
+            case 0:
+            {
+                Controller_set_vel_target(ChassisControl_ptr, debug_target_vel, false);
+                break;
+            }
+            case 1:
+            {
+                break;
+            }
+            default:
+                break;
             }
         }
-        
-    if(chassisflag == LEAVE_HOME)
-    {
-        move_step_distance(0,-0.28,0, true); // 离开HOME
-        safe_count = 1;
-        // vTaskDelay(6000);
-        // safe_count = 0;
-        chassisflag = FIND_THING; // 状态机转移到寻找灰度
-    }
+				else 
+				{
+				setYawZero();
+				}
+//        if (DEBUG_CHASSIS == 1)
+//        {
+//            if (debug_speed == 1)
+//            {
+//                move_vel(debug_chassis_speed[0], debug_chassis_speed[1], debug_chassis_speed[2]);
+//            }
+//           
+//        }
+//        if (DEBUG_CHASSIS == 1)
+//        {
+//            if( debug_distance == 1)
+//            {
+//                if(debug_chassis_distance[0] != 0 || debug_chassis_distance[1] != 0 || debug_chassis_distance[2] != 0)
+//                {
+//                    safe_count = 1;
+//                    move_step_distance(debug_chassis_distance[0], debug_chassis_distance[1], debug_chassis_distance[2], true);
+//                    vTaskDelay(10000);
+//                    safe_count = 0;
+//                    debug_chassis_distance[0] = 0;
+//                    debug_chassis_distance[1] = 0;
+//                    debug_chassis_distance[2] = 0;
+//                }
+//                vTaskDelay(10000);
+//            }
+//        }
+//        
+//    if(chassisflag == LEAVE_HOME)
+//    {
+//        move_step_distance(0,-0.28,0, true); // 离开HOME
+//        safe_count = 1;
+//        // vTaskDelay(6000);
+//        // safe_count = 0;
+//        chassisflag = FIND_THING; // 状态机转移到寻找灰度
+//    }
 
-    // if(chassisflag == FIND_GRAY)此处还缺灰度纠正的部分
+//    // if(chassisflag == FIND_GRAY)此处还缺灰度纠正的部分
 
-    if(chassisflag == FIND_THING)
-    {
-        move_step_distance(1,0,0, true); // 前往第一个物块处
-        // safe_count = 1;
-        // vTaskDelay(6000);
-        // safe_count = 0;
-        upperflag = PICKINGIN; // 状态机转移到拾取物块
-        chassisflag = WAITPICK; // 底盘状态机转移到等待拾取
-    }
+//    if(chassisflag == FIND_THING)
+//    {
+//        move_step_distance(1,0,0, true); // 前往第一个物块处
+//        // safe_count = 1;
+//        // vTaskDelay(6000);
+//        // safe_count = 0;
+//        upperflag = PICKINGIN; // 状态机转移到拾取物块
+//        chassisflag = WAITPICK; // 底盘状态机转移到等待拾取
+//    }
 
 
         vTaskDelay(30);
@@ -421,20 +468,21 @@ void OnPlannerUpdate(void *pvParameters)
 // 底盘更新任务,包括执行层
 void OnChassicControl(void *pvParameters)
 {
+	  vTaskDelay(1000);//等待一会
     uint16_t last_tick = xTaskGetTickCount();
- 
+
     while (1)
     {
         uint16_t dt = (xTaskGetTickCount() - last_tick) % portMAX_DELAY;
         last_tick = xTaskGetTickCount();
-	if(safe_count == 1)
+	if(safe_guard == 1)
 	{
         Controller_KinematicAndControlUpdateWithYaw(ChassisControl_ptr, dt,main_yaw);
         // // 步进不需要速度环，此处仅为了读取电机速度
         ChassisControl_ptr->Controller_MotorUpdate(ChassisControl_ptr, dt);
 	}
     else
-    {
+    {	
         float zero_speed[4] = {0, 0, 0, 0};
         ChassisControl_ptr->setmotor_speed(ChassisControl_ptr, zero_speed);
     }
