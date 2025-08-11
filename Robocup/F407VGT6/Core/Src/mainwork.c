@@ -44,6 +44,7 @@ int PutGoalLoop = 0;
 // 主函数状态机
 __IO int main_state = 0;
 int motor_mode = 0;
+int qr_code=-1;
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -87,6 +88,8 @@ float main_yaw = 0.0f;
 USARTInstance uart6 = {0};
 USARTInstance uart3 = {0};
 USARTInstance uart1 = {0};
+USARTInstance uart2 = {0};
+USARTInstance uart4 = {0};
 // 读陀螺仪
 void usart6_callback(void)
 {
@@ -95,24 +98,59 @@ void usart6_callback(void)
         main_yaw = ch040_get_data(uart6.recv_buff);
     }
 }
+
+//上位机通信
+void usart1_callback(void)
+{
+	if(uart1.recv_buff[0]==0x91&&uart1.recv_buff[1]==0xCB)
+	{
+
+		qr_code=uart1.recv_buff[2];	
+	}
+}
+
+//上位机通信
+void usart2_callback(void)
+{
+	if(uart2.recv_buff[0]==0x91&&uart2.recv_buff[1]==0xCB)
+	{
+	qr_code=uart2.recv_buff[2];	
+	}
+	
+}
+
+//上位机通信
+void usart4_callback(void)
+{
+	if(uart4.recv_buff[0]==0x91&&uart4.recv_buff[1]==0xCB)
+	{
+	qr_code=uart4.recv_buff[2];	
+	}
+	
+}
+
 USART_Init_Config_s uart6_cfg = {
     .recv_buff_size = 90,
     .usart_handle = &huart6,
     .module_callback = usart6_callback,
 };
-//上位机通信
-void usart1_callback(void)
-{
-	
-	
-}
 USART_Init_Config_s uart1_cfg = {
-    .recv_buff_size = 90,
+    .recv_buff_size = 40,
     .usart_handle = &huart1,
     .module_callback = usart1_callback,
 };
 
+USART_Init_Config_s uart2_cfg = {
+    .recv_buff_size = 40,
+    .usart_handle = &huart2,
+    .module_callback = usart2_callback,
+};
 
+USART_Init_Config_s uart4_cfg = {
+    .recv_buff_size = 40,
+    .usart_handle = &huart4,
+    .module_callback = usart4_callback,
+};
 
 void usart3_callback(void);
 USART_Init_Config_s uart3_cfg = {
@@ -169,9 +207,13 @@ void main_work(void)
     USARTRegister(&uart6, &uart6_cfg);
     USARTRegister(&uart3, &uart3_cfg);
 	 USARTRegister(&uart1, &uart1_cfg);
+		 USARTRegister(&uart2, &uart2_cfg);
+			 USARTRegister(&uart4, &uart4_cfg);
     memset(uart6.recv_buff, 0, uart6.recv_buff_size);
     memset(uart3.recv_buff, 0, uart3.recv_buff_size);
 	memset(uart1.recv_buff, 0, uart1.recv_buff_size);
+	memset(uart2.recv_buff, 0, uart2.recv_buff_size);
+		memset(uart4.recv_buff, 0, uart4.recv_buff_size);
     // 注意电机编号如下所示
 
     //    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
