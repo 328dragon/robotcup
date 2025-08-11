@@ -86,6 +86,7 @@ float main_yaw = 0.0f;
 // 串口接收
 USARTInstance uart6 = {0};
 USARTInstance uart3 = {0};
+USARTInstance uart1 = {0};
 // 读陀螺仪
 void usart6_callback(void)
 {
@@ -99,6 +100,19 @@ USART_Init_Config_s uart6_cfg = {
     .usart_handle = &huart6,
     .module_callback = usart6_callback,
 };
+//上位机通信
+void usart1_callback(void)
+{
+	
+	
+}
+USART_Init_Config_s uart1_cfg = {
+    .recv_buff_size = 90,
+    .usart_handle = &huart1,
+    .module_callback = usart1_callback,
+};
+
+
 
 void usart3_callback(void);
 USART_Init_Config_s uart3_cfg = {
@@ -154,8 +168,10 @@ void main_work(void)
 {
     USARTRegister(&uart6, &uart6_cfg);
     USARTRegister(&uart3, &uart3_cfg);
+	 USARTRegister(&uart1, &uart1_cfg);
     memset(uart6.recv_buff, 0, uart6.recv_buff_size);
     memset(uart3.recv_buff, 0, uart3.recv_buff_size);
+	memset(uart1.recv_buff, 0, uart1.recv_buff_size);
     // 注意电机编号如下所示
 
     //    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
