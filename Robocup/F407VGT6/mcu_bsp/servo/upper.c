@@ -45,17 +45,7 @@ void GetColorTask(Color_t *color_task, int *color_task_index)
  */
 void DistributionLoop(Servo_t *servos, ThingStore_t *plate_things, Color_t *current_color_ptr, UpperTaskFlag *upperflag, int *CurrentColorLoop)
 {
-	//绑定
-	plate_things[0]._color = 135;//黑
-	plate_things[1]._color = 45;//白
-	plate_things[2]._color = 90;
-	plate_things[3]._color = 0;
-	plate_things[4]._color = 180;
-	plate_things[0]._angle=BLACK_PICK;
-	plate_things[1]._angle=WHITE_PICK;
-	plate_things[2]._angle=RED_PICK;
-	plate_things[3]._angle=GREEN_PICK;
-	plate_things[4]._angle=BLUE_PICK;
+
     if (*CurrentColorLoop <= 5)
     {
         if (*upperflag == PICKINGIN)
@@ -142,18 +132,18 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
             vTaskDelay(200);
             for (int i = 0; i < 6; i++)
             {
+							
                 if (plate_things[i]._color == color_task[*PutGoalLoop])
                 {
-                    Servo_SetAngle(&servos[0], plate_things[i]._angle, 360);
+					(*PutGoalLoop)++;
                     break;
                 }
             }
+			PUMP_ON;
             vTaskDelay(500); // 等待舵机转动完成，需要实测
             target_upper_loacation = middle_location;
             vTaskDelay(500); // 等待舵机转动完成，需要实测
-            // 此处还需加入吸盘启动
-            PUMP_ON;
-            vTaskDelay(200);
+							*upperflag == PUTTINGOUT;
         }
 
         // 此处还需等待底盘移动到目标位置

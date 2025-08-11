@@ -34,8 +34,25 @@ int pick_goods_flag = 0;
 int put_goods_flag = 0;
 UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag *upperflag_ptr = &upperflag;
-ThingStore_t plate_things[5] = {0}; // 料盘槽数组
+ThingStore_t plate_things[5] ={
+    {COLOR_BLACK, BLACK_PICK, 0},
+    {COLOR_WHITE, WHITE_PICK, 1},
+    {COLOR_RED, RED_PICK, 2},
+    {COLOR_GREEN, GREEN_PICK, 3},
+    {COLOR_BLUE, BLUE_PICK, 4}} // 料盘槽数组
+;   
+// ThingStore_t plate_things[5] = {0}; // 料盘槽数组
 
+// 	plate_things[0]._color = 135;//黑
+// 	plate_things[1]._color = 45;//白
+// 	plate_things[2]._color = 90;//红
+// 	plate_things[3]._color = 0;//绿
+// 	plate_things[4]._color = 180;//蓝
+// 	plate_things[0]._angle=BLACK_PICK;
+// 	plate_things[1]._angle=WHITE_PICK;
+// 	plate_things[2]._angle=RED_PICK;
+// 	plate_things[3]._angle=GREEN_PICK;
+// 	plate_things[4]._angle=BLUE_PICK;
 int color_task_index=1;
 Color_t color_task[5];
 Color_t current_color = COLOR_BLACK; // 当前颜色
@@ -43,10 +60,10 @@ Color_t *current_color_ptr = &current_color;
 int CurrentColorLoop = 0;
 int PutGoalLoop = 0;
 // 主函数状态机
-__IO int main_state = 0;
-__IO int main_put_state = -1;
-//__IO int main_state = -1;
-//__IO int main_put_state = 0;
+//__IO int main_state = 0;
+//__IO int main_put_state = -1;
+__IO int main_state = -1;
+__IO int main_put_state = 0;
 int motor_mode = 0;
 int qr_code = -1;
 // 颜色传感器
@@ -215,8 +232,8 @@ void main_work(void)
     memset(uart1.recv_buff, 0, uart1.recv_buff_size);
     memset(uart2.recv_buff, 0, uart2.recv_buff_size);
     memset(uart4.recv_buff, 0, uart4.recv_buff_size);
+	
     // 注意电机编号如下所示
-
     //    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
     //    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false); // 右上
     //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
@@ -233,7 +250,7 @@ void main_work(void)
     Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
     Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
-
+	GetColorTask(color_task,&color_task_index);
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 300, NULL, 3, &Chassic_control_handle);
     BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 800, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 200, NULL, 4, &Planner_update_handle);
@@ -441,7 +458,7 @@ void Onmaincpp(void *pvParameters)
                 if (gray_data_side_middle != 0)
                 {
                     vTaskDelay(100);
-									GetColorTask(color_task,&color_task_index);
+								
                     move_step_distance(-gray_data_side_middle, 0, 0, 1);
                     main_state++;
                 }
@@ -692,7 +709,8 @@ void Onmaincpp(void *pvParameters)
             }
 
             //////**************************开启放置物块状态机******************************/////
-						if(main_state>24)
+//						if(main_state>24)
+						if(1)
 						{
 						            switch (main_put_state)
             {
@@ -758,7 +776,7 @@ void Onmaincpp(void *pvParameters)
 						    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
 										put_goods_flag=1;
-									vTaskDelay(200);
+										vTaskDelay(200);
                     main_put_state++;
                 }
                 break;
