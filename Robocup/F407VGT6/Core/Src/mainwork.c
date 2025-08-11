@@ -372,7 +372,7 @@ void Onmaincpp(void *pvParameters)
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-                    move_vel(0, 0.18, 0);
+                    move_vel(0, 0.5, 0);
                     if (real_time_gray_state_side == aim_black)
                     {
                         move_vel(0, 0, 0);
@@ -384,39 +384,13 @@ void Onmaincpp(void *pvParameters)
             /////**********对十字中********//////
             case 2:
             {
-							               while (gray_data_side_sum < 6&&(gray_data_side_middle!=0))
-                {
-                    if (gray_data_side_middle != 0)
-                    {
-                        move_step_distance(-gray_data_side_middle, 0, 0, 1);
-                    }
-										vTaskDelay(20);
-                }
-							main_state++;
-//							if(gray_data_side_sum==8)
-//							{
-//							main_state++;
-//							}							
-//              else if (gray_data_side_sum < 6||(gray_data_side_middle!=0))
-//                {
-//                    if (abs(gray_data_side_middle) >0.01)
-//                    {
-//                        move_step_distance(-gray_data_side_middle, 0, 0, 1);
-//                    }        
-//                    vTaskDelay(100);
-//                }
-//						if(digital_gray_data_side[0]==1||digital_gray_data_side[1]==1)
-//						{
-//						main_state++;					
-//						}							
-//							else {
-//							
-//					           if (abs(gray_data_side_middle) >0.01)
-//                    {
-//                        move_step_distance(-gray_data_side_middle, 0, 0, 1);
-//                    }        
-//                    vTaskDelay(100);
-//							}
+							if(gray_data_side_middle!=0)
+							{
+								vTaskDelay(100);
+                move_step_distance(0, -gray_data_side_middle, 0, 1);
+                            main_state++;
+							}											
+                        break;
 
                 break;
             }
