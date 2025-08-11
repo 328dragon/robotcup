@@ -36,6 +36,7 @@ UpperTaskFlag upperflag = IDLE; // 上层机构状态机
 UpperTaskFlag *upperflag_ptr = &upperflag;
 ThingStore_t plate_things[5] = {0}; // 料盘槽数组
 
+int color_task_index=1;
 Color_t color_task[5];
 Color_t current_color = COLOR_BLACK; // 当前颜色
 Color_t *current_color_ptr = &current_color;
@@ -43,8 +44,11 @@ int CurrentColorLoop = 0;
 int PutGoalLoop = 0;
 // 主函数状态机
 __IO int main_state = 0;
+__IO int main_put_state = -1;
+//__IO int main_state = -1;
+//__IO int main_put_state = 0;
 int motor_mode = 0;
-int qr_code=-1;
+int qr_code = -1;
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -99,34 +103,31 @@ void usart6_callback(void)
     }
 }
 
-//上位机通信，接收任务一顺序
+// 上位机通信，接收任务一顺序
 void usart1_callback(void)
 {
-	if(uart1.recv_buff[0]==0x91&&uart1.recv_buff[1]==0xCB)
-	{
+    if (uart1.recv_buff[0] == 0x91 && uart1.recv_buff[1] == 0xCB)
+    {
 
-		qr_code=uart1.recv_buff[2];	
-	}
+        qr_code = uart1.recv_buff[2];
+    }
 }
-
 
 void usart2_callback(void)
 {
-	if(uart2.recv_buff[0]==0x91&&uart2.recv_buff[1]==0xCB)
-	{
-	qr_code=uart2.recv_buff[2];	
-	}
-	
+    if (uart2.recv_buff[0] == 0x91 && uart2.recv_buff[1] == 0xCB)
+    {
+        qr_code = uart2.recv_buff[2];
+    }
 }
 
-//上位机通信，接收二维码
+// 上位机通信，接收二维码
 void usart4_callback(void)
 {
-	if(uart4.recv_buff[0]==0x91&&uart4.recv_buff[1]==0xCB)
-	{
-	qr_code=uart4.recv_buff[2];	
-	}
-	
+    if (uart4.recv_buff[0] == 0x91 && uart4.recv_buff[1] == 0xCB)
+    {
+        qr_code = uart4.recv_buff[2];
+    }
 }
 
 USART_Init_Config_s uart6_cfg = {
@@ -206,14 +207,14 @@ void main_work(void)
 {
     USARTRegister(&uart6, &uart6_cfg);
     USARTRegister(&uart3, &uart3_cfg);
-	 USARTRegister(&uart1, &uart1_cfg);
-		 USARTRegister(&uart2, &uart2_cfg);
-			 USARTRegister(&uart4, &uart4_cfg);
+    USARTRegister(&uart1, &uart1_cfg);
+    USARTRegister(&uart2, &uart2_cfg);
+    USARTRegister(&uart4, &uart4_cfg);
     memset(uart6.recv_buff, 0, uart6.recv_buff_size);
     memset(uart3.recv_buff, 0, uart3.recv_buff_size);
-	memset(uart1.recv_buff, 0, uart1.recv_buff_size);
-	memset(uart2.recv_buff, 0, uart2.recv_buff_size);
-		memset(uart4.recv_buff, 0, uart4.recv_buff_size);
+    memset(uart1.recv_buff, 0, uart1.recv_buff_size);
+    memset(uart2.recv_buff, 0, uart2.recv_buff_size);
+    memset(uart4.recv_buff, 0, uart4.recv_buff_size);
     // 注意电机编号如下所示
 
     //    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
@@ -234,7 +235,7 @@ void main_work(void)
     Planner_init(planner_ptr, ChassisControl_ptr);
 
     BaseType_t ok2 = xTaskCreate(OnChassicControl, "Chassic_control", 300, NULL, 3, &Chassic_control_handle);
-    BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 600, NULL, 4, &main_cpp_handle);
+    BaseType_t ok3 = xTaskCreate(Onmaincpp, "main_cpp", 800, NULL, 4, &main_cpp_handle);
     BaseType_t ok4 = xTaskCreate(OnPlannerUpdate, "Planner_update", 200, NULL, 4, &Planner_update_handle);
     BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 200, NULL, 3, &Get_Color_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 200, NULL, 1, &LCD_Show_handle);
@@ -401,6 +402,7 @@ void Onmaincpp(void *pvParameters)
         if (safe_count >= 3)
         {
             safe_guard = 1; // 保护锁打开
+                            //******************************** 抓取状态机**********************************////
             switch (main_state)
             {
             case 0:
@@ -409,16 +411,16 @@ void Onmaincpp(void *pvParameters)
                 main_state++;
                 break;
             }
-						case 1:
-						{
-							    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+            case 1:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-											vTaskDelay(100);
-								  move_step_distance(0, 0.5, 0, 1);
-						 main_state++;
-								}					
-						break;
-						}
+                    vTaskDelay(100);
+                    move_step_distance(0, 0.5, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
             case 2:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -432,16 +434,17 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-											
+
             /////**********对十字中********//////
             case 3:
             {
-							if(gray_data_side_middle!=0)
-							{
-								vTaskDelay(100);
-                move_step_distance(-gray_data_side_middle, 0, 0, 1);
-                main_state++;
-							}											
+                if (gray_data_side_middle != 0)
+                {
+                    vTaskDelay(100);
+									GetColorTask(color_task,&color_task_index);
+                    move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                    main_state++;
+                }
                 break;
             }
                 //////*********找第一个物块****//////
@@ -577,7 +580,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.48, -0.4, 0, 1);
+                    move_step_distance(0.47, -0.4, 0, 1);
                     main_state++;
                 }
                 break;
@@ -628,7 +631,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-						            case 20:
+            case 20:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -637,8 +640,7 @@ void Onmaincpp(void *pvParameters)
                     main_state++;
                 }
             }
-						
-						
+
             case 21:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -665,17 +667,127 @@ void Onmaincpp(void *pvParameters)
                 {
 
                     pick_goods_flag = 1;
-
                     vTaskDelay(200);
                     main_state++;
                 }
 
                 break;
             }
+
+            case 24:
+            {
+							   if (*upperflag_ptr == IDLE)
+                {
+								  vTaskDelay(200);
+                main_state++;       // 防止出bug
+                main_put_state = 0; // 开启放置任务
+								
+								}
+              
+                break;
+            }
+
+            default:
+                break;
+            }
+
+            //////**************************开启放置物块状态机******************************/////
+						if(main_state>24)
+						{
+						            switch (main_put_state)
+            {
+            case 0:
+            {
+								vTaskDelay(500);
+                move_step_distance(0, 0, 1.571, 1);
+                main_put_state++;
+                break;
+            }
+            case 1:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+									vTaskDelay(200);
+                    setYawZero();       
+									vTaskDelay(500);
+                    move_step_distance(-0.33, 0.26, 0, 1);
+                    main_put_state++;
+                }
+                break;
+            }
+            case 2:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    move_vel(0, 0.1, 0);
+                    if (gray_data_side_sum >= 1)
+                    {
+                        move_vel(0, 0, 0);
+                        main_put_state++;
+                    }
+                }
+
+                break;
+            }
+						/////////*************开始对第一个十字******************////////////////
+            case 3:
+            {
+
+                if (gray_data_side_middle != 0)
+                {
+                    vTaskDelay(100);
+                    move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                    main_put_state++;
+                }
+                break;
+            }
+            case 4:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(100);
+                    move_step_distance(0, 0.15, 0, 1);
+                    main_put_state++;
+                }
+
+                break;
+            }	
+						///////////***********放置第一个********////////
+						case 5:
+						{
+						    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+										put_goods_flag=1;
+									vTaskDelay(200);
+                    main_put_state++;
+                }
+                break;
+						}
+						
+						
+						case 6:
+						{
+						   if (*upperflag_ptr==IDLE)
+                {
+                   
+                    move_step_distance(0, -0.15, 0, 1);
+                    main_put_state++;
+                }
+                break;						
+						}
+						case 7:
+						{
+						
+						
+						
+						}
 						
             default:
                 break;
             }
+						
+						}
+
 
             switch (motor_mode)
             {
