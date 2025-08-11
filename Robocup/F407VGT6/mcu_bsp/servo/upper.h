@@ -2,7 +2,7 @@
  * @Author: Nagisa 2964793117@qq.com
  * @Date: 2025-08-07 22:06:30
  * @LastEditors: Nagisa 2964793117@qq.com
- * @LastEditTime: 2025-08-09 00:24:46
+ * @LastEditTime: 2025-08-11 12:58:59
  * @FilePath: \MDK-ARMd:\project\git\robotcup\Robocup\F407VGT6\mcu_bsp\servo\upper.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -16,41 +16,43 @@
 #include "servo.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "stdbool.h"
 //所有舵机的常量或枚举常量
+#define PUMP_ON HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, 1);
+#define PUMP_OFF HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, 0);
 #define THING_GIMBAL_FIXED_DELTA 60
-#define THING_GIMBAL_ORIGIN_ANGLE 0
-#define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
-#define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
-#define servo_zero 10
+#define THING_GIMBAL_ORIGIN_ANGLE 33
+// #define ASS_SERVO_OPEN
+// #define ASS_SERVO_CLOSE
+
 /*
     * @brief 前云台枚举常量
 */
 typedef enum
 {
-    //跟逻辑有关
-	GOAL_PLACE=83,	
-	FIND_PLATE =79+servo_zero,
-	CENTER_PICK=265+servo_zero,
-    //跟颜色有关
-	BLUE_PICK=201+servo_zero,
-	GREEN_PICK=236+servo_zero,
-	RED_PICK=267+servo_zero,
-	WHITE_PICK=300+servo_zero,
-	BLACK_PICK=332+servo_zero
- 
+    PICK_LEFT = 39,
+    FIND_PLATE = 200,
+    COLORTASKHEIGHT = 218,
+    GOAL = 39
 } GimbalArm_Servoangle_t;
-
+/*
+    * @brief 抬升舵机枚举常量
+*/
+typedef enum
+{
+    PICK_DOWN =60,
+    UP = 0,// 颜色传感器识别时和UP类似
+    PUT_DOWN = 32
+} Lift_Servoangle_t;
 /*
     * @brief 物块颜色枚举常量
 */
 typedef enum
 {
-    COLOR_RED,
-    COLOR_GREEN,
-    COLOR_BLUE,
-    COLOR_BLACK,
-    COLOR_WHITE
+    COLOR_RED=90,
+    COLOR_GREEN=0,
+    COLOR_BLUE=180,
+    COLOR_BLACK=135,
+    COLOR_WHITE=45
 } Color_t;
 
 /*
@@ -75,16 +77,6 @@ typedef enum
     PUTTINGOUT,
     IDLE
 } UpperTaskFlag;
-
-
-typedef enum 
-{
-down_location=0,
-middle_location=1,
-up_location=2	,
-pick_middle_location=3
-}upper_location;
-
 // 打算servo数组一共3个舵机，第一个舵机控制前云台，第二个控制升降，第三个控制转盘
 
 // 用全局数组存储记忆内容，功能函数全部使用指针操作
@@ -102,6 +94,5 @@ pick_middle_location=3
 void GetColorTask(Color_t* color_task, int* color_task_index);
 void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* current_color_ptr, UpperTaskFlag* upperflag,int* CurrentColorLoop);
 void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, UpperTaskFlag* upperflag,int* PutGoalLoop);
-void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t acc, uint32_t clk, bool raF, bool snF);
- void upper_to_target(upper_location target_position);
+
 #endif

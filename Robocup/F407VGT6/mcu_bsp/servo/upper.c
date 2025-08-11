@@ -1,16 +1,12 @@
 #include "upper.h"
-#include "mainwork.h"
-#include "usart.h"
-// 1980中间960前面
-extern upper_location now_upper_loacation;
-extern upper_location target_upper_loacation;
 /*
- * @brief 获得颜色任务
- */
-void GetColorTask(Color_t *color_task, int *color_task_index)
+    * @brief 获得颜色任务
+*/
+void GetColorTask(Color_t* color_task, int* color_task_index)
 {
     // 创建颜色映射表，使用Color_t枚举
-    static const Color_t colorMap[16][5] = {
+    static const Color_t colorMap[16][5] = 
+    {
         /* 1  */ {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
         /* 2  */ {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
         /* 3  */ {COLOR_WHITE, COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_BLUE},
@@ -26,260 +22,120 @@ void GetColorTask(Color_t *color_task, int *color_task_index)
         /* 13 */ {COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_BLACK},
         /* 14 */ {COLOR_RED, COLOR_GREEN, COLOR_WHITE, COLOR_BLUE, COLOR_BLACK},
         /* 15 */ {COLOR_BLUE, COLOR_WHITE, COLOR_GREEN, COLOR_RED, COLOR_BLACK},
-        /* 16 */ {COLOR_GREEN, COLOR_BLUE, COLOR_RED, COLOR_WHITE, COLOR_BLACK}};
+        /* 16 */ {COLOR_GREEN, COLOR_BLUE, COLOR_RED, COLOR_WHITE, COLOR_BLACK}
+    };
+
+
 
     // 检查输入数字是否有效
-    if (*color_task_index >= 1 && *color_task_index <= 16)
+    if (*color_task_index >= 1 && *color_task_index <= 16) 
     {
         // 将对应行的颜色复制到输出数组
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++) 
         {
             color_task[i] = colorMap[*color_task_index - 1][i];
         }
-    }
+    } 
 }
 
 /*
- * @brief 绑定料盘槽的信息并且抓取
- *dragon:只用一个舵机，一个抬升,servo[0]是云台舵机
- */
-void DistributionLoop(Servo_t *servos, ThingStore_t *plate_things, Color_t *current_color_ptr, UpperTaskFlag *upperflag, int *CurrentColorLoop)
+    * @brief 绑定料盘槽的信息
+*/
+void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* current_color_ptr, UpperTaskFlag* upperflag, int* CurrentColorLoop)
 {
-
-    if (*CurrentColorLoop <= 5)
+    if(*CurrentColorLoop<5)
     {
         if (*upperflag == PICKINGIN)
         {
-            PUMP_ON;
-            target_upper_loacation = up_location;
-            vTaskDelay(1000);
-            Servo_SetAngle(&servos[0], FIND_PLATE, 360); // 等待抓取
-            vTaskDelay(1000);                             // 等待舵机转动完成，需要实测
-            target_upper_loacation = down_location;
+						PUMP_ON;
+            Servo_SetAngle(&servos[1], UP,180);
+            Servo_SetAngle(&servos[0], PICK_LEFT,270);
+						vTaskDelay(2000);
+            Servo_SetAngle(&servos[1], PICK_DOWN,180);
+						
+						
+						vTaskDelay(2000);
+            Servo_SetAngle(&servos[1], UP,180);
+					 vTaskDelay(2000);
+            Servo_SetAngle(&servos[0], COLORTASKHEIGHT,270);
             vTaskDelay(2000);
 
-            target_upper_loacation = middle_location;
-            vTaskDelay(1000);
-            target_upper_loacation = up_location;
-            vTaskDelay(1000);
-            Servo_SetAngle(&servos[0], CENTER_PICK, 360); // 开始颜色识别
-            vTaskDelay(2000);
             *upperflag = GETCOLORIN;
         }
         if (*upperflag == GETCOLORIN)
         {
+            plate_things[*CurrentColorLoop]._color = *current_color_ptr;
+            plate_things[*CurrentColorLoop]._angle = THING_GIMBAL_ORIGIN_ANGLE + *CurrentColorLoop*THING_GIMBAL_FIXED_DELTA;
+            if(plate_things[*CurrentColorLoop]._angle>360)
+            {
+                plate_things[*CurrentColorLoop]._angle -= 360;
+            }
             plate_things[*CurrentColorLoop]._number = *CurrentColorLoop;
-            int color_angle = -1;
-            switch (*current_color_ptr)
-            {
-            case 0:
-            {
-                color_angle = GREEN_PICK;
-                break;
-            }
-            case 45:
-            {
-
-                color_angle = WHITE_PICK;
-                break;
-            }
-            case 90:
-            {
-                color_angle = RED_PICK;
-                break;
-            }
-            case 135:
-            {
-                color_angle = BLACK_PICK;
-                break;
-            }
-            case 180:
-            {
-                color_angle = BLUE_PICK;
-                break;
-            }
-            default:
-                break;
-            }
-            Servo_SetAngle(&servos[0], color_angle, 360); // 放到对应颜色料盘正上方
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop]._angle,360);
             (*CurrentColorLoop)++;
             *upperflag = PUTINGIN;
+            vTaskDelay(2000);
         }
         if (*upperflag == PUTINGIN)
-        {
-            vTaskDelay(500);
-            // 此处还需加入吸盘关闭
-            target_upper_loacation = middle_location;
-            vTaskDelay(500);
+        {   
+            Servo_SetAngle(&servos[0], FIND_PLATE,270);
+            vTaskDelay(2000);
+            //Servo_SetAngle(&servos[1], PUT_DOWN,180);
+            //vTaskDelay(2000);
+
             PUMP_OFF;
             vTaskDelay(2000);
-            target_upper_loacation = up_location; // 上升到中间防止冲突
-					 vTaskDelay(3000);
-					  Servo_SetAngle(&servos[0], FIND_PLATE, 360); // 等待抓取
+            Servo_SetAngle(&servos[1], UP,180);
+            vTaskDelay(500);
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle+60,360);
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle,360);
             *upperflag = IDLE;
         }
     }
 }
-// 拿出去
-void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, UpperTaskFlag *upperflag, int *PutGoalLoop)
+
+void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, UpperTaskFlag* upperflag,int* PutGoalLoop)
 {
-    if (*PutGoalLoop <= 5)
-    {
-        if (*upperflag == PICKINGOUT) // 将物块分拣到对应料盘
-                                      //  按顺序筛选对应颜色任务的料盘
-        {
-            target_upper_loacation = up_location;
-            vTaskDelay(200);
-            for (int i = 0; i < 6; i++)
+    if(*PutGoalLoop<=5)
+    {   
+        if (*upperflag == PICKINGOUT)
+         // 按顺序筛选对应颜色任务的料盘
+        {   
+            Servo_SetAngle(&servos[1], UP,180);
+            for (int i = 0; i < 5; i++) 
             {
-							
-                if (plate_things[i]._color == color_task[*PutGoalLoop])
+                if (plate_things[i]._color == color_task[*PutGoalLoop])   
                 {
-					(*PutGoalLoop)++;
+                    Servo_SetAngle(&servos[2], plate_things[i]._angle,360);
+                    vTaskDelay(2000);
+                    (*PutGoalLoop)++;
                     break;
                 }
             }
-			PUMP_ON;
-            vTaskDelay(500); // 等待舵机转动完成，需要实测
-            target_upper_loacation = middle_location;
-            vTaskDelay(500); // 等待舵机转动完成，需要实测
-							*upperflag == PUTTINGOUT;
+            Servo_SetAngle(&servos[0], FIND_PLATE,270);
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[1], PUT_DOWN,180);
+            vTaskDelay(2000); // 等待舵机转动完成，需要实测
+
+            PUMP_ON;
+            vTaskDelay(2000);
+
+            Servo_SetAngle(&servos[1], UP,180);
         }
 
         // 此处还需等待底盘移动到目标位置
-        if (*upperflag == PUTTINGOUT) // 放置物块到目标位置
-        {
-            target_upper_loacation = up_location;
-            vTaskDelay(200);
-            Servo_SetAngle(&servos[0], GOAL_PLACE, 360);
-            vTaskDelay(500); // 等待舵机转动完成，需要实测
-            target_upper_loacation = down_location;
-            vTaskDelay(200);
-            // 此处还需加入吸盘关闭
+
+        // if(*upperflag == PUTTINGOUT)
+        // {
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[0], GOAL,270);
+            vTaskDelay(700);
+            Servo_SetAngle(&servos[1], PICK_DOWN,270);
+            vTaskDelay(2000);
             PUMP_OFF;
-            vTaskDelay(500);
-        }
+            vTaskDelay(2000);
+
+        // }
     }
-}
-
- void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t acc, uint32_t clk, bool raF, bool snF)
-{
-  uint8_t cmd[16] = {0};
-
-  // 装载命令
-  cmd[0]  =  addr;                      // 地址
-  cmd[1]  =  0xFD;                      // 功能码
-  cmd[2]  =  dir;                       // 方向
-  cmd[3]  =  (uint8_t)(vel >> 8);       // 速度(RPM)高8位字节
-  cmd[4]  =  (uint8_t)(vel >> 0);       // 速度(RPM)低8位字节 
-  cmd[5]  =  acc;                       // 加速度，注意：0是直接启动
-  cmd[6]  =  (uint8_t)(clk >> 24);      // 脉冲数(bit24 - bit31)
-  cmd[7]  =  (uint8_t)(clk >> 16);      // 脉冲数(bit16 - bit23)
-  cmd[8]  =  (uint8_t)(clk >> 8);       // 脉冲数(bit8  - bit15)
-  cmd[9]  =  (uint8_t)(clk >> 0);       // 脉冲数(bit0  - bit7 )
-	
-  cmd[10] =  raF;                       // 相位/绝对标志，false为相对运动，true为绝对值运动
-  cmd[11] =  snF;                       // 多机同步运动标志，false为不启用，true为启用
-  cmd[12] =  0x6B;                      // 校验字节
-  
-  // 发送命令
-  HAL_UART_Transmit(&huart3, (uint8_t *)cmd, 13,1000);
-	vTaskDelay(10);
-}
-static void upper_move_location(upper_location now_location,upper_location target_position )
-{
-//origin-- down--pick_middle--middle--up
-int origin_pulse=0;
-int down_pulse=200;
-int pick_middle_pulse=4400;
-int middle_pulse=5000;
-int up_pulse=7800;
-    switch (now_location)
-    {
-    case down_location:
-        if (target_position == middle_location)
-        {
-            upper_move_distance(5, 0, 300, 0.02, middle_pulse-down_pulse, 0, 0); // 上升到中间位置
-            now_upper_loacation = middle_location;
-        }
-        else if (target_position == up_location)
-        {
-            upper_move_distance(5, 0, 300, 0.02, up_pulse-down_pulse, 0, 0); // 上升到最高位置
-            now_upper_loacation = up_location;
-        }else if(target_position==pick_middle_location)
-        {
-					upper_move_distance(5, 0, 300, 0.02, pick_middle_pulse-down_pulse, 0, 0); // 上升到分拣位置
-            now_upper_loacation = pick_middle_location;
-        }
-        break;
-
-        case pick_middle_location:
-        {
-            if(target_position=down_location)
-            {
-                upper_move_distance(5, 1, 300, 0.02, pick_middle_pulse-down_pulse, 0, 0); // 降落到最低位置
-                now_upper_loacation = down_location;
-            }
-            else if(target_position==middle_location)
-            {
-							upper_move_distance(5, 0, 300, 0.02, middle_pulse-pick_middle_pulse, 0, 0); // 上升到中间位置
-                now_upper_loacation = middle_location;
-            }else if(target_position==up_location)
-            {
-							upper_move_distance(5, 0, 300, 0.02, up_pulse-pick_middle_pulse, 0, 0); // 上升到最高位置
-                now_upper_loacation = up_location;
-            }
-
-            break;
-        }
-
-
-    case middle_location:
-    {
-        if (target_position == down_location)
-        {
-            upper_move_distance(5, 1, 300, 0.02, middle_pulse-down_pulse, 0, 0); // 降落到最低位置
-            now_upper_loacation = down_location;
-        }
-        else if (target_position == up_location)
-        {
-            upper_move_distance(5, 0, 300, 0.02, up_pulse-middle_pulse, 0, 0); // 上升到最高位置
-            now_upper_loacation = up_location;
-        }else if(target_position == pick_middle_location)
-        {
-            upper_move_distance(5, 1, 300, 0.02, middle_pulse-pick_middle_pulse, 0, 0); // 下降到分拣位置
-            now_upper_loacation = middle_location;
-        }
-        break;
-
-    }
-    case up_location:
-    {
-        if (target_position == down_location)
-        {
-            upper_move_distance(5, 1, 300, 0.02, up_pulse-down_pulse, 0, 0); // 降落到最低位置
-            now_upper_loacation = down_location;
-        }
-        else if (target_position == middle_location)
-        {
-            upper_move_distance(5, 1, 300, 0.02, up_pulse-middle_pulse, 0, 0); // 降落到中间位置
-            now_upper_loacation = middle_location;
-        }else if(target_position==pick_middle_location)
-        {
-            upper_move_distance(5, 1, 300, 0.02, up_pulse-pick_middle_pulse, 0, 0); // 降落到分拣位置
-            now_upper_loacation = pick_middle_location;
-        }
-        break;
-
-    }
-
-    
-    default:
-        break;
-    }
-}
-
- void upper_to_target(upper_location target_position)
-{
-upper_move_location(now_upper_loacation,target_position);
 }
