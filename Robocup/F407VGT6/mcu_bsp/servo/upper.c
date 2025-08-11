@@ -47,16 +47,16 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
     {
         if (*upperflag == PICKINGIN)
         {
+						PUMP_ON;
             Servo_SetAngle(&servos[1], UP,180);
             Servo_SetAngle(&servos[0], PICK_LEFT,270);
+						vTaskDelay(2000);
             Servo_SetAngle(&servos[1], PICK_DOWN,180);
-
-            vTaskDelay(2000); // 等待舵机转动完成，需要实测
-
-            PUMP_ON;
-            vTaskDelay(2000);
-
+						
+						
+						vTaskDelay(2000);
             Servo_SetAngle(&servos[1], UP,180);
+					 vTaskDelay(2000);
             Servo_SetAngle(&servos[0], COLORTASKHEIGHT,270);
             vTaskDelay(2000);
 
@@ -80,8 +80,8 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
         {   
             Servo_SetAngle(&servos[0], FIND_PLATE,270);
             vTaskDelay(2000);
-            Servo_SetAngle(&servos[1], PUT_DOWN,180);
-            vTaskDelay(2000);
+            //Servo_SetAngle(&servos[1], PUT_DOWN,180);
+            //vTaskDelay(2000);
 
             PUMP_OFF;
             vTaskDelay(2000);
@@ -89,7 +89,7 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
             vTaskDelay(500);
             Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle+60,360);
             vTaskDelay(2000);
-            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle+60,360);
+            Servo_SetAngle(&servos[2], plate_things[*CurrentColorLoop-1]._angle,360);
             *upperflag = IDLE;
         }
     }

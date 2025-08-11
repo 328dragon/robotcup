@@ -87,19 +87,14 @@ unsigned char HSL[3] = {0};
 // 灰度
 gray_state real_time_gray_state = orgin_gray;      // 主灰度状态
 gray_state real_time_gray_state_side = orgin_gray; // 侧边灰度
-// 前面灰度
-float gray_front_p = 0.01f; // 前面灰度传感器的神秘小参数
-float gray_data_front_middle = 0;
-float gray_data_front_middle_temp = 0;
-uint8_t digital_gray_data_front[8];
-int sensor_weights_front[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
-unsigned char Digtal_gray_front;
-unsigned char Anolog_gray_front[8] = {0};
-unsigned char Normal_front[8] = {0};
+
 // 侧边灰度
-float gray_side_p = 0.01f;
+float gray_side_p = -0.0035;
 float gray_data_side_middle = 0;
 float gray_data_side_middle_temp = 0;
+float gray_data_side_sum = 0;
+float gray_data_side_sum_temp = 0;
+
 uint8_t digital_gray_data_side[8];
 int sensor_weights_side[8] = {-7, -4, -3, -2, 2, 3, 4, 7}; // 传感器权重
 unsigned char Digtal_gray_side;
@@ -301,6 +296,27 @@ void gray_read_task(void *pvParameters)
         {
         }
         IIC_Anolog_Normalize(0xff, side);
+				
+				   for (int i = 0; i < 8; i++)
+        {
+            gray_data_side_middle_temp += digital_gray_data_side[i] * sensor_weights_side[i] * gray_side_p;
+            gray_data_side_sum_temp += digital_gray_data_side[i];
+        }
+        gray_data_side_middle = gray_data_side_middle_temp;
+        gray_data_side_middle_temp = 0;
+        gray_data_side_sum = gray_data_side_sum_temp;
+        gray_data_side_sum_temp = 0;
+
+        if (gray_data_side_sum >= 5)
+        {
+            real_time_gray_state_side = aim_black;
+            BUZZER_ON;
+        }
+        else
+        {
+            real_time_gray_state_side = orgin_gray;
+            BUZZER_OFF;
+        }
 
         vTaskDelay(10); // 延时10ms
     }
@@ -369,13 +385,76 @@ void Onmaincpp(void *pvParameters)
 						{
 								    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
 								{
+									vTaskDelay(100);
 											   move_step_distance(0.6, 0, 0, 1);
                 main_state++;
 								}
 						
-                break;
+                break;			
 							
+						}
+						case 2:
+						{
+														    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								{
+									
+											move_vel(0.1,0,0);
+                main_state++;
+									vTaskDelay(100);
+								}					
+                break;		
+						}
+						case 3:
+						{
 							
+						if(  real_time_gray_state_side == aim_black)
+						{
+										move_vel(0,0,0);
+                main_state++;					
+						}
+						
+						break;
+						}
+							case 4:
+						{
+							vTaskDelay(100);
+							move_step_distance(0, gray_data_side_middle, 0, 1);
+							main_state++;
+						break;
+						}
+						case 5:
+						{
+							 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								{
+									vTaskDelay(500);
+										move_step_distance(0.3, 0.05, 0, 1);	
+                main_state++;
+									
+								}					
+                break;	
+						}
+						
+						
+						case 6:
+						{
+													 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								{
+									vTaskDelay(200);
+										move_step_distance(0.15, 0, 0, 1);	
+                main_state++;
+									
+								}					
+                break;	
+						
+						}
+						case 7:
+						{
+						 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+						 {
+						 *upperflag_ptr=PICKINGIN;
+						  main_state++;						 
+						 }
+						break;
 						}
             default:
                 break;

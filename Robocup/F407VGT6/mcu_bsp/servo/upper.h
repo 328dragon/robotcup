@@ -39,9 +39,9 @@ typedef enum
 */
 typedef enum
 {
-    PICK_DOWN =52,
+    PICK_DOWN =60,
     UP = 0,// 颜色传感器识别时和UP类似
-    PUT_DOWN = 35
+    PUT_DOWN = 32
 } Lift_Servoangle_t;
 /*
     * @brief 物块颜色枚举常量
