@@ -508,7 +508,7 @@ void Onmaincpp(void *pvParameters)
                 //////*********找第一个物块****//////
             case 5:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_code != 0)
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     color_task_index = qr_code;
                     GetColorTask(color_task, &color_task_index);
@@ -546,7 +546,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.36, 0.28, 0, 1);
+                    move_step_distance(0.38, 0.28, 0, 1);
                     main_state++;
                 }
                 break;
@@ -592,7 +592,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.50, 0.11, 0, 1);
+                    move_step_distance(0.53, 0.05, 0, 1);
                     main_state++;
                 }
                 break;
@@ -694,7 +694,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0.40, 0, 0, 1);
+                    move_step_distance(0.37, 0, 0, 1);
                     main_state++;
                 }
             }
@@ -808,7 +808,7 @@ void Onmaincpp(void *pvParameters)
                     {
                         target_upper_loacation = up_location;
                         vTaskDelay(100);
-                        move_step_distance(-0.23, 0.50, 0, 1);
+                        move_step_distance(-0.23, 0.46, 0, 1);
                         main_put_state++;
                     }
 
