@@ -806,7 +806,6 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                        target_upper_loacation = up_location;
                         vTaskDelay(100);
                         move_step_distance(-0.23, 0.46, 0, 1);
                         main_put_state++;
@@ -814,19 +813,11 @@ void Onmaincpp(void *pvParameters)
 
                     break;
                 }
-                // 等待视觉
                 case 5:
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         wait_vision++;
-                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-                        {
-                            vTaskDelay(200);
-                            move_step_distance(final_circle_dx, final_circle_dy, 0, 1);
-                            wait_vision = 0;
-                            main_put_state++;
-                        }
                         // else if(wait_vision>100)
                         // {
                         // move_step_distance(0.01,0.01, 0, 1);
@@ -842,7 +833,6 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                        put_goods_flag = 1;
                         vTaskDelay(200);
                         main_put_state++;
                     }
@@ -852,12 +842,9 @@ void Onmaincpp(void *pvParameters)
                 ///////// 空闲状态然后去另一个地方a,b到a(20,25)////////
                 case 7:
                 {
-                    if (*upperflag_ptr == IDLE)
-                    {
                         vTaskDelay(200);
                         move_step_distance(0.23, -0.45, 0, 1);
                         main_put_state++;
-                    }
                     break;
                 }
                 case 8:
@@ -876,12 +863,6 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         wait_vision++;
-                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-                        {
-                            vTaskDelay(200);
-                            move_step_distance(final_circle_dx, final_circle_dy, 0, 1);
-                            main_put_state++;
-                        }
                     }
                     break;
                 }
@@ -890,7 +871,6 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                        put_goods_flag = 1;
                         vTaskDelay(200);
                         main_put_state++;
                     }
@@ -899,12 +879,9 @@ void Onmaincpp(void *pvParameters)
                     // ***************空闲状态然后去另一个地方A,A到D(-100,50)**************//////////
                 case 11:
                 {
-                    if (*upperflag_ptr == IDLE)
-                    {
                         vTaskDelay(200);
                         move_step_distance(-1,0, 0, 1);
                         main_put_state++;
-                    }
                     break;
                 }
                 case 12:
@@ -924,12 +901,6 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         wait_vision++;
-                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-                        {
-                            vTaskDelay(200);
-                            move_step_distance(final_circle_dx, final_circle_dy, 0, 1);
-                            main_put_state++;
-                        }
                     }
                     break;
                 }
@@ -938,7 +909,6 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                        put_goods_flag = 1;
                         vTaskDelay(200);
                         main_put_state++;
                     }
@@ -971,12 +941,6 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         wait_vision++;
-                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-                        {
-                            vTaskDelay(200);
-                            move_step_distance(final_circle_dx, final_circle_dy, 0, 1);
-                            main_put_state++;
-                        }
                         // else if (wait_vision > 6)
                         // {
                         //     move_step_distance(0.01, 0.01, 0, 1);
@@ -992,7 +956,6 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        put_goods_flag = 1;
                         main_put_state++;
                     }
                     break;
@@ -1002,12 +965,9 @@ void Onmaincpp(void *pvParameters)
                 case 19:
                 {
 
-                    if (*upperflag_ptr == IDLE)
-                    {
                         vTaskDelay(200);
                         move_step_distance(-0.65, 0, 0, 1);
                         main_put_state++;
-                    }
                     break;
                 }
                 ///////////////////去找第五个物块EEEEEEEEEEEEEEEEEEEEE（-65，40）/////////////////
@@ -1027,12 +987,6 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         wait_vision++;
-                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-                        {
-                            vTaskDelay(200);
-                            move_step_distance(final_circle_dx, final_circle_dy, 0, 1);
-                            main_put_state++;
-                        }
                     }
                     break;
                 }
@@ -1042,7 +996,6 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        put_goods_flag = 1;
                         main_put_state++;
                     }
                     break;
