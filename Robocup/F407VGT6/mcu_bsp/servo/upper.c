@@ -122,7 +122,6 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
 
             PUMP_ON;
             vTaskDelay(2000);
-
             Servo_SetAngle(&servos[1], UP,180);
         }
 
