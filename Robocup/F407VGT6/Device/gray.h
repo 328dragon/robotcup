@@ -13,8 +13,7 @@ typedef enum gray_state
 {
     orgin_gray=0,
      all_black,//全黑
-		aim_black,//修正位置
-
+aim_black=2,
    
 } gray_state;
 unsigned char Ping(void);
