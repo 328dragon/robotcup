@@ -463,7 +463,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(100);
-                    move_step_distance(0, 0.6, 0, 1);
+                    move_step_distance(0, 0.5, 0, 1);
                     main_state++;
                 }
                 break;
