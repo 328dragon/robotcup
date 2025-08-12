@@ -30,7 +30,7 @@ typedef enum
 {
     //跟逻辑有关
 	GOAL_PLACE=83,	
-	FIND_PLATE =810+servo_zero,
+	FIND_PLATE =77+servo_zero,
 	CENTER_PICK=265+servo_zero,
     //跟颜色有关
 	BLUE_PICK=201+servo_zero,
@@ -83,7 +83,7 @@ down_location=0,
 middle_location=1,
 up_location=2	,
 pick_middle_location=3,
-	dowm_put_lcoation=4,
+down_put_lcoation=4,
 }upper_location;
 
 // 打算servo数组一共3个舵机，第一个舵机控制前云台，第二个控制升降，第三个控制转盘

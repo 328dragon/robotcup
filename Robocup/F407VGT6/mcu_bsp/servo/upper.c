@@ -128,41 +128,41 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
         if (*upperflag == PICKINGOUT) // 将物块分拣到对应料盘
                                       //  按顺序筛选对应颜色任务的料盘
         {
-			
+
             target_upper_loacation = up_location;
-					  PUMP_ON;
-            vTaskDelay(200);
+            PUMP_ON;
+            vTaskDelay(1000);
             for (int i = 0; i < 6; i++)
             {
 
-                if (plate_things[i]._color == color_task[*PutGoalLoop])//找对应放置任务的颜色
+                if (plate_things[i]._color == color_task[*PutGoalLoop]) // 找对应放置任务的颜色
                 {
-										Servo_SetAngle(&servos[0], plate_things[i]._angle, 360);           
-									(*PutGoalLoop)++;										
+                    Servo_SetAngle(&servos[0], plate_things[i]._angle, 360);
+                    (*PutGoalLoop)++;
                     break;
                 }
             }
-            vTaskDelay(1000); 
-            target_upper_loacation = pick_middle_location;      
+            vTaskDelay(1000);
+            target_upper_loacation = pick_middle_location;
             *upperflag = PUTTINGOUT;
         }
 
         // 此处还需等待底盘移动到目标位置
         if (*upperflag == PUTTINGOUT) // 放置物块到目标位置
         {
-					  vTaskDelay(1000);
+            vTaskDelay(1000);
             target_upper_loacation = up_location;
             vTaskDelay(2000);
             Servo_SetAngle(&servos[0], GOAL_PLACE, 360);
             vTaskDelay(1000); // 等待舵机转动完成，需要实测
-            target_upper_loacation = dowm_put_lcoation;
+            target_upper_loacation = down_put_lcoation;
             vTaskDelay(500);
             // 此处还需加入吸盘关闭
-            PUMP_OFF;					 
+            PUMP_OFF;
             vTaskDelay(1000);
-					target_upper_loacation = up_location;
-					vTaskDelay(200);
-					 *upperflag = IDLE;
+            target_upper_loacation = up_location;
+            *upperflag = IDLE;
+            vTaskDelay(1000);
         }
     }
 }
@@ -196,13 +196,14 @@ static void upper_move_location(upper_location now_location, upper_location targ
     // origin-- down--dowm_put_pulse--pick_middle--middle--up
     int origin_pulse = 0;
     int down_pulse = 200;
-	int dowm_put_pulse=500;
+    int dowm_put_pulse = 500;
     int pick_middle_pulse = 4600;
     int middle_pulse = 5000;
     int up_pulse = 7800;
     switch (now_location)
     {
     case down_location:
+    {
         if (target_position == middle_location)
         {
             upper_move_distance(5, 0, 300, 0.02, middle_pulse - down_pulse, 0, 0); // 上升到中间位置
@@ -217,17 +218,45 @@ static void upper_move_location(upper_location now_location, upper_location targ
         {
             upper_move_distance(5, 0, 300, 0.02, pick_middle_pulse - down_pulse, 0, 0); // 上升到分拣位置
             now_upper_loacation = pick_middle_location;
-        }else if(target_position== dowm_put_lcoation)
+        }
+        else if (target_position == down_put_lcoation)
         {
             upper_move_distance(5, 0, 300, 0.02, dowm_put_pulse - down_pulse, 0, 0); // 上升到放置位置
-            now_upper_loacation = dowm_put_lcoation;
+            now_upper_loacation = down_put_lcoation;
         }
-				
+
         break;
+    }
+
+    case down_put_lcoation:
+    {
+        if (target_position == down_location)
+        {
+            upper_move_distance(5, 1, 300, 0.02, dowm_put_pulse - down_pulse, 0, 0); // 降落到最低位置
+            now_upper_loacation = down_location;
+        }
+        else if (target_position == middle_location)
+        {
+            upper_move_distance(5, 0, 300, 0.02, middle_location - dowm_put_pulse, 0, 0); // 上升到中间位置
+            now_upper_loacation = middle_location;
+        }
+        else if (target_position == up_location)
+        {
+            upper_move_distance(5, 0, 300, 0.02,up_pulse-dowm_put_pulse , 0, 0); // 上升到最高位置
+            now_upper_loacation = up_location;
+        }
+        if (target_position == pick_middle_location)
+        {
+            upper_move_distance(5, 0, 300, 0.02, pick_middle_pulse - dowm_put_pulse, 0, 0); // 上升到分拣位置
+            now_upper_loacation = pick_middle_location;
+        }
+
+        break;
+    }
 
     case pick_middle_location:
     {
-        if (target_position ==down_location)
+        if (target_position == down_location)
         {
             upper_move_distance(5, 1, 300, 0.02, pick_middle_pulse - down_pulse, 0, 0); // 降落到最低位置
             now_upper_loacation = down_location;
@@ -241,10 +270,11 @@ static void upper_move_location(upper_location now_location, upper_location targ
         {
             upper_move_distance(5, 0, 300, 0.02, up_pulse - pick_middle_pulse, 0, 0); // 上升到最高位置
             now_upper_loacation = up_location;
-        }else if(target_position== dowm_put_lcoation)
+        }
+        else if (target_position == down_put_lcoation)
         {
-            upper_move_distance(5, 1, 300, 0.02, pick_middle_pulse-dowm_put_pulse  , 0, 0); // 下降到放置位置
-            now_upper_loacation = dowm_put_lcoation;
+            upper_move_distance(5, 1, 300, 0.02, pick_middle_pulse - dowm_put_pulse, 0, 0); // 下降到放置位置
+            now_upper_loacation = down_put_lcoation;
         }
 
         break;
@@ -267,10 +297,10 @@ static void upper_move_location(upper_location now_location, upper_location targ
             upper_move_distance(5, 1, 300, 0.02, middle_pulse - pick_middle_pulse, 0, 0); // 下降到分拣位置
             now_upper_loacation = pick_middle_location;
         }
-        else if(target_position== dowm_put_lcoation)
+        else if (target_position == down_put_lcoation)
         {
-            upper_move_distance(5, 1, 300, 0.02, middle_pulse-dowm_put_pulse  , 0, 0); // 下降到放置位置
-            now_upper_loacation = dowm_put_lcoation;
+            upper_move_distance(5, 1, 300, 0.02, middle_pulse - dowm_put_pulse, 0, 0); // 下降到放置位置
+            now_upper_loacation = down_put_lcoation;
         }
         break;
     }
@@ -291,10 +321,10 @@ static void upper_move_location(upper_location now_location, upper_location targ
             upper_move_distance(5, 1, 300, 0.02, up_pulse - pick_middle_pulse, 0, 0); // 降落到分拣位置
             now_upper_loacation = pick_middle_location;
         }
-        else if(target_position== dowm_put_lcoation)
+        else if (target_position == down_put_lcoation)
         {
-            upper_move_distance(5, 1, 300, 0.02, up_pulse-dowm_put_pulse  , 0, 0); // 下降到放置位置
-            now_upper_loacation = dowm_put_lcoation;
+            upper_move_distance(5, 1, 300, 0.02, up_pulse - dowm_put_pulse, 0, 0); // 下降到放置位置
+            now_upper_loacation = down_put_lcoation;
         }
         break;
     }
