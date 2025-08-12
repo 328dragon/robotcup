@@ -68,10 +68,13 @@ __IO int main_put_state = -1;
 //__IO int main_put_state = -2;
 int motor_mode = 0;
 int qr_code = 0;
-float find_circle_dx = 0;
+float find_circle_dx = 0;//视觉传过来juli
 float find_circle_dy = 0;
-float final_circle_dx = 0;
+float final_circle_dx = 0;//乘上系数后距离
 float final_circle_dy = 0;
+float final_Circle_px=1;//纠正x系数
+float final_Circle_py=1;//纠正y系数
+float pump_view_distance=0.043;///吸盘到摄像头距离
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -161,9 +164,9 @@ void usart2_callback(void)
         {
             find_circle_dy = -0.1;
         }
-        find_circle_dy += 0.043;
-        final_circle_dx = find_circle_dx;
-        final_circle_dy = find_circle_dy;
+        find_circle_dy += pump_view_distance;
+        final_circle_dx = final_Circle_px*find_circle_dx;
+        final_circle_dy = final_Circle_py*find_circle_dy;
     }
 }
 
@@ -261,10 +264,6 @@ void main_work(void)
     memset(uart4.recv_buff, 0, uart4.recv_buff_size);
 
     // 注意电机编号如下所示
-    //    Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 0, 0.06f, false); // 左上
-    //    Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 1, 0.06f, false); // 右上
-    //    Step_ZDT_Init(zdt_stepmotor_ptr[2], 4, &huart3, 0, 0.06f, false); // 左下
-    //    Step_ZDT_Init(zdt_stepmotor_ptr[3], 3, &huart3, 1, 0.06f, true);  // 右下
 
     Step_ZDT_Init(zdt_stepmotor_ptr[0], 1, &huart3, 1, 0.08f, false); // 左上
     Step_ZDT_Init(zdt_stepmotor_ptr[1], 2, &huart3, 0, 0.08f, false); // 右上
