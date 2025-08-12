@@ -30,7 +30,7 @@ typedef enum
 {
     //跟逻辑有关
 	GOAL_PLACE=83,	
-	FIND_PLATE =79+servo_zero,
+	FIND_PLATE =810+servo_zero,
 	CENTER_PICK=265+servo_zero,
     //跟颜色有关
 	BLUE_PICK=201+servo_zero,
