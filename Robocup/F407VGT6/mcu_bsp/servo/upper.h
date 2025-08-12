@@ -32,6 +32,7 @@ typedef enum
     PICK_LEFT = 39,
     FIND_PLATE = 200,
     COLORTASKHEIGHT = 218,
+    UNMEANING_BIAS = 120,
     GOAL = 39
 } GimbalArm_Servoangle_t;
 /*
@@ -40,6 +41,7 @@ typedef enum
 typedef enum
 {
     PICK_DOWN =60,
+    FUCK_LIMIT = 20,
     UP = 0,// 颜色传感器识别时和UP类似
     PUT_DOWN = 32
 } Lift_Servoangle_t;

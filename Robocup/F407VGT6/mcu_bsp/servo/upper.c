@@ -47,19 +47,18 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
     {
         if (*upperflag == PICKINGIN)
         {
-						PUMP_ON;
+			PUMP_ON;
             Servo_SetAngle(&servos[1], UP,180);
             Servo_SetAngle(&servos[0], PICK_LEFT,270);
-						vTaskDelay(2000);
+			vTaskDelay(2000);
             Servo_SetAngle(&servos[1], PICK_DOWN,180);
 						
 						
-						vTaskDelay(2000);
+			vTaskDelay(2000);
             Servo_SetAngle(&servos[1], UP,180);
-					 vTaskDelay(2000);
+			vTaskDelay(2000);
             Servo_SetAngle(&servos[0], COLORTASKHEIGHT,270);
             vTaskDelay(2000);
-
             *upperflag = GETCOLORIN;
         }
         if (*upperflag == GETCOLORIN)
@@ -78,10 +77,13 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
         }
         if (*upperflag == PUTINGIN)
         {   
+            Servo_SetAngle(&servos[0], UNMEANING_BIAS,270);
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[1], FUCK_LIMIT,180);
             Servo_SetAngle(&servos[0], FIND_PLATE,270);
             vTaskDelay(2000);
-            //Servo_SetAngle(&servos[1], PUT_DOWN,180);
-            //vTaskDelay(2000);
+            // Servo_SetAngle(&servos[1], PUT_DOWN,180);
+            // vTaskDelay(2000);
 
             PUMP_OFF;
             vTaskDelay(2000);
