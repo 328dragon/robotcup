@@ -68,6 +68,7 @@ __IO int main_put_state = -1;
 //__IO int main_put_state = -2;
 int motor_mode = 0;
 int qr_code = 0;
+int qr_mv_code=0;
 float find_circle_dx = 0; // 视觉传过来juli
 float find_circle_dy = 0;
 float final_circle_dx = 0; // 乘上系数后距离
@@ -174,6 +175,7 @@ void usart4_callback(void)
 {
     if (uart4.recv_buff[0] == 0x91 && uart4.recv_buff[1] == 0xCB)
     {
+			qr_mv_code=uart4.recv_buff[2];
     }
 }
 
