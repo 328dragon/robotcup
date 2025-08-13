@@ -454,7 +454,7 @@ void Onmaincpp(void *pvParameters)
             {
             case 0:
             {
-							vTaskDelay(5000);
+
                 setYawZero();
                 vTaskDelay(200);
                 move_step_distance(0.32, 0, 0, 1);
