@@ -123,12 +123,13 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
             PUMP_ON;
             vTaskDelay(2000);
             Servo_SetAngle(&servos[1], UP,180);
+						*upperflag = PUTTINGOUT;
         }
 
         // 此处还需等待底盘移动到目标位置
 
-        // if(*upperflag == PUTTINGOUT)
-        // {
+        if(*upperflag == PUTTINGOUT)
+        {
             vTaskDelay(2000);
             Servo_SetAngle(&servos[0], GOAL,270);
             vTaskDelay(700);
@@ -137,6 +138,6 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
             PUMP_OFF;
             vTaskDelay(2000);
 
-        // }
+        }
     }
 }
