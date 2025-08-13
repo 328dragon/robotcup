@@ -22,7 +22,7 @@
 #define THING_GIMBAL_ORIGIN_ANGLE 0
 #define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
 #define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
-#define servo_zero 10
+#define servo_zero 8
 /*
     * @brief 前云台枚举常量
 */
@@ -30,7 +30,7 @@ typedef enum
 {
     //跟逻辑有关
 	GOAL_PLACE=83,	
-	FIND_PLATE =77+servo_zero,
+	FIND_PLATE =79+servo_zero,
 	CENTER_PICK=265+servo_zero,
     //跟颜色有关
 	BLUE_PICK=201+servo_zero,

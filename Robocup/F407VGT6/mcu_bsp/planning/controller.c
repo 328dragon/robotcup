@@ -138,9 +138,20 @@ void Controller_control_update(Controller_t *controller, odom_t *odom_in)
         }
 
         odom_t *target_odom = &controller->kinematic->target_odom;
+				const float yaw_diff = normalRad(target_odom->yaw) -controller->kinematic->current_odom.yaw;
+				float current_yaw = controller->kinematic->current_odom.yaw;
+				if(yaw_diff>PI)
+				{
+						current_yaw += 2*PI;
+				}
+				else if(yaw_diff<-PI)
+				{
+						current_yaw -= 2*PI;
+				}
+   
        	float vx = pid_calc(&controller->pid_x,odom_in->x, target_odom->x) + controller->kinematic->target_val.linear_x;
           float vy = pid_calc(&controller->pid_y, odom_in->y,target_odom->y) + controller->kinematic->target_val.linear_y;
-         float v_yaw = pid_calc(&controller->pid_yaw, odom_in->yaw, target_odom->yaw) + controller->kinematic->target_val.angular_z;
+         float v_yaw = pid_calc(&controller->pid_yaw, current_yaw, normalRad(target_odom->yaw) + controller->kinematic->target_val.angular_z);
 
 
         cmd_vel_t vel = {vx, vy, v_yaw};

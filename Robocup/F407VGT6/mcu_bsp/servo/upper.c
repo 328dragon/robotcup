@@ -128,13 +128,11 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
         if (*upperflag == PICKINGOUT) // 将物块分拣到对应料盘
                                       //  按顺序筛选对应颜色任务的料盘
         {
-
             target_upper_loacation = up_location;
             PUMP_ON;
             vTaskDelay(1000);
             for (int i = 0; i < 6; i++)
             {
-
                 if (plate_things[i]._color == color_task[*PutGoalLoop]) // 找对应放置任务的颜色
                 {
                     Servo_SetAngle(&servos[0], plate_things[i]._angle, 360);
@@ -142,7 +140,7 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
                     break;
                 }
             }
-            vTaskDelay(1000);
+            vTaskDelay(1400);
             target_upper_loacation = pick_middle_location;
             *upperflag = PUTTINGOUT;
         }

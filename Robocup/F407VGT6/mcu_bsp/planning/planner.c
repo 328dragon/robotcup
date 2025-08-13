@@ -17,7 +17,7 @@ void Planner_init(Planner_t *self, Controller_t *controller)
     CubicSpline_Init(&self->cub_spline[2], (Point){0, 0}, (Point){0, 0}, (Point){0, 0});
     self->controller = controller;
     SimpleStatus_t_init(&self->promise);
-    self->control_mode = PLANNER_MODE_CLOSE_CONTROL;
+    self->control_mode = PLANNER_MODE_OPEN_CONTROL;
 }
 void Planner_update(Planner_t *self, uint16_t dt)
 {
