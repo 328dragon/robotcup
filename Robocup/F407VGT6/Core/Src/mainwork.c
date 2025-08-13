@@ -2,7 +2,7 @@
 // ​​Controller模块​​：负责控制算法执行和电机控制
 // ​​Kinematic模块​​：负责运动学正逆解计算和里程计更新
 // ​​FreeRTOS任务​​：提供实时调度框架
-#define DEBUG_TASK  1
+#define DEBUG_TASK  0
 #include "mainwork.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -473,7 +473,7 @@ void Onmaincpp(void *pvParameters)
 				}
 				vTaskDelay(30);
 			}
-	#else 
+	#else	
     int safe_count = 0; // 保护锁
     while (1)
     {
@@ -546,7 +546,7 @@ void Onmaincpp(void *pvParameters)
                 /////////////等待直到二维码识别成功,到第一个物块处
             case 6:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise)&&qr_mv_code!=0)
                 {
                     vTaskDelay(500);
                     move_step_distance(0.15, 0.02, 0, 1);
