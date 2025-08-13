@@ -169,5 +169,8 @@ void Kinematic_ClearOdometry(Kinematic_t *_Kinematic) {
  * @param _Kinematic 麦轮结构体指针
  */
 void Kinematic_update_odom( odom_t *odom_in, Kinematic_t *_Kinematic) {
+ // 归一化偏航角
+  _Kinematic->_yaw_zero   -=odom_in->yaw- _Kinematic->current_odom.yaw; // 确保偏航角在 -PI 到 PI 之间
+    _Kinematic->_yaw_zero = normalRad(_Kinematic->_yaw_zero);
     _Kinematic->current_odom = *odom_in;
 }
