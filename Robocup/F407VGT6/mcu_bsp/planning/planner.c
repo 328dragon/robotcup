@@ -99,10 +99,23 @@ SimpleStatus_t *Planner_LoactaionOpenControl(Planner_t *self, const odom_t *targ
     {
        target_t = Sqrt(targetx * targetx + targety * targety) / (max_v * 0.5) + fabs(targetyaw) / (max_v * 0.5);
     }
+		    //单独对yaw 做处理,扩展到-PI到PI之外
+    const float yaw_diff = target_odom->yaw - self->controller->kinematic->current_odom.yaw;
+    float yaw_target_optimize;
+    if (yaw_diff > PI) {
+        yaw_target_optimize= target_odom->yaw - 2 * PI;
+    }
+    else if (yaw_diff < -PI) {
+        yaw_target_optimize= target_odom->yaw + 2 * PI;
+    }
+    else {
+        yaw_target_optimize = target_odom->yaw;
+    }
+		
 		
     CubicSpline_Init(&self->cub_spline[0], (Point){0, 0}, (Point){target_t, targetx}, (Point){0, target_vel->linear_x});
     CubicSpline_Init(&self->cub_spline[1], (Point){0, 0}, (Point){target_t, targety}, (Point){0, target_vel->linear_y});
-    CubicSpline_Init(&self->cub_spline[2], (Point){0, 0}, (Point){target_t, targetyaw}, (Point){0, target_vel->angular_z});
+    CubicSpline_Init(&self->cub_spline[2], (Point){0, 0}, (Point){target_t, yaw_target_optimize}, (Point){0, target_vel->angular_z});
 
     self->target_t = target_t;
     self->current_t = 0;
@@ -115,8 +128,7 @@ SimpleStatus_t *Planner_LoactaionCloseControl(Planner_t *self, const odom_t *tar
 {
   
     Planner_LoactaionOpenControl(self, target_odom, max_v, &(cmd_vel_t){0, 0, 0}, clearodom);
-
-    self->controller->kinematic->_odom_error = *target_error;
+    self->controller->kinematic->_odom_error = *target_error;	
     self->control_mode = PLANNER_MODE_CLOSE_CONTROL;
     self->target_odom = *target_odom;
       self->start_odom = self->controller->kinematic->current_odom;
