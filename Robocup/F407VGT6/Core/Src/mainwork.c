@@ -452,6 +452,7 @@ void Onmaincpp(void *pvParameters)
             {
             case 0:
             {
+							vTaskDelay(5000);
                 setYawZero();
                 vTaskDelay(200);
                 move_step_distance(0.32, 0, 0, 1);
@@ -505,11 +506,11 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-						///////////直到扫到二维码启动！！！！！！！！！！
+                ///////////直到扫到二维码启动！！！！！！！！！！
                 //////*********找第一个物块****//////
             case 5:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise)&&qr_code!=0)
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_code != 0)
                 {
                     color_task_index = qr_code;
                     GetColorTask(color_task, &color_task_index);
@@ -796,10 +797,10 @@ void Onmaincpp(void *pvParameters)
                     if (gray_data_side_middle != 0)
                     {
                         vTaskDelay(100);
-											if(gray_data_side_middle!=0)
-											{
-											   move_step_distance(-gray_data_side_middle, 0, 0, 1);
-											}                     
+                        if (gray_data_side_middle != 0)
+                        {
+                            move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                        }
                         main_put_state++;
                     }
                     break;
@@ -922,7 +923,7 @@ void Onmaincpp(void *pvParameters)
                     }
                     break;
                 }
-																
+
                 /////////////等待空闲///////
                 case 15:
                 {
@@ -935,7 +936,7 @@ void Onmaincpp(void *pvParameters)
                     }
                     break;
                 }
-								///////////////这后面有问题///////////////////
+                    ///////////////这后面有问题///////////////////
                 case 16:
                 {
                     main_put_state++;
@@ -944,7 +945,7 @@ void Onmaincpp(void *pvParameters)
                 case 17:
                 {
 
-                        main_put_state++;
+                    main_put_state++;
 
                     break;
                 }
@@ -953,8 +954,8 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-										  put_goods_flag = 1;
-                        vTaskDelay(200);                   
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
                         main_put_state++;
                     }
                     break;
@@ -971,19 +972,50 @@ void Onmaincpp(void *pvParameters)
                     }
                     break;
                 }
-								case 20:
-								{
-								               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+								
+                case 21:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-										                         vTaskDelay(200);
-                        move_step_distance(0, 0, 1.5713, 1);
+                        vTaskDelay(200);
+                        move_step_distance(0, 0, PI/2, 1);
                         main_put_state++;
                     }
                     break;
-								
-								
-								}
+                }
+                case 22:
+                {
 
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0.4, 0, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+								//////////*******放置第五个物块****************///////////
+                case 23:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
+                        main_put_state++;
+                    }
+
+                    break;
+                }
+								case 24:
+								{
+								            if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0.5, 0, 0, 1);
+                        main_put_state++;
+                    }
+                    break;						
+								}
 
                 default:
                     break;
