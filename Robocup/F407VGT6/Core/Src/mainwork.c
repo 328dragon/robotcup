@@ -971,7 +971,18 @@ void Onmaincpp(void *pvParameters)
                     }
                     break;
                 }
-
+								case 20:
+								{
+								               if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+										                         vTaskDelay(200);
+                        move_step_distance(0, 0, 1.5713, 1);
+                        main_put_state++;
+                    }
+                    break;
+								
+								
+								}
 
 
                 default:

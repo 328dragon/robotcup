@@ -152,11 +152,10 @@ void Controller_control_update(Controller_t *controller, odom_t *odom_in)
         {
             current_yaw -= 2 * PI;
         }
-
         float vx = pid_calc(&controller->pid_x, odom_in->x, target_odom->x) + controller->kinematic->target_val.linear_x;
         float vy = pid_calc(&controller->pid_y, odom_in->y, target_odom->y) + controller->kinematic->target_val.linear_y;
         float v_yaw = pid_calc(&controller->pid_yaw, current_yaw, normalRad(target_odom->yaw))+  controller->kinematic->target_val.angular_z;
-
+				
         cmd_vel_t vel = {vx, vy, v_yaw};
         Kinematic_inv_global(&vel, controller->target_speed, odom_in, controller->kinematic); // 换算给四个电机具体速度
         break;
