@@ -815,7 +815,7 @@ void Onmaincpp(void *pvParameters)
                     {
                         target_upper_loacation = up_location;
                         vTaskDelay(100);
-                        move_step_distance(-0.23, 0.46, 0, 1);
+                        move_step_distance(-0.23, 0.47, 0, 1);
                         main_put_state++;
                     }
 
@@ -889,7 +889,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-1, 0, 0, 1);
+                        move_step_distance(-1.05, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -933,7 +933,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.15, -0.30, 0, 1);
+                        move_step_distance(0.14, -0.30, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -969,56 +969,38 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-0.5, 0, 0, 1);
+                        move_step_distance(-0.4, 0.25, 0, 1);
                         main_put_state++;
                     }
                     break;
                 }
 								
-                case 21:
+                case 20:
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
+                         put_goods_flag = 1;
                         vTaskDelay(200);
-                        move_step_distance(0, 0, PI/2, 1);
                         main_put_state++;
                     }
                     break;
                 }
-                case 22:
+                           case 21:
                 {
-
-                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.4, 0, 0, 1);
+                        move_step_distance(0.2, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
                 }
-								//////////*******放置第五个物块****************///////////
-                case 23:
-                {
-                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-                    {
-                        put_goods_flag = 1;
-                        vTaskDelay(200);
-                        main_put_state++;
-                    }
-
-                    break;
-                }
-								case 24:
-								{
-								            if (*upperflag_ptr == IDLE)
-                    {
-                        vTaskDelay(200);
-                        move_step_distance(0.5, 0, 0, 1);
-                        main_put_state++;
-                    }
-                    break;						
-								}
-
+													 case 22:
+													 {
+													 
+													 
+													 break;
+													 }
                 default:
                     break;
                 }

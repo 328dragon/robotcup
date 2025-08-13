@@ -22,7 +22,7 @@
 #define THING_GIMBAL_ORIGIN_ANGLE 0
 #define PUMP_ON  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,1);
 #define PUMP_OFF  HAL_GPIO_WritePin(PUMP_GPIO_Port,PUMP_Pin,0);
-#define servo_zero 8
+#define servo_zero 10
 /*
     * @brief 前云台枚举常量
 */
@@ -33,7 +33,7 @@ typedef enum
 	FIND_PLATE =79+servo_zero,
 	CENTER_PICK=265+servo_zero,
     //跟颜色有关
-	BLUE_PICK=201+servo_zero,
+	BLUE_PICK=203+servo_zero,
 	GREEN_PICK=236+servo_zero,
 	RED_PICK=267+servo_zero,
 	WHITE_PICK=300+servo_zero,
