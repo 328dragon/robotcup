@@ -27,7 +27,7 @@
 #include "chassislogic.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
-#define DEBUG_UPPER 1
+#define DEBUG_UPPER 0
 #define DEBUG_CHASSIS 1
 
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
@@ -49,7 +49,6 @@ static float Byte2Float(uint8_t *byte)
     p[3] = byte[3];
     return f;
 }
-
 
 Servo_t servo[3] = {
     {&htim9, TIM_CHANNEL_2, 0, 0},
@@ -84,13 +83,13 @@ __IO int main_put_state = -1;
 //__IO int main_put_state = -2;
 int motor_mode = 0;
 int qr_code = 0;
-float find_circle_dx = 0;//视觉传过来juli
+float find_circle_dx = 0; // 视觉传过来juli
 float find_circle_dy = 0;
-float final_circle_dx = 0;//乘上系数后距离
+float final_circle_dx = 0; // 乘上系数后距离
 float final_circle_dy = 0;
-float final_Circle_px=1;//纠正x系数
-float final_Circle_py=1;//纠正y系数
-float pump_view_distance=0.043;///吸盘到摄像头距离
+float final_Circle_px = 1;        // 纠正x系数
+float final_Circle_py = 1;        // 纠正y系数
+float pump_view_distance = 0.043; /// 吸盘到摄像头距离
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -180,8 +179,8 @@ void usart2_callback(void)
             find_circle_dy = -0.1;
         }
         find_circle_dy += pump_view_distance;
-        final_circle_dx = final_Circle_px*find_circle_dx;
-        final_circle_dy = final_Circle_py*find_circle_dy;
+        final_circle_dx = final_Circle_px * find_circle_dx;
+        final_circle_dy = final_Circle_py * find_circle_dy;
     }
 }
 
@@ -419,8 +418,8 @@ void LCD_Show_task(void *pvParameters)
             HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, debug_isOpened);
         }
         DistributionLoop(servo, plate_things, current_color_ptr, upperflag_ptr, &CurrentColorLoop);
-//         PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
-				
+        PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
+
         //        // 显示
         //        // 陀螺仪
         //        LCD_ShowFloatNum1(0, 20, gyro[0], 4, RED, WHITE, 16);
@@ -459,6 +458,10 @@ void Onmaincpp(void *pvParameters)
             {
             case 0:
             {
+							setYawZero();
+							
+                Servo_SetAngle(&servo[1], UP,180);
+							vTaskDelay(200);
                 move_step_distance(0, -0.3, 0, 1);
                 main_state++;
                 break;
@@ -492,7 +495,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-						/////////////*********对十字中************/////////
+                /////////////*********对十字中************/////////
             case 4:
             {
                 vTaskDelay(100);
@@ -500,27 +503,26 @@ void Onmaincpp(void *pvParameters)
                 main_state++;
                 break;
             }
-						///到二维码处
-						case 5:
-						{
-							    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+            /// 到二维码处
+            case 5:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-															  vTaskDelay(100);
-                move_step_distance(0.15, 0, 0, 1);
-                main_state++;
-								}
+                    vTaskDelay(100);
+                    move_step_distance(0.15, 0, 0, 1);
+                    main_state++;
+                }
 
                 break;
-						
-						}
-						
-						/////////////等待直到二维码识别成功
+            }
+
+                /////////////等待直到二维码识别成功,到第一个物块处
             case 6:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(500);
-                    move_step_distance(0.15, 0.05, 0, 1);
+                    move_step_distance(0.15, 0.02, 0, 1);
                     main_state++;
                 }
                 break;
@@ -554,7 +556,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.05, -0.39, 0, 1);
+                    move_step_distance(0.07, -0.41, 0, 1);
                     main_state++;
                 }
                 break;
@@ -564,7 +566,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(500);
-                    move_step_distance(0.25, 0, 0, 1);
+                    move_step_distance(0.28, 0, 0, 1);
                     main_state++;
                 }
             }
@@ -590,7 +592,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.1, -0.40, 0, 1);
+                    move_step_distance(-0.1, -0.53, 0, 1);
                     main_state++;
                 }
                 break;
@@ -600,7 +602,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(500);
-                    move_step_distance(0.3, 0, 0, 1);
+                    move_step_distance(0.2, 0, 0, 1);
                     main_state++;
                 }
             }
@@ -627,7 +629,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.3, -0.45, 0, 1);
+                    move_step_distance(-0.3, -0.49, 0, 1);
                     main_state++;
                 }
                 break;
@@ -674,7 +676,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0, -0.40, 0, 1);
+                    move_step_distance(0, -0.38, 0, 1);
                     main_state++;
                 }
             }
@@ -701,9 +703,9 @@ void Onmaincpp(void *pvParameters)
                 }
 
                 break;
-            }    
-            
-             case 22:
+            }
+
+            case 22:
             {
                 if (*upperflag_ptr == IDLE)
                 {
@@ -719,7 +721,6 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
 
-            
             //////**************************开启放置物块状态机******************************/////
 
             /////顺序////////////////****************************BADCE**********************//////
@@ -734,6 +735,7 @@ void Onmaincpp(void *pvParameters)
                     main_put_state++;
                     break;
                 }
+                //去找十字纠正自身
                 case 1:
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -741,7 +743,7 @@ void Onmaincpp(void *pvParameters)
                         vTaskDelay(200);
                         setYawZero();
                         vTaskDelay(500);
-                        move_step_distance(0.27, 0.31, 0, 1);
+                        move_step_distance(0.35, 0.37, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -750,7 +752,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                        move_vel(0.1,0, 0);
+                        move_vel(0.1, 0, 0);
                         if (gray_data_side_sum >= 3)
                         {
                             move_vel(0, 0, 0);
@@ -767,23 +769,23 @@ void Onmaincpp(void *pvParameters)
                     if (gray_data_side_middle != 0)
                     {
                         vTaskDelay(100);
-                         move_step_distance(0, gray_data_side_middle, 0, 1);
+                        move_step_distance(0, gray_data_side_middle, 0, 1);
                         main_put_state++;
                     }
-										else 
-										{
-									  main_put_state++;									
-										}
+                    else
+                    {
+                        main_put_state++;
+                    }
                     break;
                 }
-                        ////////////*****从AAAAAAAAAAAAAAA到BBBBBBBBBBBBBB(-23，50)**********/////////
+                    ////////////*****从AAAAAAAAAAAAAAA到BBBBBBBBBBBBBB(-23，50)**********/////////
                 case 4:
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-											//注意要抬升到上面
+                        // 注意要抬升到上面
                         vTaskDelay(100);
-                        move_step_distance(0.46,0.23, 0, 1);
+                        move_step_distance(0.46, 0.23, 0, 1);
                         main_put_state++;
                     }
 
@@ -794,9 +796,8 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                     
-                      main_put_state++;
-                  
+
+                        main_put_state++;
                     }
                     break;
                 }
@@ -806,9 +807,8 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                        
+                        upperflag = PICKINGOUT;
                         vTaskDelay(200);
-											   PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
                         main_put_state++;
                     }
                     break;
@@ -820,7 +820,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-0.30,-0.23,0, 1);
+                        move_step_distance(-0.30, -0.23, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -840,13 +840,13 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-//                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-//                        {
-//                            vTaskDelay(200);
-//                             move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);  
-//                            main_put_state++;
-//                        }
-											    main_put_state++;
+                        //                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
+                        //                        {
+                        //                            vTaskDelay(200);
+                        //                             move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);
+                        //                            main_put_state++;
+                        //                        }
+                        main_put_state++;
                     }
                     break;
                 }
@@ -855,8 +855,8 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                          PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
-                        vTaskDelay(200);									 
+                        upperflag = PICKINGOUT;
+                        vTaskDelay(200);
                         main_put_state++;
                     }
                     break;
@@ -867,7 +867,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0,1, 0, 1);
+                        move_step_distance(0, 1, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -888,13 +888,13 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-//                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-//                        {
-//                            vTaskDelay(200);
-//                            move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);  
-//                            main_put_state++;
-//                        }
-											  main_put_state++;
+                        //                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
+                        //                        {
+                        //                            vTaskDelay(200);
+                        //                            move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);
+                        //                            main_put_state++;
+                        //                        }
+                        main_put_state++;
                     }
                     break;
                 }
@@ -903,8 +903,8 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-                     PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
-                        vTaskDelay(200);												   
+                        upperflag = PICKINGOUT;
+                        vTaskDelay(200);
                         main_put_state++;
                     }
                     break;
@@ -926,7 +926,7 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-//                        move_step_distance(-0.45, 0, 0, 1);
+                        //                        move_step_distance(-0.45, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -935,14 +935,14 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-//                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
-//                        {
-//                            vTaskDelay(200);
-//                            move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);  
-//                            main_put_state++;
-//                        }
-											
-											  main_put_state++;
+                        //                        if (abs(final_circle_dx) < 0.05 && abs(final_circle_dy) < 0.05 && final_circle_dx != 0 && final_circle_dy != 0)
+                        //                        {
+                        //                            vTaskDelay(200);
+                        //                            move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);
+                        //                            main_put_state++;
+                        //                        }
+
+                        main_put_state++;
                         // else if (wait_vision > 6)
                         // {
                         //     move_step_distance(0.01, 0.01, 0, 1);
@@ -957,9 +957,9 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-											     PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
+                        upperflag = PICKINGOUT;
                         vTaskDelay(200);
-                 
+
                         main_put_state++;
                     }
                     break;
@@ -993,7 +993,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-										main_put_state++;
+                        main_put_state++;
                     }
                     break;
                 }
@@ -1002,9 +1002,9 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-											  PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
+                        upperflag = PICKINGOUT;
                         vTaskDelay(200);
-                     
+
                         main_put_state++;
                     }
                     break;
@@ -1030,7 +1030,6 @@ void Onmaincpp(void *pvParameters)
         }
         else
         {
-					
         }
         //        if (DEBUG_CHASSIS == 1)
         //        {

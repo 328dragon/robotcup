@@ -48,6 +48,7 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
         if (*upperflag == PICKINGIN)
         {
 			PUMP_ON;
+            VALVE_OFF;
             Servo_SetAngle(&servos[1], UP,180);
             Servo_SetAngle(&servos[0], PICK_LEFT,270);
 			vTaskDelay(2000);
@@ -85,7 +86,9 @@ void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* curren
             // Servo_SetAngle(&servos[1], PUT_DOWN,180);
             // vTaskDelay(2000);
 
+            VALVE_ON;
             PUMP_OFF;
+
             vTaskDelay(2000);
             Servo_SetAngle(&servos[1], UP,180);
             vTaskDelay(500);
@@ -117,13 +120,14 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
             }
             Servo_SetAngle(&servos[0], FIND_PLATE,270);
             vTaskDelay(2000);
-            Servo_SetAngle(&servos[1], PUT_DOWN,180);
+            Servo_SetAngle(&servos[1], PUT_DOWN+5,180);
             vTaskDelay(2000); // 等待舵机转动完成，需要实测
 
             PUMP_ON;
+            VALVE_OFF;
             vTaskDelay(2000);
             Servo_SetAngle(&servos[1], UP,180);
-						*upperflag = PUTTINGOUT;
+			*upperflag = PUTTINGOUT;
         }
 
         // 此处还需等待底盘移动到目标位置
@@ -133,10 +137,14 @@ void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, Upp
             vTaskDelay(2000);
             Servo_SetAngle(&servos[0], GOAL,270);
             vTaskDelay(700);
-            Servo_SetAngle(&servos[1], PICK_DOWN,270);
+            Servo_SetAngle(&servos[1], PICK_DOWN+10,270);
             vTaskDelay(2000);
+            
+            VALVE_ON;
             PUMP_OFF;
+
             vTaskDelay(2000);
+            *upperflag = IDLE;
 
         }
     }
