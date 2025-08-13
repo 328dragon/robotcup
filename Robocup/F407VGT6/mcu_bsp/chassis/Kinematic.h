@@ -43,6 +43,6 @@ void Kinematic_forward( float *current_speed, cmd_vel_t *cmd_vel_in,  Kinematic_
 void Kinematic_CalculationUpdate(uint16_t dt,  cmd_vel_t *cmd_vel_in, odom_t *odom_in);
 void Kinematic_CalculationUpdateWithYaw(uint16_t dt,Kinematic_t *_Kinematic,  cmd_vel_t *cmd_vel_in, odom_t *odom_in, float yaw);
 void Kinematic_ClearOdometry(Kinematic_t *_Kinematic);
-void Kinematic_update_odom( odom_t *odom_in, Kinematic_t *_Kinematic);
+void Kinematic_update_odom( odom_t *odom_in, Kinematic_t *_Kinematic) ;
 
 #endif

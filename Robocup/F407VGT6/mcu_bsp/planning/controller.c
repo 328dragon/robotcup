@@ -1,11 +1,15 @@
 #include "controller.h"
-static float normalRad(float rad) {
-  if (rad > PI) {
-    rad -= 2 * PI;
-  } else if (rad < -PI) {
-    rad += 2 * PI;
-  }
-  return rad;
+static float normalRad(float rad)
+{
+    if (rad > PI)
+    {
+        rad -= 2 * PI;
+    }
+    else if (rad < -PI)
+    {
+        rad += 2 * PI;
+    }
+    return rad;
 }
 // 绝对式，速度只是一个参考，调用内部函数
 void Controller_setMotor_Targetpos_vel(Controller_t *controller, float *target_pos, float *target_vel)
@@ -138,21 +142,20 @@ void Controller_control_update(Controller_t *controller, odom_t *odom_in)
         }
 
         odom_t *target_odom = &controller->kinematic->target_odom;
-				const float yaw_diff = normalRad(target_odom->yaw) -controller->kinematic->current_odom.yaw;
-				float current_yaw = controller->kinematic->current_odom.yaw;
-				if(yaw_diff>PI)
-				{
-						current_yaw += 2*PI;
-				}
-				else if(yaw_diff<-PI)
-				{
-						current_yaw -= 2*PI;
-				}
-   
-       	float vx = pid_calc(&controller->pid_x,odom_in->x, target_odom->x) + controller->kinematic->target_val.linear_x;
-          float vy = pid_calc(&controller->pid_y, odom_in->y,target_odom->y) + controller->kinematic->target_val.linear_y;
-         float v_yaw = pid_calc(&controller->pid_yaw, current_yaw, normalRad(target_odom->yaw) + controller->kinematic->target_val.angular_z);
+        const float yaw_diff = normalRad(target_odom->yaw) - controller->kinematic->current_odom.yaw;
+        float current_yaw = controller->kinematic->current_odom.yaw;
+        if (yaw_diff > PI)
+        {
+            current_yaw += 2 * PI;
+        }
+        else if (yaw_diff < -PI)
+        {
+            current_yaw -= 2 * PI;
+        }
 
+        float vx = pid_calc(&controller->pid_x, odom_in->x, target_odom->x) + controller->kinematic->target_val.linear_x;
+        float vy = pid_calc(&controller->pid_y, odom_in->y, target_odom->y) + controller->kinematic->target_val.linear_y;
+        float v_yaw = pid_calc(&controller->pid_yaw, current_yaw, normalRad(target_odom->yaw))+  controller->kinematic->target_val.angular_z;
 
         cmd_vel_t vel = {vx, vy, v_yaw};
         Kinematic_inv_global(&vel, controller->target_speed, odom_in, controller->kinematic); // 换算给四个电机具体速度
@@ -201,7 +204,7 @@ void Controller_KinematicAndControlUpdate(Controller_t *controller, uint16_t dt)
 void Controller_KinematicAndControlUpdateWithYaw(Controller_t *controller, uint16_t dt, float yaw)
 {
     Kinematic_forward(controller->current_speed, &controller->kinematic->current_vel, controller->kinematic);
-    Kinematic_CalculationUpdateWithYaw(dt,controller->kinematic, &controller->kinematic->current_vel, &controller->kinematic->current_odom, yaw);
+    Kinematic_CalculationUpdateWithYaw(dt, controller->kinematic, &controller->kinematic->current_vel, &controller->kinematic->current_odom, yaw);
     Controller_control_update(controller, &controller->kinematic->current_odom);
     Controller_StatusUpdate(controller, &controller->kinematic->current_odom);
     // 这个函数随电机改变
