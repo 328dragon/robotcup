@@ -1040,7 +1040,7 @@ void Onmaincpp(void *pvParameters)
             {
             case 0:
             {
-                if ( qr_code != 0)
+                if ( qr_mv_code != 0)
                 {
                     setYawZero();
                     vTaskDelay(200);
@@ -1317,8 +1317,8 @@ void Onmaincpp(void *pvParameters)
             default:
                 break;
             }
+						
         }
-
         vTaskDelay(30);
     }
 }
