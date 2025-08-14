@@ -30,8 +30,10 @@
 #define DEBUG_UPPER 0
 #define DEBUG_CHASSIS 1
 // #define DEBUG_PARAM_PUT 1
-#define TASK2 1
-
+#define TASK2 0
+#define TASKDEBUG 1
+#define TASK1 0
+#define DEBUG_PARAM_PUT 0
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
 #define abs(x) (x > 0 ? x : (-x))
 float debug_angle[3] = {0, 0, 0}; // 调试角度
@@ -198,9 +200,9 @@ void usart2_callback(void)
         {
             find_circle_dy = -0.1;
         }
-        find_circle_dy += pump_view_distance;
-        final_circle_dx = final_Circle_px * find_circle_dx;
-        final_circle_dy = final_Circle_py * find_circle_dy;
+//        find_circle_dy += pump_view_distance;
+//        final_circle_dx = final_Circle_px * find_circle_dx;
+//        final_circle_dy = final_Circle_py * find_circle_dy;
     }
 }
 
@@ -498,7 +500,7 @@ void Onmaincpp(void *pvParameters)
         vTaskDelay(30);
     }
 #endif
-#ifdef DEBUG_PARAM_PUT
+#if DEBUG_PARAM_PUT
     main_state = 23;
     main_put_state = 0;
 #endif
@@ -509,7 +511,13 @@ void Onmaincpp(void *pvParameters)
         if (safe_count >= 3)
         {
             safe_guard = 1; // 保护锁打开
-#ifdef TASK1
+#if TASKDEBUG
+            while(1)
+            {
+                vTaskDelay(400);
+            }
+#endif
+#if TASK1
             switch (main_state)
             {
             case 0:
@@ -1072,7 +1080,7 @@ void Onmaincpp(void *pvParameters)
                 }
             }
 #endif
-#ifdef TASK2
+#if TASK2
             switch (main_second_state)
             {
            case 0:
@@ -1306,7 +1314,46 @@ void OnChassicControl(void *pvParameters)
         vTaskDelay(10);
     }
 }
+//使用视觉校准，不包含位置刷新
+/**
+ * @brief 
+ * 
+ * @param direction 车体的位置是朝冠军还是Home 1是朝Home 其他朝冠军
+ * @param map_x 放置点在地图的x位置
+ * @param map_y 放置点在地图的y位置
+ * @param x_tolerance 车体坐标下x 的容差,绝对值
+ * @param dx 
+ * @param dy 
+ */
+void PutWithVisual(int direction,float map_x,float map_y,float x_tolerance)
+{
+    float cemareToPut=-0.05;  //相机相对于机械臂的本地坐标系偏差
+    float baseToPut=-0.2;
+    SimpleStatus_t* result;
+    odom_t target_odom;
+    odom_t target_error={0.005,0.005,0.005};
+    if(direction==1)
+    {
+        target_odom.x=map_x-baseToPut+x_tolerance;
+        target_odom.yaw=-PI/2;
+    }
+    else
+    {
+        target_odom.x=map_x+baseToPut-x_tolerance;
+        target_odom.yaw=PI/2;
+    }
+    
 
+    // Planner_LoactaionCloseControl(&result,)
+    Planner_LoactaionCloseControl(&result, &target_odom,1.5,&target_error,false);
+    find_circle_dx=0.0;
+    find_circle_dy=0.0;
+    osDelay(1000);
+    if(find_circle_dx!=0.0||find_circle_dy!=0.0)
+    {
+    }
+
+}
 void usart3_callback(void)
 {
     // 处理接收到的数据

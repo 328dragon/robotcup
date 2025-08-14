@@ -128,3 +128,14 @@ SimpleStatus_t *Planner_LoactaionCloseControl(Planner_t *self, const odom_t *tar
       self->start_odom = self->controller->kinematic->current_odom;
     return &self->promise;
 }
+SimpleStatus_t *Planner_LoactaionBaseOdomContorl(Planner_t *self, const odom_t *target_odom, float max_v, const odom_t *target_error, bool clearodom)
+{
+    //将局部坐标转化到全局坐标下
+    const odom_t * current_odom = &self->controller->kinematic->current_odom;
+    odom_t targetGlobal;
+    float targetYawGlobal=normalRad(target_odom->yaw + current_odom->yaw);
+    targetGlobal.x=target_odom->x*cos(current_odom->yaw) - target_odom->y*sin(current_odom->yaw) + current_odom->x;
+    targetGlobal.y=target_odom->x*sin(current_odom->yaw) + target_odom->y*cos(current_odom->yaw) + current_odom->y;
+    targetGlobal.yaw=targetYawGlobal;
+    return Planner_LoactaionCloseControl(self, &targetGlobal, max_v, target_error, clearodom);
+}

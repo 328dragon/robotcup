@@ -1,3 +1,11 @@
+/*
+ * @Author: Nagisa 2964793117@qq.com
+ * @Date: 2025-08-07 15:49:24
+ * @LastEditors: Nagisa 2964793117@qq.com
+ * @LastEditTime: 2025-08-15 04:01:34
+ * @FilePath: \robotcup\Robocup\F407VGT6\mcu_bsp\IMU\ch040.c
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include "ch040.h"
 uint8_t ch040_origin_data[76] = {0};
 float ch040_acc[3] = {0};
@@ -59,4 +67,17 @@ __NOINLINE float ch040_get_data(uint8_t *data)
 void setYawZero()
 {
 	yaw_zero = yaw_raw; // 设置当前yaw为零点
+}
+//设置当前的yaw为yaw
+void setYaw(float currentYawIn)
+{
+	yaw_zero -= currentYawIn-yaw;
+	if(yaw_zero<-3.1415926f)
+	{
+		yaw_zero+=2*3.1415926f;
+	}
+	else if (yaw_zero>3.1415926f)
+	{
+		yaw_zero-=2*3.1415926f;
+	}
 }

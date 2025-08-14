@@ -130,7 +130,7 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim9,TIM_CHANNEL_2);
-  HAL_Delay(10000);
+  // HAL_Delay(10000);
 	//这时候板子的pwm还是上一版                   
 	// __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,600);//大转盘，950刚好一个对齐屁股，
 	// __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,1500);//1800卡住，2500松开，左小蓝机
