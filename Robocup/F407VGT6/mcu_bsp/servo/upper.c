@@ -206,7 +206,7 @@ void DistributionRankLoop(Rank_t* rank_task,Servo_t* servos,ThingStore_Task2_t* 
 						
 			vTaskDelay(2000);
             Servo_SetAngle(&servos[1], UP,180);
-			vTaskDelay(2000);
+			vTaskDelay(1000);
 
             plate_task2_things[*CurrentRankLoop]._rank = rank_task[*CurrentRankLoop];
             plate_task2_things[*CurrentRankLoop]._angle = THING_GIMBAL_ORIGIN_ANGLE + *CurrentRankLoop*THING_GIMBAL_FIXED_DELTA;
@@ -255,8 +255,39 @@ void PutRank(Servo_t* servos, ThingStore_Task2_t* plate_task2_things, UpperTaskF
         if (*upperflag == PICKINGOUT)
         {
             Servo_SetAngle(&servos[1], UP,180);
-            Servo_SetAngle(&servos[2], plate_task2_things[*PutRankLoop]._angle,360);
 
+            if(*PutRankLoop == 0)
+            for (int i = 0; i < 3; i++) 
+            {
+                if (plate_task2_things[i]._rank == GOLD)   
+                {
+                    Servo_SetAngle(&servos[2], plate_task2_things[i]._angle,360);
+                    vTaskDelay(2000);
+                    break;
+                }
+            }
+
+            else if(*PutRankLoop == 1)
+            for (int i = 0; i < 3; i++) 
+            {
+                if (plate_task2_things[i]._rank == SILVER)   
+                {
+                    Servo_SetAngle(&servos[2], plate_task2_things[i]._angle,360);
+                    vTaskDelay(2000);
+                    break;
+                }
+            }
+
+            else if(*PutRankLoop == 2)
+            for (int i = 0; i < 3; i++) 
+            {
+                if (plate_task2_things[i]._rank == BRONZE)   
+                {
+                    Servo_SetAngle(&servos[2], plate_task2_things[i]._angle,360);
+                    vTaskDelay(2000);
+                    break;
+                }
+            }
             Servo_SetAngle(&servos[0], FIND_PLATE,270);
             vTaskDelay(4000);
             Servo_SetAngle(&servos[1], PUT_DOWN+5,180);
@@ -284,8 +315,7 @@ void PutRank(Servo_t* servos, ThingStore_Task2_t* plate_task2_things, UpperTaskF
             vTaskDelay(4000);
             Servo_SetAngle(&servos[1], UP,180);
             vTaskDelay(2000);
-            (*PutRankLoop)++;
-
+						(*PutRankLoop)++;
             *upperflag = IDLE;
         }
     }
