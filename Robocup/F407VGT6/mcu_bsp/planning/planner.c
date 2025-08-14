@@ -17,7 +17,8 @@ void Planner_init(Planner_t *self, Controller_t *controller)
     CubicSpline_Init(&self->cub_spline[2], (Point){0, 0}, (Point){0, 0}, (Point){0, 0});
     self->controller = controller;
     SimpleStatus_t_init(&self->promise);
-    self->control_mode = PLANNER_MODE_CLOSE_CONTROL;
+    self->control_mode = PLANNER_MODE_OPEN_CONTROL;
+    self->promise._isResolved=true;
 }
 void Planner_update(Planner_t *self, uint16_t dt)
 {
@@ -30,16 +31,7 @@ void Planner_update(Planner_t *self, uint16_t dt)
         {
         case PLANNER_MODE_OPEN_CONTROL:
         {
-            cmd_vel_t vel_target = {
-                CubicSpline_dx(&self->cub_spline[0], t),
-                CubicSpline_dx(&self->cub_spline[1], t),
-                CubicSpline_dx(&self->cub_spline[2], t)};
-            Controller_set_vel_target(self->controller, vel_target, true);
-
-            if (t >= self->target_t)
-            {
-                SimpleStatus_t_resolve(&self->promise);
-            }
+          
             break;
         }
         case PLANNER_MODE_CLOSE_CONTROL:
@@ -55,12 +47,13 @@ void Planner_update(Planner_t *self, uint16_t dt)
                 //判断是否到达目标位置
             odom_t *error = &self->controller->kinematic->_odom_error;
             odom_t *current = &self->controller->kinematic->current_odom;
-		
+            float yaw_diff=normalRad(self->target_odom.yaw - current->yaw);
             if (fabs(self->target_odom.x - current->x) < error->x &&
                 fabs(self->target_odom.y - current->y) < error->y &&
-                fabs(self->target_odom.yaw - current->yaw) < error->yaw)
+                fabs(yaw_diff) < error->yaw)
             {
                 SimpleStatus_t_resolve(&self->promise);
+                self->control_mode = PLANNER_MODE_OPEN_CONTROL;
             }
             break;
         }

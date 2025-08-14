@@ -70,6 +70,27 @@ typedef struct
 }ThingStore_t;
 
 /*
+    * @brief 任务二物块枚举常量
+*/
+typedef enum
+{
+    GOLD=1,
+    SILVER=2,
+    BRONZE=3
+}Rank_t;
+/*
+    * @brief 任务二料盘结构体
+*/
+typedef struct 
+{
+    Rank_t _rank;
+    int _angle;
+    int _number;
+}ThingStore_Task2_t;
+
+
+/*
+
     * @brief 上层机构状态机
 */
 typedef enum
@@ -98,5 +119,7 @@ typedef enum
 void GetColorTask(Color_t* color_task, int* color_task_index);
 void DistributionLoop(Servo_t* servos,ThingStore_t* plate_things,Color_t* current_color_ptr, UpperTaskFlag* upperflag,int* CurrentColorLoop);
 void PutGoal(Color_t* color_task,Servo_t* servos,ThingStore_t* plate_things, UpperTaskFlag* upperflag,int* PutGoalLoop);
-
+void GetRankTask(Rank_t* rank_task, int* rank_task_index);
+void DistributionRankLoop(Rank_t* rank_task,Servo_t* servos,ThingStore_Task2_t* plate_task2_things, UpperTaskFlag* upperflag,int* CurrentRankLoop);
+void PutRank(Servo_t* servos,ThingStore_Task2_t* plate_task2_things, UpperTaskFlag* upperflag,int* PutRankLoop);
 #endif
