@@ -51,7 +51,7 @@ void Controller_Init(Controller_t *controller, StepMotorZDT_t **_zdt_motor, Kine
         controller->zdt_mot[i] = _zdt_motor[i];
     }
     controller->kinematic = kinematic;
-    controller->ControlMode = LOCATION_CONTROL;
+    controller->ControlMode =  SPEED_CONTROL_SELF;
     controller->setmotor_speed = Controller_setMotorTargetSpeed;
     controller->Controller_MotorUpdate = ZDTController_MotorUpdate;
     controller->setmotor_pos_vel = Controller_setMotor_Targetpos_vel;

@@ -133,7 +133,8 @@ SimpleStatus_t *Planner_LoactaionBaseOdomContorl(Planner_t *self, const odom_t *
     //将局部坐标转化到全局坐标下
     const odom_t * current_odom = &self->controller->kinematic->current_odom;
     odom_t targetGlobal;
-    float targetYawGlobal=normalRad(target_odom->yaw + current_odom->yaw);
+    float targetYawGlobal=target_odom->yaw + current_odom->yaw;
+	targetYawGlobal=normalRad(targetYawGlobal);
     targetGlobal.x=target_odom->x*cos(current_odom->yaw) - target_odom->y*sin(current_odom->yaw) + current_odom->x;
     targetGlobal.y=target_odom->x*sin(current_odom->yaw) + target_odom->y*cos(current_odom->yaw) + current_odom->y;
     targetGlobal.yaw=targetYawGlobal;

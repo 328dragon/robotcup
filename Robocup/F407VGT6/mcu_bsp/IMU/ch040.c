@@ -17,6 +17,7 @@ float ch040_quat[4] = {0};
 float ch040_yaw = 0;
 float yaw_raw = 0.0f;  // 用于存储原始yaw角度
 float yaw_zero = 0.0f; // 用于存储零点yaw角度
+float currentYaw=0.0f;  //用于存储当前的yaw
 __NOINLINE float ch040_get_data(uint8_t *data)
 {
 	float yaw = 0.0f; // 用于存储处理后的yaw角度
@@ -53,16 +54,16 @@ __NOINLINE float ch040_get_data(uint8_t *data)
 		yaw_raw -= 2 * 3.1415926f;
 	}
 
-	yaw = yaw_raw - yaw_zero; // 减去零点偏移
-	if (yaw < -3.1415926f)
+	currentYaw = yaw_raw - yaw_zero; // 减去零点偏移
+	if (currentYaw < -3.1415926f)
 	{
-		yaw += 2 * 3.1415926f;
+		currentYaw += 2 * 3.1415926f;
 	}
-	else if (yaw > 3.1415926f)
+	else if (currentYaw > 3.1415926f)
 	{
-		yaw -= 2 * 3.1415926f;
+		currentYaw -= 2 * 3.1415926f;
 	}
-	return yaw;
+	return currentYaw;
 }
 void setYawZero()
 {
@@ -71,7 +72,7 @@ void setYawZero()
 //设置当前的yaw为yaw
 void setYaw(float currentYawIn)
 {
-	yaw_zero -= currentYawIn-yaw;
+	yaw_zero -= currentYawIn-currentYaw;
 	if(yaw_zero<-3.1415926f)
 	{
 		yaw_zero+=2*3.1415926f;
