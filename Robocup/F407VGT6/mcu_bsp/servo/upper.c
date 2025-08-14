@@ -165,6 +165,147 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
     }
 }
 
+/*
+ * @brief 获得任务二摆放顺序
+ */
+void Get_ABC_Task( ThingStore_t *plate_things, int *ranking_task_index)
+{
+    // 创建名次映射表，使用Ranking_t枚举
+    ////顺序3,2,1/////
+ static const Ranking_t ABC_ranking_Map[6][3] = {
+            /* 1  */ {Bronze_medal, Runner_up, Champion},
+            /* 2  */ {Runner_up, Bronze_medal, Champion},
+            /* 3  */ {Bronze_medal, Champion, Runner_up},
+            /* 4  */ {Champion, Bronze_medal, Runner_up},
+            /* 5  */ {Runner_up, Champion, Bronze_medal},
+            /* 6  */ {Champion, Runner_up, Bronze_medal},
+        };
+
+    // 检查输入数字是否有效
+    if (*ranking_task_index >= 1 && *ranking_task_index <= 6)
+    {
+        // 将对应行的颜色复制到输出数组
+        for (int i = 2; i < 5; i++)
+        {
+            plate_things[i]._rank = ABC_ranking_Map[*ranking_task_index - 1][i];
+        }
+    }
+}
+
+/*
+ * @brief 绑定料盘槽的信息并且抓取
+ *dragon:只用一个舵机，一个抬升,servo[0]是云台舵机
+ */
+void Distribution_ABC(Servo_t *servos, ThingStore_t *plate_things, UpperTaskFlag *upperflag, int *CurrentrankingLoop)
+{
+
+    if (*CurrentrankingLoop <= 3)
+    {
+        if (*upperflag == PICKINGABC)
+        {
+            PUMP_ON;
+            target_upper_loacation = up_location;
+            vTaskDelay(1000);
+            Servo_SetAngle(&servos[0], FIND_PLATE, 360); // 等待抓取
+            vTaskDelay(1000);                            // 等待舵机转动完成，需要实测
+            target_upper_loacation = down_location;
+            vTaskDelay(2000);
+            target_upper_loacation = middle_location;
+            vTaskDelay(1000);
+            target_upper_loacation = up_location;
+            vTaskDelay(1000);
+
+            *upperflag = GETABCIN;
+        }
+        if (*upperflag == GETABCIN)
+        {
+            int ranking_angle = -1;
+            switch (*CurrentrankingLoop)
+            {
+            case 0:
+            {
+                ranking_angle = THIRD_PLACE;
+                break;
+            }
+            case 1:
+            {
+                ranking_angle = SECOND_PLACE;
+                break;
+            }
+            case 2:
+            {
+                ranking_angle = ONCE_PLACE;
+
+                break;
+            }
+            default:
+                break;
+            }
+            Servo_SetAngle(&servos[0], ranking_angle, 360); // 放到对应任务料盘正上方
+            (*CurrentrankingLoop)++;
+            *upperflag = PUTINGINABC;
+        }
+        if (*upperflag == PUTINGINABC)
+        {
+            vTaskDelay(1000);
+            // 此处还需加入吸盘关闭
+            target_upper_loacation = middle_location;
+            vTaskDelay(500);
+            PUMP_OFF;
+            vTaskDelay(2000);
+            target_upper_loacation = up_location; // 上升到上面防止冲突
+            vTaskDelay(3000);
+            Servo_SetAngle(&servos[0], FIND_PLATE, 360); // 等待抓取
+            *upperflag = IDLE;
+        }
+    }
+}
+
+// 拿出去
+void PutABCGoal(Ranking_t *ranking_task, Servo_t *servos, ThingStore_t *plate_things, UpperTaskFlag *upperflag, int *PutGoalLoop)
+{
+    if (*PutGoalLoop <= 3)
+    {
+        if (*upperflag == PICKINGOUT) // 将物块分拣到对应料盘
+                                      //  按顺序筛选对应颜色任务的料盘
+        {
+            target_upper_loacation = up_location;
+            PUMP_ON;
+            vTaskDelay(1000);
+            for (int i = 0; i < 4; i++)
+            {
+                if (plate_things[i]._rank == ranking_task[*PutGoalLoop]) // 找对应放置任务的名次
+                {
+                    Servo_SetAngle(&servos[0], plate_things[i]._angle, 360);
+                    (*PutGoalLoop)++;
+                    break;
+                }
+            }
+            vTaskDelay(1400);
+            target_upper_loacation = pick_middle_location;
+            *upperflag = PUTTINGOUT;
+        }
+
+        // 此处还需等待底盘移动到目标位置
+        if (*upperflag == PUTTINGOUT) // 放置物块到目标位置
+        {
+            vTaskDelay(1000);
+            target_upper_loacation = up_location;
+            vTaskDelay(2000);
+            Servo_SetAngle(&servos[0], GOAL_PLACE, 360);
+            vTaskDelay(1000); // 等待舵机转动完成，需要实测
+            target_upper_loacation = down_put_lcoation;
+            vTaskDelay(500);
+            // 此处还需加入吸盘关闭
+            PUMP_OFF;
+            vTaskDelay(1000);
+            target_upper_loacation = up_location;
+            *upperflag = IDLE;
+            vTaskDelay(1000);
+        }
+    }
+}
+
 void upper_move_distance(uint8_t addr, uint8_t dir, uint16_t vel, uint8_t acc, uint32_t clk, bool raF, bool snF)
 {
     uint8_t cmd[16] = {0};
@@ -240,7 +381,7 @@ static void upper_move_location(upper_location now_location, upper_location targ
         }
         else if (target_position == up_location)
         {
-            upper_move_distance(5, 0, 300, 0.02,up_pulse-dowm_put_pulse , 0, 0); // 上升到最高位置
+            upper_move_distance(5, 0, 300, 0.02, up_pulse - dowm_put_pulse, 0, 0); // 上升到最高位置
             now_upper_loacation = up_location;
         }
         if (target_position == pick_middle_location)
