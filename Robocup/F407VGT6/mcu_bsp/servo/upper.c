@@ -187,7 +187,7 @@ void Get_ABC_Task( ThingStore_t *plate_things, int *ranking_task_index)
         // 将对应行的颜色复制到输出数组
         for (int i = 2; i < 5; i++)
         {
-            plate_things[i]._rank = ABC_ranking_Map[*ranking_task_index - 1][i];
+            plate_things[i]._rank = ABC_ranking_Map[*ranking_task_index - 1][i-2];
         }
     }
 }
@@ -214,7 +214,6 @@ void Distribution_ABC(Servo_t *servos, ThingStore_t *plate_things, UpperTaskFlag
             vTaskDelay(1000);
             target_upper_loacation = up_location;
             vTaskDelay(1000);
-
             *upperflag = GETABCIN;
         }
         if (*upperflag == GETABCIN)
@@ -266,13 +265,13 @@ void PutABCGoal(Ranking_t *ranking_task, Servo_t *servos, ThingStore_t *plate_th
 {
     if (*PutGoalLoop <= 3)
     {
-        if (*upperflag == PICKINGOUT) // 将物块分拣到对应料盘
+        if (*upperflag == PICKINGABCOUT) // 将物块分拣到对应料盘
                                       //  按顺序筛选对应颜色任务的料盘
         {
             target_upper_loacation = up_location;
             PUMP_ON;
             vTaskDelay(1000);
-            for (int i = 0; i < 4; i++)
+            for (int i = 2; i < 5; i++)
             {
                 if (plate_things[i]._rank == ranking_task[*PutGoalLoop]) // 找对应放置任务的名次
                 {
@@ -283,11 +282,11 @@ void PutABCGoal(Ranking_t *ranking_task, Servo_t *servos, ThingStore_t *plate_th
             }
             vTaskDelay(1400);
             target_upper_loacation = pick_middle_location;
-            *upperflag = PUTTINGOUT;
+            *upperflag = PUTTINGABCOUT;
         }
 
         // 此处还需等待底盘移动到目标位置
-        if (*upperflag == PUTTINGOUT) // 放置物块到目标位置
+        if (*upperflag == PUTTINGABCOUT) // 放置物块到目标位置
         {
             vTaskDelay(1000);
             target_upper_loacation = up_location;

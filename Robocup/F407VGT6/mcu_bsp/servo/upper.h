@@ -91,6 +91,8 @@ typedef enum
     PICKINGABC,
     GETABCIN,
     PUTINGINABC,
+    PICKINGABCOUT,
+    PUTTINGABCOUT,
     IDLE
 } UpperTaskFlag;
 
