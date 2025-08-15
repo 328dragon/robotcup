@@ -1320,7 +1320,7 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(200);
-                    move_step_distance(-1.42, 0.07, 0, 1);
+                    move_step_distance(-1.3, 0.02, 0, 1);
 									 vTaskDelay(80);
                     main_second_state++;
                 }
@@ -1354,7 +1354,7 @@ void Onmaincpp(void *pvParameters)
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-									move_step_distance(0.06, 0.328, 0, 1);//第一个值是神秘小参数，因为圆在十字左上方
+									move_step_distance(0.05, 0.328, 0, 1);//第一个值是神秘小参数，因为圆在十字左上方
                     main_second_state++;
                 }
 
