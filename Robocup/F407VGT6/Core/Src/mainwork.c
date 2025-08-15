@@ -30,8 +30,8 @@
 #define DEBUG_UPPER 0
 #define DEBUG_CHASSIS 1
 // #define DEBUG_PARAM_PUT 1
-#define TASK2 0
-#define TASKDEBUG 0
+#define TASK2 1
+// #define TASKDEBUG 0
 #define TASK1 1
 // #define DEBUG_PARAM_PUT 1
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
@@ -71,13 +71,16 @@ ThingStore_t plate_things[5] = {
 Color_t color_task[5] = {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_GREEN}; // 颜色任务数组
 Color_t current_color_RGB = COLOR_BLACK;                                                // 当前颜色
 Color_t current_color_HSL = COLOR_BLACK;                                                // 当前颜色
-Color_t *current_color_ptr = &current_color_RGB;
+Color_t *current_color_ptr = &current_color_HSL;
+int color_task_lock = 0;
 
 ThingStore_Task2_t plate_task2_things[3] = {
     {GOLD, 33, 0},
     {SILVER, 93, 1},
     {BRONZE, 153, 2}};
 Rank_t rank_task[3] = {GOLD, SILVER, BRONZE}; // 排序任务数组
+int rank_task_lock = 1;
+
 int CurrentColorLoop = 0;                     // 物块获取循环
 int PutGoalLoop = 0;                          // 目标放置循环
 int CurrentRankLoop = 0;                      // 任务二物块获取循环
@@ -88,7 +91,7 @@ int safe_count = 0;    // 保护锁
 // 主函数状态机
 __IO int main_state = 0;
 __IO int main_put_state = -1;
-__IO int main_second_state = 0;
+__IO int main_second_state = -1;
 // 调试跑十字时候状态
 //__IO int main_state = -1;
 //__IO int main_put_state = 0;
@@ -171,8 +174,20 @@ void usart1_callback(void)
 {
     if (uart1.recv_buff[0] == 0x91 && uart1.recv_buff[1] == 0xCB)
     {
+        
 
         qr_code = uart1.recv_buff[2];
+        if(qr_code != 0 && color_task_lock == 0)
+        {
+            color_task_lock++;
+            GetColorTask(color_task, qr_code_ptr);
+        }
+        if(qr_code != 0 && rank_task_lock == 0)
+        {
+            rank_task_lock++;
+            GetRankTask(rank_task, qr_code_ptr);
+        }
+
     }
 }
 
@@ -318,7 +333,7 @@ void main_work(void)
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
-    Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
+    Kinematic_init(kinematic_ptr, 0.2, 1.1, X_shape);
     Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
     //	GetColorTask(color_task,&color_task_index);
@@ -349,7 +364,7 @@ static void move_step_distance(float odom_x, float odom_y, float odom_yaw, bool 
     motor_mode = 1;
     debug_target_odom = (odom_t){odom_x, odom_y, odom_yaw};
     debug_target_erro = (odom_t){0.005, 0.005, 0.005};
-    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 2.0f, &debug_target_erro, clear_odom);
+    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 2.5f, &debug_target_erro, clear_odom);
 }
 
 void GwGet_color_task(void *pvParameters)
@@ -593,8 +608,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_code != 0)
                 {
                     vTaskDelay(500);
-                    GetColorTask(color_task, qr_code_ptr);
-                    move_step_distance(0.15, 0.02, 0, 1);
+                    move_step_distance(0.1, 0.02, 0, 1);
                     main_state++;
                 }
                 break;
@@ -628,7 +642,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.07, -0.41, 0, 1);
+                    move_step_distance(0.07, -0.42, 0, 1);
                     main_state++;
                 }
                 break;
@@ -664,7 +678,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.06, -0.50, 0, 1);
+                    move_step_distance(-0.10, -0.50, 0, 1);
                     main_state++;
                 }
                 break;
@@ -701,7 +715,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.33, -0.51, 0, 1);
+                    move_step_distance(-0.33, -0.49, 0, 1);
                     main_state++;
                 }
                 break;
@@ -748,7 +762,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0, -0.38, 0, 1);
+                    move_step_distance(0, -0.40, 0, 1);
                     main_state++;
                 }
             }
@@ -814,7 +828,7 @@ void Onmaincpp(void *pvParameters)
                         vTaskDelay(200);
                         setYawZero();
                         vTaskDelay(500);
-                        move_step_distance(0.35, 0.37, 0, 1);
+                        move_step_distance(0.37, 0.50, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -839,7 +853,7 @@ void Onmaincpp(void *pvParameters)
 
                     if (gray_data_side_middle != 0)
                     {
-                        vTaskDelay(100);
+                        vTaskDelay(200);
                         move_step_distance(0, gray_data_side_middle, 0, 1);
                         main_put_state++;
                     }
@@ -856,7 +870,7 @@ void Onmaincpp(void *pvParameters)
                     {
                         // 注意要抬升到上面
                         vTaskDelay(100);
-                        move_step_distance(0.40, 0.21, 0, 1);
+                        move_step_distance(0.38, 0.24, 0, 1);
                         main_put_state++;
                     }
 
@@ -982,14 +996,14 @@ void Onmaincpp(void *pvParameters)
                     }
                     break;
                 }
-                /////////////等待空闲///////
+                /////////////等待空闲去找CCCCCCCCCCCCCCCCCCCCCCCC///////
                 case 15:
                 {
 
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-0.30, -0.15, 0, 1);
+                        move_step_distance(-0.30, -0.13, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1056,7 +1070,7 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.29, 0.25, 0, 1);
+                        move_step_distance(0.26, 0.19, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1079,7 +1093,6 @@ void Onmaincpp(void *pvParameters)
                         upperflag = PICKINGOUT;
                         vTaskDelay(200);
                         main_put_state++;
-                        main_second_state =0;
                     }
                     break;
                 }
@@ -1089,7 +1102,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0, -0.1, 0, 1);
+                        move_step_distance(0, -0.25, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1100,31 +1113,75 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.6, 0, 0, 1);
+                        move_step_distance(0.90, 0, 0, 1);
+                        main_put_state++;
+                        main_second_state =0;
+                    }
+                    break;
+                }
+                // 去找十字纠正自身
+                case 25:
+                {
+                   if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        move_vel(0.1, 0, 0);
+                        if (gray_data_side_sum >= 3)
+                        {
+                            move_vel(0, 0, 0);
+                            main_put_state++;
+                        }
+                    }
+                    break;
+                }
+                /////////*************开始对第二个二维码处十字******************////////////////
+                case 26:
+                {
+
+                    if (gray_data_side_middle != 0)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0, gray_data_side_middle, 0, 1);
+                        main_put_state++;
+                    }
+                    else
+                    {
                         main_put_state++;
                     }
                     break;
                 }
-
+                //转过来准备看二维码
+                case 27:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(500);
+                        move_step_distance(0, 0, -1.571, 1);
+                        main_put_state++;
+                        main_second_state = 0;
+                    }
+                    break;
+                }
                 default:
                     break;
                 }
             }
 #endif
-#if TASK2
+#ifdef TASK2
             switch (main_second_state)
             {
-            case 0:
+           case 0:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_code != 0 )
                 {
+                    CurrentColorLoop =5;
+                    PutGoalLoop =5;
                     setYawZero();
                     vTaskDelay(200);
-                    GetRankTask(rank_task, qr_mv_code_ptr2);
+                    rank_task_lock = 0;
                     vTaskDelay(2000);
                     move_step_distance(0, 0, 3.1415926, 1);
                     main_second_state++;
-                    vTaskDelay(2000);
+					vTaskDelay(2000);
                 }
                 break;
             }
@@ -1136,12 +1193,22 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(500);
-                    move_step_distance(0.6, 0.5, 0, 1);
+                    move_step_distance(0.6, 0.39, 0, 1);
                     main_second_state++;
                 }
                 break;
             }
-            case 2:
+						case 2:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0.2, 0, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 3:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -1152,7 +1219,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
             // 抓取第一个物块
-            case 3:
+            case 4:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -1162,28 +1229,28 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            // 去找2//
-            case 4:
+            //去找2//
+            case 5:
             {
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.2, 0.2, 0, 1);
-                    main_second_state++;
-                }
-                break;
-            }
-            case 5:
-            {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-                {
-                    vTaskDelay(500);
-                    move_step_distance(0.3, 0, 0, 1);
+                    move_step_distance(-0.02, 0.44, 0, 1);
                     main_second_state++;
                 }
                 break;
             }
             case 6:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0.2, 0, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 7:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -1194,7 +1261,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
             // 抓取第二个物块
-            case 7:
+            case 8:
             {
 
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -1205,28 +1272,28 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-                /// 去找最后
-            case 8:
-            {
-                if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
-                {
-                    vTaskDelay(1000);
-                    move_step_distance(-0.4, 0.2, 0, 1);
-                    main_second_state++;
-                }
-                break;
-            }
+            /// 去找最后
             case 9:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                if (*upperflag_ptr == IDLE) 
                 {
-                    vTaskDelay(500);
-                    move_step_distance(0.4, 0, 0, 1);
+                    vTaskDelay(1000);
+                    move_step_distance(-0.3, 0.44, 0, 1);
                     main_second_state++;
                 }
                 break;
             }
             case 10:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0.3, 0, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 11:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -1237,7 +1304,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
             // 抓取最后物块
-            case 11:
+            case 12:
             {
 
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -1249,7 +1316,7 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
             // 旋转去冠亚季领奖台
-            case 12:
+            case 13:
             {
                 if (*upperflag_ptr == IDLE)
                 {
@@ -1259,19 +1326,19 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            case 13:
+            case 14:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(500);
-                    move_step_distance(0, 1.1, 0, 1);
+                    move_step_distance(0.23, 1.63, 0, 1);
                     main_second_state++;
                 }
                 break;
             }
-            case 14:
+            case 15:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -1285,8 +1352,91 @@ void Onmaincpp(void *pvParameters)
 
                 break;
             }
+            //找冠圈
+            case 16:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0.27, 0, 0, 1);
+                    main_second_state++;
+                }
+
+                break;
+            }
+            //放冠圈
+            case 17:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+					CurrentColorLoop =5;
+                    PutGoalLoop =5;
+                    upperflag = PICKINGOUT;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+                break;
+            }
+            //找亚圈
+            case 18:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, -0.28, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            //放亚圈
+            case 19:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    upperflag = PICKINGOUT;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+                break;
+            }
+            //去季圈
+            case 20:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, 0.56, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            //放季圈
+            case 21:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    upperflag = PICKINGOUT;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+                break;
+            }
+            //go home 
+            case 22:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(200);
+                    main_second_state++;
+                    vTaskDelay(500);
+                    move_step_distance(-1.9, -0.33, 0, 1);
+                }
+                break;
+            }
+
             default:
                 break;
+
             }
 #endif
             switch (motor_mode)
