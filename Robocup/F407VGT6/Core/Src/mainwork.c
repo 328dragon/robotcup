@@ -33,7 +33,7 @@
 #define TASK2 1
 // #define TASKDEBUG 0
 #define TASK1 1
-// #define DEBUG_PARAM_PUT 1
+#define DEBUG_PARAM_PUT 1
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
 #define abs(x) (x > 0 ? x : (-x))
 float debug_angle[3] = {0, 0, 0}; // 调试角度
@@ -364,7 +364,7 @@ static void move_step_distance(float odom_x, float odom_y, float odom_yaw, bool 
     motor_mode = 1;
     debug_target_odom = (odom_t){odom_x, odom_y, odom_yaw};
     debug_target_erro = (odom_t){0.005, 0.005, 0.005};
-    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 2.5f, &debug_target_erro, clear_odom);
+    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 1.2f, &debug_target_erro, clear_odom);
 }
 
 void GwGet_color_task(void *pvParameters)
@@ -905,6 +905,19 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
+                        if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
                         move_step_distance(-0.30, -0.23, 0, 1);
                         main_put_state++;
                     }
@@ -953,6 +966,19 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
+                        if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
                         move_step_distance(0, 1.08, 0, 1);
                         main_put_state++;
                     }
@@ -1003,6 +1029,19 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
+                        if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
                         move_step_distance(-0.30, -0.13, 0, 1);
                         main_put_state++;
                     }
@@ -1046,7 +1085,6 @@ void Onmaincpp(void *pvParameters)
                     {
                         upperflag = PICKINGOUT;
                         vTaskDelay(200);
-
                         main_put_state++;
                     }
                     break;
@@ -1059,6 +1097,19 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
+                        if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
                         move_step_distance(0, 0.5, 0, 1);
                         main_put_state++;
                     }
@@ -1102,6 +1153,19 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
+                        if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
                         move_step_distance(0, -0.25, 0, 1);
                         main_put_state++;
                     }
@@ -1349,7 +1413,6 @@ void Onmaincpp(void *pvParameters)
                         main_second_state++;
                     }
                 }
-
                 break;
             }
             //找冠圈
@@ -1364,8 +1427,18 @@ void Onmaincpp(void *pvParameters)
 
                 break;
             }
-            //放冠圈
+            //视觉纠正
             case 17:
+            {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        PutWithVisual();
+                        main_second_state++;
+                    }
+                    break;
+            }
+            //放冠圈
+            case 18:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
@@ -1378,39 +1451,40 @@ void Onmaincpp(void *pvParameters)
                 break;
             }
             //找亚圈
-            case 18:
+            case 19:
             {
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(200);
+                    if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
                     move_step_distance(0, -0.28, 0, 1);
                     main_second_state++;
                 }
                 break;
             }
-            //放亚圈
-            case 19:
-            {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
-                {
-                    upperflag = PICKINGOUT;
-                    vTaskDelay(200);
-                    main_second_state++;
-                }
-                break;
-            }
-            //去季圈
+            //视觉纠正
             case 20:
             {
-                if (*upperflag_ptr == IDLE)
-                {
-                    vTaskDelay(500);
-                    move_step_distance(0, 0.56, 0, 1);
-                    main_second_state++;
-                }
-                break;
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        PutWithVisual();
+                        main_second_state++;
+                    }
+                    break;
             }
-            //放季圈
+            //放亚圈
             case 21:
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
@@ -1421,8 +1495,66 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            //go home 
+            //去季圈
             case 22:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(500);
+                    if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
+                    move_step_distance(0, 0.56, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            //视觉纠正
+            case 23:
+            {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        PutWithVisual();
+                        main_second_state++;
+                    }
+                    break;
+            }
+            //放季圈
+            case 24:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    upperflag = PICKINGOUT;
+                    vTaskDelay(200);
+                    if(errorXVisual!=0.0 || errorYVisual!=0.0)
+                        {
+                            odom_t target_odom_base={0.0,0.0,0.0};
+                            odom_t target_error = {0.005, 0.005, 0.005};
+                            target_odom_base.x=errorXVisual;
+                            target_odom_base.y=errorYVisual;
+                            SimpleStatus_t * result;
+                            result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+                            while (SimpleStatus_t_isResolved(result) == false)
+                            {
+                                osDelay(40);
+                            }
+                        }
+                    main_second_state++;
+                }
+                break;
+            }
+            //go home 
+            case 25:
             {
                 if (*upperflag_ptr == IDLE)
                 {
@@ -1584,16 +1716,13 @@ void PutWithVisual()
         {
             osDelay(40);
         }
-        target_odom_base.x=-target_odom_base.x;
-        target_odom_base.y=-target_odom_base.y;
-        result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
-        while (SimpleStatus_t_isResolved(result) == false)
-        {
-            osDelay(40);
-        }
+         errorXVisual=-target_odom_base.x;
+         errorYVisual=-target_odom_base.y;
     }
     else
     {
+        errorXVisual=0.0;
+        errorYVisual=0.0;
         return;
     }
 }

@@ -57,6 +57,7 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
-    "ch040.h": "c"
+    "ch040.h": "c",
+    "controller.h": "c"
   }
 }

@@ -1,3 +1,11 @@
+/*
+ * @Author: Nagisa 2964793117@qq.com
+ * @Date: 2025-08-07 15:49:24
+ * @LastEditors: Nagisa 2964793117@qq.com
+ * @LastEditTime: 2025-08-15 17:41:15
+ * @FilePath: \robotcup\Robocup\F407VGT6\mcu_bsp\planning\controller.c
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include "controller.h"
 static float normalRad(float rad) {
   if (rad > PI) {
@@ -59,8 +67,8 @@ void Controller_Init(Controller_t *controller, StepMotorZDT_t **_zdt_motor, Kine
     uint32_t init_y_maxout = 2;
     uint32_t init_yaw_maxout = 3;
     // 初始化PID控制器
-    PID_struct_init(&controller->pid_x, POSITION_PID, init_x_maxout, 0.4f, 0.7f, 0.04f, 0);
-    PID_struct_init(&controller->pid_y, POSITION_PID, init_y_maxout, 0.4f, 0.7f, 0.04f, 0);
+    PID_struct_init(&controller->pid_x, POSITION_PID, init_x_maxout, 0.5f, 1.0f, 0.04f, 0.4);
+    PID_struct_init(&controller->pid_y, POSITION_PID, init_y_maxout, 0.5f, 1.0f, 0.04f, 0.4);
     PID_struct_init(&controller->pid_yaw, POSITION_PID, init_yaw_maxout, 0.6f, 0.7f, 0.04f, 0);
 
     // 初始化状态
