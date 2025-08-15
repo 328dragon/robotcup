@@ -28,8 +28,8 @@
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
 #define abs(x) (x > 0 ? x : (-x))
 
-// #define TASK_1
-#define TASK_2
+ #define TASK_1
+//#define TASK_2
 //// #define TASK_ALL
 
 //任务进行阶段，默认从1开始，任务一结束后将他切换成2
@@ -475,7 +475,7 @@ static void move_step_distance(float odom_x, float odom_y, float odom_yaw, bool 
     motor_mode = 1;
     debug_target_odom = (odom_t){odom_x, odom_y, odom_yaw};
     debug_target_erro = (odom_t){0.005, 0.005, 0.005};
-    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 3.0f, &debug_target_erro, clear_odom);
+    Planner_LoactaionCloseControl(planner_ptr, &debug_target_odom, 4.0f, &debug_target_erro, clear_odom);
 }
 
 void Onmaincpp(void *pvParameters)
@@ -557,10 +557,11 @@ void Onmaincpp(void *pvParameters)
                 //////*********找第一个物块****//////
             case 5:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_code != 0)
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_mv_code != 0)
                 {
-                    color_task_index = qr_code;
+                    color_task_index = qr_mv_code;
                     GetColorTask(color_task, &color_task_index);
+									qr_mv_code=0;
                     move_step_distance(-0.07, 0.27, 0, 1);
                     main_state++;
                 }
@@ -595,7 +596,8 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.38, 0.28, 0, 1);
+//                    move_step_distance(0.38, 0.28, 0, 1);
+									 move_step_distance(0.40, 0.28, 0, 1);//修正
                     main_state++;
                 }
                 break;
@@ -641,7 +643,8 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.53, 0.05, 0, 1);
+//                    move_step_distance(0.53, 0.05, 0, 1);
+									  move_step_distance(0.50, 0.05, 0, 1);
                     main_state++;
                 }
                 break;
@@ -687,7 +690,8 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(0.48, -0.4, 0, 1);
+//                    move_step_distance(0.48, -0.4, 0, 1);
+									 move_step_distance(0.46, -0.4, 0, 1);
                     main_state++;
                 }
                 break;
@@ -743,7 +747,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0.37, 0, 0, 1);
+                    move_step_distance(0.39, 0, 0, 1);
                     main_state++;
                 }
             }
@@ -1014,7 +1018,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-0.4, 0.25, 0, 1);
+                        move_step_distance(-0.6, 0.25, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1058,7 +1062,8 @@ void Onmaincpp(void *pvParameters)
                         vTaskDelay(200);
                         setYawZero();
                         vTaskDelay(500);
-                        move_step_distance(0.8, 0, 0, 1);
+//                        move_step_distance(0.8, 0, 0, 1);
+											move_step_distance(1.0, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
