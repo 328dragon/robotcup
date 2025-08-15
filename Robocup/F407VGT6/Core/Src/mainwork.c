@@ -30,7 +30,10 @@
 
 // #define TASK_1
 #define TASK_2
-// #define TASK_ALL
+//// #define TASK_ALL
+
+//任务进行阶段，默认从1开始，任务一结束后将他切换成2
+int task_state = 2;
 
 // 测试舵机
 #define SERVO_TEST
@@ -452,9 +455,9 @@ void LCD_Show_task(void *pvParameters)
         // 显示
         //        LCD_ShowString(48, 20, ",", RED, WHITE, 16, 0);
         //        LCD_ShowFloatNum1(0, 20, HSL[0], 8, RED, WHITE, 16);
-        LCD_ShowFloatNum1(0, 20, ranking_task_index, 8, RED, WHITE, 16);
+        LCD_ShowFloatNum1(0, 20, color_task_index, 8, RED, WHITE, 16);
         LCD_ShowFloatNum1(0, 40, goods_color_HSL, 8, RED, WHITE, 16);
-        LCD_ShowFloatNum1(0, 60, final_circle_dy, 8, RED, WHITE, 16);
+        LCD_ShowFloatNum1(0, 60, ranking_task_index, 8, RED, WHITE, 16);
         //							LCD_ShowFloatNum1(0, 60, HSL[2], 8, RED, WHITE, 16);
         //        LCD_ShowFloatNum1(0, 60, abs(main_yaw), 8, RED, WHITE, 16);
 
@@ -1164,7 +1167,7 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(500);
-                    move_step_distance(-0.32, 0.8, 0, 1);
+                    move_step_distance(-0.35, 0.8, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1195,7 +1198,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个
                 {
                     vTaskDelay(200);
-                    move_step_distance(-0.5, -0.1, 0, 1);
+                    move_step_distance(-0.43, -0.1, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1237,8 +1240,8 @@ void Onmaincpp(void *pvParameters)
             {
                 if (*upperflag_ptr == IDLE)
                 {
-                    vTaskDelay(1000);
-                    move_step_distance(-0.5, -0.2, 0, 1);
+                      vTaskDelay(200);
+                    move_step_distance(-0.45, -0.21, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1248,7 +1251,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0, 0.4, 0, 1);
+                    move_step_distance(0, 0.3, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1293,7 +1296,8 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(200);
-                    move_step_distance(-1.1, -0.1, 0, 1);
+                    move_step_distance(-1.2, 0.07, 0, 1);
+									 vTaskDelay(80);
                     main_second_state++;
                 }
                 break;
@@ -1326,7 +1330,7 @@ void Onmaincpp(void *pvParameters)
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-                    move_step_distance(0, 0.2, 0, 1);
+									  move_step_distance(0.08, 0.34, 0, 1);//第一个值是神秘小参数，因为车会偏左
                     main_second_state++;
                 }
 
@@ -1350,7 +1354,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(200);
-                    move_step_distance(-0.2, 0, 0, 1);
+                    move_step_distance(-0.28, 0, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1373,7 +1377,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(200);
-                    move_step_distance(-0.2, 0, 0, 1);
+                    move_step_distance(-0.28, 0, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1397,7 +1401,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(200);
-                    move_step_distance(0.2, -2, 0, 1);
+                    move_step_distance(0.135, -2, 0, 1);
                     main_second_state++;
                 }
                 break;
