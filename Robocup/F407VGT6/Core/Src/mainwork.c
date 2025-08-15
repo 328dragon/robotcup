@@ -30,10 +30,10 @@
 #define DEBUG_UPPER 0
 #define DEBUG_CHASSIS 1
 // #define DEBUG_PARAM_PUT 1
-#define TASK2 1
+//#define TASK2 1
 // #define TASKDEBUG 0
 #define TASK1 1
-#define DEBUG_PARAM_PUT 1
+//#define DEBUG_PARAM_PUT 1
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
 #define abs(x) (x > 0 ? x : (-x))
 float debug_angle[3] = {0, 0, 0}; // 调试角度
@@ -828,7 +828,7 @@ void Onmaincpp(void *pvParameters)
                         vTaskDelay(200);
                         setYawZero();
                         vTaskDelay(500);
-                        move_step_distance(0.37, 0.50, 0, 1);
+                        move_step_distance(0.30, 0.48, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -870,7 +870,7 @@ void Onmaincpp(void *pvParameters)
                     {
                         // 注意要抬升到上面
                         vTaskDelay(100);
-                        move_step_distance(0.38, 0.24, 0, 1);
+                        move_step_distance(0.435, 0.255, 0, 1);
                         main_put_state++;
                     }
 
@@ -990,7 +990,7 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.28, 0, 0, 1);
+                        move_step_distance(0.29, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1221,7 +1221,19 @@ void Onmaincpp(void *pvParameters)
                         vTaskDelay(500);
                         move_step_distance(0, 0, -1.571, 1);
                         main_put_state++;
-                        main_second_state = 0;
+                    }
+                    break;
+                }
+                 //滚回家
+                case 28:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(500);
+                        setYawZero();
+                        vTaskDelay(200);
+                        move_step_distance(0.64,0.31,0, 1);
+                        main_put_state++;
                     }
                     break;
                 }
@@ -1299,7 +1311,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.02, 0.44, 0, 1);
+                    move_step_distance(-0.02, 0.45, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1397,7 +1409,7 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(500);
-                    move_step_distance(0.23, 1.63, 0, 1);
+                    move_step_distance(0.15, 1.63, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1421,7 +1433,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(500);
-                    move_step_distance(0.27, 0, 0, 1);
+                    move_step_distance(0.24, 0, 0, 1);
                     main_second_state++;
                 }
 
@@ -1469,7 +1481,7 @@ void Onmaincpp(void *pvParameters)
                                 osDelay(40);
                             }
                         }
-                    move_step_distance(0, -0.28, 0, 1);
+                    move_step_distance(0, -0.27, 0, 1);
                     main_second_state++;
                 }
                 break;
