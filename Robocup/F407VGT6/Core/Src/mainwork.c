@@ -33,7 +33,7 @@
 #define TASK2 0
 #define TASKDEBUG 0
 #define TASK1 1
-#define DEBUG_PARAM_PUT 0
+// #define DEBUG_PARAM_PUT 1
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
 #define abs(x) (x > 0 ? x : (-x))
 float debug_angle[3] = {0, 0, 0}; // 调试角度
@@ -76,13 +76,12 @@ Color_t *current_color_ptr = &current_color_RGB;
 ThingStore_Task2_t plate_task2_things[3] = {
     {GOLD, 33, 0},
     {SILVER, 93, 1},
-    {BRONZE, 153, 2}
-};
+    {BRONZE, 153, 2}};
 Rank_t rank_task[3] = {GOLD, SILVER, BRONZE}; // 排序任务数组
-int CurrentColorLoop = 0;// 物块获取循环
-int PutGoalLoop = 0;   // 目标放置循环
-int CurrentRankLoop = 0;// 任务二物块获取循环
-int PutRankLoop = 0;   // 任务二目标放置循环
+int CurrentColorLoop = 0;                     // 物块获取循环
+int PutGoalLoop = 0;                          // 目标放置循环
+int CurrentRankLoop = 0;                      // 任务二物块获取循环
+int PutRankLoop = 0;                          // 任务二目标放置循环
 
 float main_yaw = 0.0f; // imu存取的yaw
 int safe_count = 0;    // 保护锁
@@ -98,12 +97,12 @@ __IO int main_second_state = 0;
 //__IO int main_put_state = -2;
 int motor_mode = 0;
 int qr_code = 0; // 香橙派获得的二维码数字（暂未使用）
-
+int* qr_code_ptr = &qr_code;
 int qr_mv_code = 0; // openmv获取的二维码数字（任务二）
-int* qr_mv_code_ptr = &qr_mv_code;
+int *qr_mv_code_ptr = &qr_mv_code;
 
-int qr_mv_code2 = 0;// openmv获取的二维码数字(任务二)
-int* qr_mv_code_ptr2 = &qr_mv_code2;
+int qr_mv_code2 = 0; // openmv获取的二维码数字(任务二)
+int *qr_mv_code_ptr2 = &qr_mv_code2;
 
 float find_circle_dx = 0; // 视觉传过来juli
 float find_circle_dy = 0;
@@ -112,8 +111,8 @@ float final_circle_dy = 0;
 float final_Circle_px = 1;        // 纠正x系数
 float final_Circle_py = 1;        // 纠正y系数
 float pump_view_distance = 0.043; /// 吸盘到摄像头距离
-float errorXVisual=0;
-float errorYVisual=0;
+float errorXVisual = 0;
+float errorYVisual = 0;
 // 颜色传感器
 int GET_RGB_FLAG = 0;
 int GET_HSL_FLAG = 0;
@@ -186,25 +185,25 @@ void usart2_callback(void)
         find_circle_dx = Byte2Float(uart2.recv_buff + 2);
         find_circle_dy = Byte2Float(uart2.recv_buff + 6);
         // 限幅
-//        if (find_circle_dx > 0.1)
-//        {
-//            find_circle_dx = 0.1;
-//        }
-//        else if (find_circle_dx < -0.1)
-//        {
-//            find_circle_dx = -0.1;
-//        }
-//        if (find_circle_dy > 0.1)
-//        {
-//            find_circle_dy = 0.1;
-//        }
-//        else if (find_circle_dy < -0.1)
-//        {
-//            find_circle_dy = -0.1;
-//        }
-//        find_circle_dy += pump_view_distance;
-//        final_circle_dx = final_Circle_px * find_circle_dx;
-//        final_circle_dy = final_Circle_py * find_circle_dy;
+        //        if (find_circle_dx > 0.1)
+        //        {
+        //            find_circle_dx = 0.1;
+        //        }
+        //        else if (find_circle_dx < -0.1)
+        //        {
+        //            find_circle_dx = -0.1;
+        //        }
+        //        if (find_circle_dy > 0.1)
+        //        {
+        //            find_circle_dy = 0.1;
+        //        }
+        //        else if (find_circle_dy < -0.1)
+        //        {
+        //            find_circle_dy = -0.1;
+        //        }
+        //        find_circle_dy += pump_view_distance;
+        //        final_circle_dx = final_Circle_px * find_circle_dx;
+        //        final_circle_dy = final_Circle_py * find_circle_dy;
     }
 }
 
@@ -291,7 +290,7 @@ void gray_read_task(void *pvParameters);
 void GwGet_color_task(void *pvParameters);
 void UPPER_control_task(void *pvParameters);
 void PutWithVisual();
-void PutWithVisualMap(int direction,float map_x,float map_y,float x_tolerance);
+void PutWithVisualMap(int direction, float map_x, float map_y, float x_tolerance);
 void main_work(void)
 {
     USARTRegister(&uart6, &uart6_cfg);
@@ -329,7 +328,7 @@ void main_work(void)
     BaseType_t ok5 = xTaskCreate(GwGet_color_task, "GwGet_color", 400, NULL, 3, &Get_Color_handle);
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 400, NULL, 1, &LCD_Show_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 400, NULL, 2, &gray_read_handle);
-    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok5 != pdPASS || ok8!=pdPASS)
+    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok5 != pdPASS || ok8 != pdPASS)
     {
         // 任务创建失败，进入死循环
         while (1)
@@ -447,7 +446,7 @@ void LCD_Show_task(void *pvParameters)
         }
         DistributionLoop(servo, plate_things, current_color_ptr, upperflag_ptr, &CurrentColorLoop);
         PutGoal(color_task, servo, plate_things, upperflag_ptr, &PutGoalLoop);
-        if(CurrentColorLoop ==5 && PutGoalLoop == 5)
+        if (CurrentColorLoop == 5 && PutGoalLoop == 5)
         {
             DistributionRankLoop(rank_task, servo, plate_task2_things, upperflag_ptr, &CurrentRankLoop);
             PutRank(servo, plate_task2_things, upperflag_ptr, &PutRankLoop);
@@ -480,7 +479,7 @@ void LCD_Show_task(void *pvParameters)
 
 void Onmaincpp(void *pvParameters)
 {
-		setYawZero();
+    setYawZero();
 #if DEBUG_TASK == 1
     int safe_count = 0; // 保护锁
     while (1)
@@ -517,11 +516,11 @@ void Onmaincpp(void *pvParameters)
         {
             safe_guard = 1; // 保护锁打开
 #if TASKDEBUG
-						setYawZero();
-            PutWithVisual();  
-			while(1)
+            setYawZero();
+            PutWithVisual();
+            while (1)
             {
-                
+
                 vTaskDelay(400);
             }
 #endif
@@ -591,10 +590,10 @@ void Onmaincpp(void *pvParameters)
                 /////////////等待直到二维码识别成功,到第一个物块处
             case 6:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_mv_code != 0)
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_code != 0)
                 {
                     vTaskDelay(500);
-                    GetColorTask(color_task, qr_mv_code_ptr);
+                    GetColorTask(color_task, qr_code_ptr);
                     move_step_distance(0.15, 0.02, 0, 1);
                     main_state++;
                 }
@@ -606,7 +605,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0.15, 0, 0, 1);
+                    move_step_distance(0.3, 0, 0, 1);
                     main_state++;
                 }
                 break;
@@ -665,7 +664,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.1, -0.53, 0, 1);
+                    move_step_distance(-0.06, -0.50, 0, 1);
                     main_state++;
                 }
                 break;
@@ -702,7 +701,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(1000);
-                    move_step_distance(-0.33, -0.49, 0, 1);
+                    move_step_distance(-0.33, -0.51, 0, 1);
                     main_state++;
                 }
                 break;
@@ -777,7 +776,6 @@ void Onmaincpp(void *pvParameters)
 
                 break;
             }
-
             case 22:
             {
                 if (*upperflag_ptr == IDLE)
@@ -869,7 +867,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-												PutWithVisual();
+                        PutWithVisual();
                         main_put_state++;
                     }
                     break;
@@ -919,7 +917,7 @@ void Onmaincpp(void *pvParameters)
                         //                             move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);
                         //                            main_put_state++;
                         //                        }
-												PutWithVisual();
+                        PutWithVisual();
                         main_put_state++;
                     }
                     break;
@@ -968,7 +966,7 @@ void Onmaincpp(void *pvParameters)
                         //                            move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);
                         //                            main_put_state++;
                         //                        }
-											PutWithVisual();
+                        PutWithVisual();
                         main_put_state++;
                     }
                     break;
@@ -1016,7 +1014,7 @@ void Onmaincpp(void *pvParameters)
                         //                            move_step_distance(final_circle_dy,-final_circle_dx, 0, 1);
                         //                            main_put_state++;
                         //                        }
-												PutWithVisual();
+                        PutWithVisual();
                         main_put_state++;
                         // else if (wait_vision > 6)
                         // {
@@ -1068,7 +1066,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
-												PutWithVisual();
+                        PutWithVisual();
                         main_put_state++;
                     }
                     break;
@@ -1081,10 +1079,32 @@ void Onmaincpp(void *pvParameters)
                         upperflag = PICKINGOUT;
                         vTaskDelay(200);
                         main_put_state++;
+                        main_second_state =0;
                     }
                     break;
                 }
-
+                //去找任务二二维码的十字（横移）
+                case 23:
+                {
+                    if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0, -0.1, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                //去找任务二二维码的十字（前进）
+                case 24:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0.6, 0, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
 
                 default:
                     break;
@@ -1094,9 +1114,9 @@ void Onmaincpp(void *pvParameters)
 #if TASK2
             switch (main_second_state)
             {
-           case 0:
+            case 0:
             {
-                if (SimpleStatus_t_isResolved(&planner_ptr->promise) )
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     setYawZero();
                     vTaskDelay(200);
@@ -1104,7 +1124,7 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(2000);
                     move_step_distance(0, 0, 3.1415926, 1);
                     main_second_state++;
-										vTaskDelay(2000);
+                    vTaskDelay(2000);
                 }
                 break;
             }
@@ -1142,7 +1162,7 @@ void Onmaincpp(void *pvParameters)
                 }
                 break;
             }
-            //去找2//
+            // 去找2//
             case 4:
             {
                 if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
@@ -1267,7 +1287,6 @@ void Onmaincpp(void *pvParameters)
             }
             default:
                 break;
-
             }
 #endif
             switch (motor_mode)
@@ -1325,94 +1344,92 @@ void OnChassicControl(void *pvParameters)
         vTaskDelay(10);
     }
 }
-//使用视觉校准，包括位置刷新与到达目标 有问题,坐标转化的方式改了
+// 使用视觉校准，包括位置刷新与到达目标 有问题,坐标转化的方式改了
 /**
- * @brief 
- * 
+ * @brief
+ *
  * @param direction 车体的位置是朝冠军还是Home 1是朝Home 其他朝冠军
  * @param map_x 放置点在地图的x位置
  * @param map_y 放置点在地图的y位置
  * @param x_tolerance 车体坐标下x 的容差,绝对值
- * @param dx 
- * @param dy 
+ * @param dx
+ * @param dy
  */
-void PutWithVisualMap(int direction,float map_x,float map_y,float x_tolerance)
+void PutWithVisualMap(int direction, float map_x, float map_y, float x_tolerance)
 {
-    float cemareToPut=-0.05;  //相机相对于机械臂的本地坐标系偏差
-    float baseToPut=-0.2;
-    SimpleStatus_t* result;
+    float cemareToPut = -0.05; // 相机相对于机械臂的本地坐标系偏差
+    float baseToPut = -0.2;
+    SimpleStatus_t *result;
     odom_t target_odom;
-    odom_t target_error={0.005,0.005,0.005};
-    if(direction==1)
+    odom_t target_error = {0.005, 0.005, 0.005};
+    if (direction == 1)
     {
-        target_odom.x=map_x-baseToPut+x_tolerance;
-        target_odom.yaw=-PI/2;
+        target_odom.x = map_x - baseToPut + x_tolerance;
+        target_odom.yaw = -PI / 2;
     }
     else
     {
-        target_odom.x=map_x+baseToPut-x_tolerance;
-        target_odom.yaw=PI/2;
+        target_odom.x = map_x + baseToPut - x_tolerance;
+        target_odom.yaw = PI / 2;
     }
-    
 
     // Planner_LoactaionCloseControl(&result,)
-    result=Planner_LoactaionCloseControl(planner_ptr, &target_odom,1.5,&target_error,false);
-    while (SimpleStatus_t_isResolved(result)==false)
+    result = Planner_LoactaionCloseControl(planner_ptr, &target_odom, 1.5, &target_error, false);
+    while (SimpleStatus_t_isResolved(result) == false)
     {
         vTaskDelay(40);
         /* code */
     }
-    
-    find_circle_dx=0.0;
-    find_circle_dy=0.0;
+
+    find_circle_dx = 0.0;
+    find_circle_dy = 0.0;
     osDelay(1000);
-    if(find_circle_dx!=0.0||find_circle_dy!=0.0)
+    if (find_circle_dx != 0.0 || find_circle_dy != 0.0)
     {
-        odom_t target_odom_base={0,0,0};
-        //刷新当前的坐标
-        
-        target_odom_base.x=-final_circle_dy-cemareToPut;
-        target_odom_base.y=-final_circle_dx;
-            // Planner_LoactaionBaseOdomContorl()
-        result=Planner_LoactaionBaseOdomContorl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+        odom_t target_odom_base = {0, 0, 0};
+        // 刷新当前的坐标
+
+        target_odom_base.x = -final_circle_dy - cemareToPut;
+        target_odom_base.y = -final_circle_dx;
+        // Planner_LoactaionBaseOdomContorl()
+        result = Planner_LoactaionBaseOdomContorl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
 
         while (SimpleStatus_t_isResolved(result) == false)
         {
             vTaskDelay(40);
         }
-				errorXVisual=target_odom_base.x;
-				errorYVisual=target_odom_base.y;
+        errorXVisual = target_odom_base.x;
+        errorYVisual = target_odom_base.y;
     }
-		else
-		{
-			errorXVisual=0.0;
-			errorYVisual=0.0;
-		}
-		
+    else
+    {
+        errorXVisual = 0.0;
+        errorYVisual = 0.0;
+    }
 }
 /**
  * @brief 同上但是不包含位置刷新与到达目标点附件
- * 
- * @param direction 
+ *
+ * @param direction
  */
 void PutWithVisual()
 {
-    float cemareToPut=-0.055;  //相机相对于机械臂的本地坐标系偏差
-    float baseToPut=-0.2;
-    SimpleStatus_t* result;
-    find_circle_dx=0.0;
-    find_circle_dy=0.0;
-    odom_t target_error={0.002,0.002,0.005};
+    float cemareToPut = -0.055; // 相机相对于机械臂的本地坐标系偏差
+    float baseToPut = -0.2;
+    SimpleStatus_t *result;
+    find_circle_dx = 0.0;
+    find_circle_dy = 0.0;
+    odom_t target_error = {0.005, 0.005, 0.01};
     osDelay(1000);
-    if(find_circle_dx!=0.0||find_circle_dy!=0.0)
+    if (find_circle_dx != 0.0 || find_circle_dy != 0.0)
     {
-        odom_t target_odom_base={0,0,0};
-        //刷新当前的坐标
-        
-        target_odom_base.x=-find_circle_dy+cemareToPut;
-        target_odom_base.y=-find_circle_dx;
-            // Planner_LoactaionBaseOdomContorl()
-        result=Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+        odom_t target_odom_base = {0, 0, 0};
+        // 刷新当前的坐标
+
+        target_odom_base.x = -find_circle_dy + cemareToPut;
+        target_odom_base.y = -find_circle_dx;
+        // Planner_LoactaionBaseOdomContorl()
+        result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
         while (SimpleStatus_t_isResolved(result) == false)
         {
             osDelay(40);
