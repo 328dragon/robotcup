@@ -28,15 +28,15 @@
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
 #define abs(x) (x > 0 ? x : (-x))
 
- #define TASK_1
+//#define servo_task
+int servo_test_angle=83;
+// #define TASK_1
 //#define TASK_2
-//// #define TASK_ALL
+ #define TASK_ALL
 
 //任务进行阶段，默认从1开始，任务一结束后将他切换成2
 int task_state = 2;
 
-// 测试舵机
-#define SERVO_TEST
 Servo_t servo[1] = {
     {&htim3, TIM_CHANNEL_4, 83, 0}};
 int pick_goods_flag = 0;
@@ -303,7 +303,7 @@ void main_work(void)
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
-    Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
+    Kinematic_init(kinematic_ptr, 0.1, 0.2, X_shape);
     Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
     //	GetColorTask(color_task,&color_task_index);
@@ -492,8 +492,11 @@ void Onmaincpp(void *pvParameters)
         {
             safe_guard = 1; // 保护锁打开
 
-#ifdef TASK_1
-
+					#ifdef servo_task
+					Servo_SetAngle(servo,servo_test_angle,360);
+					#endif
+					
+#ifdef TASK_ALL
             //******************************** 抓取状态机**********************************////
             switch (main_state)
             {
@@ -502,7 +505,7 @@ void Onmaincpp(void *pvParameters)
 
                 setYawZero();
                 vTaskDelay(200);
-                move_step_distance(0.32, 0, 0, 1);
+                move_step_distance(0.31, 0, 0, 1);
                 main_state++;
                 break;
             }
@@ -597,7 +600,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     vTaskDelay(1000);
 //                    move_step_distance(0.38, 0.28, 0, 1);
-									 move_step_distance(0.40, 0.28, 0, 1);//修正
+									 move_step_distance(0.44, 0.28, 0, 1);//修正
                     main_state++;
                 }
                 break;
@@ -644,7 +647,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     vTaskDelay(1000);
 //                    move_step_distance(0.53, 0.05, 0, 1);
-									  move_step_distance(0.50, 0.05, 0, 1);
+									  move_step_distance(0.49, 0.05, 0, 1);
                     main_state++;
                 }
                 break;
@@ -691,7 +694,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     vTaskDelay(1000);
 //                    move_step_distance(0.48, -0.4, 0, 1);
-									 move_step_distance(0.46, -0.4, 0, 1);
+									 move_step_distance(0.43, -0.4, 0, 1);
                     main_state++;
                 }
                 break;
@@ -832,7 +835,7 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         move_vel(0, 0.1, 0);
-                        if (gray_data_side_sum >= 1)
+                        if (gray_data_side_sum >= 3)
                         {
                             move_vel(0, 0, 0);
                             main_put_state++;
@@ -864,7 +867,7 @@ void Onmaincpp(void *pvParameters)
                     {
                         target_upper_loacation = up_location;
                         vTaskDelay(100);
-                        move_step_distance(-0.23, 0.47, 0, 1);
+                        move_step_distance(-0.225, 0.445, 0, 1);
                         main_put_state++;
                     }
 
@@ -891,13 +894,14 @@ void Onmaincpp(void *pvParameters)
                     break;
                 }
 
-                ///////// 空闲状态然后去另一个地方a,b到a(20,25)////////
+                ///////// 空闲状态然后去另一个地方a,b到a(27,22)////////
                 case 7:
                 {
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.23, -0.30, 0, 1);
+//                        move_step_distance(0.23, -0.30, 0, 1);
+											 move_step_distance(0.225, -0.28, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -938,7 +942,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-1.05, 0, 0, 1);
+                        move_step_distance(-1.0305, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -949,7 +953,7 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        move_step_distance(0, 0.30, 0, 1);
+                        move_step_distance(0, 0.275, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -982,7 +986,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.14, -0.30, 0, 1);
+                        move_step_distance(0.14, -0.29, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1018,7 +1022,7 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(-0.6, 0.25, 0, 1);
+                        move_step_distance(-0.695, 0.20, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1040,7 +1044,947 @@ void Onmaincpp(void *pvParameters)
                     if (*upperflag_ptr == IDLE)
                     {
                         vTaskDelay(200);
-                        move_step_distance(0.2, 0, 0, 1);
+                        move_step_distance(0.360, 0, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                case 22:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0, 0, PI / 2, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                case 23:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        setYawZero();
+                        vTaskDelay(500);
+
+											move_step_distance(0.5, 0, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+								case 24:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        setYawZero();
+                        vTaskDelay(500);
+
+											move_step_distance(0.5, -0.3, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+								//找十字
+                case 25:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_vel(0, 0.2, 0);
+                        if (gray_data_side_sum >=3)
+                        {
+                            move_vel(0, 0, 0);
+                            main_put_state++;
+                        }
+                    }
+                    break;
+                }
+                // 纠正十字
+                case 26:
+                {
+                    if (gray_data_side_middle != 0)
+                    {
+                        vTaskDelay(100);
+                        if (gray_data_side_middle != 0)
+                        {
+                            move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                        }
+                        main_put_state++;
+                    }
+                    break;
+                }
+								
+								
+                case 27:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0, 0.2, 0, 1);
+                        main_put_state++;
+                    }
+
+                    break;
+                }
+                case 28:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0, 0, PI, 1);
+                        main_put_state++;
+                    }
+                }
+                case 29:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        setYawZero();
+                        vTaskDelay(500);
+                        move_step_distance(0, 0.1, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                case 30:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+												#ifdef TASK_ALL
+                       	main_second_state=0;
+												#endif
+                        main_put_state++;
+                    }
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+
+
+            switch (main_second_state)
+            {
+            case 0:
+            {
+                if (qr_mv_code != 0)
+                {
+//                    setYawZero();
+									ranking_task_index = qr_mv_code;
+                    vTaskDelay(200);
+                    
+                    Get_ABC_Task(plate_things, &ranking_task_index);
+                    move_step_distance(0, 0, PI, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 去三那
+            case 1:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    setYawZero();
+                    vTaskDelay(500);
+                    move_step_distance(-0.37, 0.8, 0, 1);
+                    main_second_state++;0
+                }
+                break;
+            }
+            case 2:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 抓取第一个物块
+            case 3:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    pick_abc_flag = 1;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 4:
+            {
+                if (*upperflag_ptr == IDLE) // 抓完第一个
+                {
+                    vTaskDelay(200);
+                    move_step_distance(-0.44, -0.1, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 5:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, 0.3, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 6:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 抓取第二个物块
+            case 7:
+            {
+
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    pick_abc_flag = 1;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+                break;
+            }
+                /// 去找最后
+            case 8:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                      vTaskDelay(200);
+                    move_step_distance(-0.45, -0.21, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 9:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, 0.3, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 10:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 抓取最后物块
+            case 11:
+            {
+
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    pick_abc_flag = 1;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 旋转去冠亚季领奖台
+            case 12:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+                    move_step_distance(0, 0, PI / 2, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 13:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    setYawZero();
+                    vTaskDelay(200);
+                    move_step_distance(-1.3, 0.07, 0, 1);
+									 vTaskDelay(80);
+                    main_second_state++;
+                }
+                break;
+            }
+            case 14:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    move_vel(0, 0.1, 0);
+                    if (real_time_gray_state_side == aim_black)
+                    {
+                        move_vel(0, 0, 0);
+                        main_second_state++;
+                    }
+                }
+
+                break;
+            }
+            case 15:
+            {
+                if (gray_data_side_middle != 0)
+                {
+                    vTaskDelay(100);
+                    move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                }
+                main_second_state++;
+                break;
+            }
+            case 16:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+									move_step_distance(-0.08, 0.34, 0, 1);//第一个值是神秘小参数，因为圆在十字左上方
+                    main_second_state++;
+                }
+
+                break;
+            }
+                // 放第一个物块亚军
+            case 17:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    put_abc_flag = 1;
+                    vTaskDelay(200);
+
+                    main_second_state++;
+                }
+
+                break;
+            }
+            case 18:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(200);
+                    move_step_distance(-0.28, 0, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 冠军
+            case 19:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    put_abc_flag = 1;
+                    vTaskDelay(200);
+                    main_second_state++;
+                }
+
+                break;
+            }
+            case 20:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(200);
+                    move_step_distance(-0.28, 0, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+            // 放置季军
+            case 21:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    put_abc_flag = 1;
+                    vTaskDelay(200);
+
+                    main_second_state++;
+                }
+
+                break;
+            }
+                // 回家
+            case 22:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0.134, -2.2, 0, 1);
+                    main_second_state++;
+                }
+                break;
+            }
+
+            default:
+                break;
+            }
+
+#else 					
+#ifdef TASK_1
+
+            //******************************** 抓取状态机**********************************////
+            switch (main_state)
+            {
+            case 0:
+            {
+
+                setYawZero();
+                vTaskDelay(200);
+                move_step_distance(0.32, 0, 0, 1);
+                main_state++;
+                break;
+            }
+            case 1:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(100);
+                    move_step_distance(0, 0.5, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 2:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    move_vel(0, 0.1, 0);
+                    if (real_time_gray_state_side == aim_black)
+                    {
+                        move_vel(0, 0, 0);
+                        main_state++;
+                    }
+                }
+                break;
+            }
+
+            /////**********对十字中********//////
+            case 3:
+            {
+                if (gray_data_side_middle != 0)
+                {
+                    vTaskDelay(100);
+                    move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                }
+                main_state++;
+                break;
+            }
+
+            // 找二维码
+            case 4:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(100);
+                    move_step_distance(0, 0.23, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+                ///////////直到扫到二维码启动！！！！！！！！！！
+                //////*********找第一个物块****//////
+            case 5:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise) && qr_mv_code != 0)
+                {
+                    color_task_index = qr_mv_code;
+                    GetColorTask(color_task, &color_task_index);
+									qr_mv_code=0;
+                    move_step_distance(-0.07, 0.27, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 6:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+                //****************抓取第一个*********///////
+            case 7:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    pick_goods_flag = 1;
+                    vTaskDelay(500);
+                    main_state++;
+                }
+                break;
+            }
+
+                // **********抓完第一个，去找第二个物块***********///
+                // 第一个到第二个是dx:346.6(mm),dy:341.136(mm)
+            case 8:
+            {
+                if (*upperflag_ptr == IDLE) // 抓完第一个还是很正的
+                {
+                    vTaskDelay(1000);
+//                    move_step_distance(0.38, 0.28, 0, 1);
+									 move_step_distance(0.45, 0.28, 0, 1);//修正
+                    main_state++;
+                }
+                break;
+            }
+            case 9:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, 0.20, 0, 1);
+                    main_state++;
+                }
+            }
+            case 10:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+
+                ////********抓取第二个物块**********/////
+            case 11:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    pick_goods_flag = 1;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+                // *************抓第二个完成，去找第三个物块************////
+                // 第二 个到第三个是dx:470.109(mm),dy:124.624(mm)
+            case 12:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+//                    move_step_distance(0.53, 0.05, 0, 1);
+									  move_step_distance(0.495, 0.05, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 13:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, 0.2, 0, 1);
+                    main_state++;
+                }
+            }
+            case 14:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+                // *************抓第三个物块********//
+            case 15:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    pick_goods_flag = 1;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+
+                // *************抓第三个完成，去找第四个物块************////
+                // 第三 个到第四个是dx:470.109(mm),dy:124.624(mm)
+            case 16:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+//                    move_step_distance(0.48, -0.4, 0, 1);
+									 move_step_distance(0.43, -0.4, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 17:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, 0.3, 0, 1);
+                    main_state++;
+                }
+            }
+            case 18:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+                // *************抓第四个物块********//
+            case 19:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    pick_goods_flag = 1;
+
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+
+                // *************抓第四个完成，去找第五个物块************////
+                // 第四 个到第五个是dx:346.614(mm),dy:341.136(mm)
+            case 20:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(1000);
+                    move_step_distance(0, -0.63, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+            case 21:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0.39, 0, 0, 1);
+                    main_state++;
+                }
+            }
+
+            case 22:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, 0.33, 0, 1);
+                    main_state++;
+                }
+            }
+            case 23:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+                    vTaskDelay(200);
+                    move_step_distance(0, -0.065, 0, 1);
+                    main_state++;
+                }
+                break;
+            }
+                // *************抓第五个物块********//
+            case 24:
+            {
+                if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                {
+
+                    pick_goods_flag = 1;
+                    vTaskDelay(200);
+                    main_state++;
+                }
+
+                break;
+            }
+
+            case 25:
+            {
+                if (*upperflag_ptr == IDLE)
+                {
+                    vTaskDelay(200);
+                    main_state++;       // 防止出bug
+                    main_put_state = 0; // 开启放置任务
+                }
+
+                break;
+            }
+
+            default:
+                break;
+            }
+
+            //////**************************开启放置物块状态机******************************/////
+
+            /////顺序::badce//////
+            if (main_state > 25)
+            {
+                switch (main_put_state)
+                {
+                case 0:
+                {
+                    vTaskDelay(500);
+                    move_step_distance(0, 0, 1.571, 1);
+                    main_put_state++;
+                    break;
+                }
+                case 1:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        setYawZero();
+                        vTaskDelay(500);
+                        move_step_distance(-0.33, 0.26, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        move_vel(0, 0.1, 0);
+                        if (gray_data_side_sum >= 3)
+                        {
+                            move_vel(0, 0, 0);
+                            main_put_state++;
+                        }
+                    }
+
+                    break;
+                }
+                    /////////*************开始对第一个十字******************////////////////
+                case 3:
+                {
+
+                    if (gray_data_side_middle != 0)
+                    {
+                        vTaskDelay(100);
+                        if (gray_data_side_middle != 0)
+                        {
+                            move_step_distance(-gray_data_side_middle, 0, 0, 1);
+                        }
+                        main_put_state++;
+                    }
+                    break;
+                }
+
+                    ////////////*****从AAAAAAAAAAAAAAA到BBBBBBBBBBBBBB(-23，50)**********/////////
+                case 4:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        target_upper_loacation = up_location;
+                        vTaskDelay(100);
+                        move_step_distance(-0.225, 0.45, 0, 1);
+                        main_put_state++;
+                    }
+
+                    break;
+                }
+
+                    ///////后面就是纯电控写的。注意**************/////////
+                case 5:
+                {
+                    main_put_state++;
+
+                    break;
+                }
+
+                ///////////***********放置第一个:::::::AAAAAAAAAAAAAAA********////////
+                case 6:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
+                        main_put_state++;
+                    }
+                    break;
+                }
+
+                ///////// 空闲状态然后去另一个地方a,b到a(27,22)////////
+                case 7:
+                {
+                    if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+//                        move_step_distance(0.23, -0.30, 0, 1);
+											 move_step_distance(0.225, -0.28, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                case 8:
+                {
+
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        main_put_state++;
+                    }
+                    break;
+                }
+
+                //*************等底盘对准第二个************//////////
+                case 9:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        main_put_state++;
+                    }
+                    break;
+                }
+                    ///////////***********放置第二个AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:::::::********////////
+                case 10:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                    // ***************空闲状态然后去另一个地方A,A到D(-100,50)**************//////////
+                case 11:
+                {
+                    if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(-1.0305, 0, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                case 12:
+                {
+
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0, 0.275, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                ////到c了等待对准第三个/////
+                case 13:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        main_put_state++;
+                    }
+                    break;
+                }
+                ///////////***********放置第三个:::::::DDDDDDDDDDDDDDDDDDDDD********////////
+                case 14:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
+                        main_put_state++;
+                    }
+                    break;
+                }
+
+                /////////////等待空闲///////
+                case 15:
+                {
+
+                    if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0.14, -0.29, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                    ///////////////这后面有问题///////////////////
+                case 16:
+                {
+                    main_put_state++;
+                    break;
+                }
+                case 17:
+                {
+
+                    main_put_state++;
+
+                    break;
+                }
+                ///////////////***************放置第四个物块CCCCCCCCCCCCCCCCCCCCCCCCCCCC***************////////
+                case 18:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
+                        main_put_state++;
+                    }
+                    break;
+                }
+
+                    /////////////等待放置完成///////
+                case 19:
+                {
+                    if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(-0.7, 0.20, 0, 1);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                    //////放置第五个物块
+                case 20:
+                {
+                    if (SimpleStatus_t_isResolved(&planner_ptr->promise))
+                    {
+                        put_goods_flag = 1;
+                        vTaskDelay(200);
+                        main_put_state++;
+                    }
+                    break;
+                }
+                    ////////****跑到中间准备实现任务二***********///////////
+                case 21:
+                {
+                    if (*upperflag_ptr == IDLE)
+                    {
+                        vTaskDelay(200);
+                        move_step_distance(0.275, 0, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1417,6 +2361,9 @@ void Onmaincpp(void *pvParameters)
             }
 
 #endif
+#endif					
+					
+
 
             switch (motor_mode)
             {

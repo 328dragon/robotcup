@@ -9,25 +9,25 @@ extern upper_location target_upper_loacation;
  */
 void GetColorTask(Color_t *color_task, int *color_task_index)
 {
-    // 创建颜色映射表，使用Color_t枚举
+    // 创建颜色映射表，使用Color_t枚举：bacde
     static const Color_t colorMap[16][5] = {
-        /* 1  */ {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
-        /* 2  */ {COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
-        /* 3  */ {COLOR_WHITE, COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_BLUE},
-        /* 4  */ {COLOR_BLUE, COLOR_WHITE, COLOR_BLACK, COLOR_RED, COLOR_GREEN},
-        /* 5  */ {COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_GREEN},
-        /* 6  */ {COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_WHITE, COLOR_GREEN},
-        /* 7  */ {COLOR_BLUE, COLOR_GREEN, COLOR_BLACK, COLOR_WHITE, COLOR_RED},
-        /* 8  */ {COLOR_GREEN, COLOR_WHITE, COLOR_BLUE, COLOR_BLACK, COLOR_RED},
-        /* 9  */ {COLOR_WHITE, COLOR_GREEN, COLOR_BLACK, COLOR_BLUE, COLOR_RED},
-        /* 10 */ {COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_WHITE},
-        /* 11 */ {COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_BLACK, COLOR_WHITE},
-        /* 12 */ {COLOR_GREEN, COLOR_RED, COLOR_BLACK, COLOR_BLUE, COLOR_WHITE},
-        /* 13 */ {COLOR_WHITE, COLOR_RED, COLOR_BLUE, COLOR_GREEN, COLOR_BLACK},
-        /* 14 */ {COLOR_RED, COLOR_GREEN, COLOR_WHITE, COLOR_BLUE, COLOR_BLACK},
-        /* 15 */ {COLOR_BLUE, COLOR_WHITE, COLOR_GREEN, COLOR_RED, COLOR_BLACK},
-        /* 16 */ {COLOR_GREEN, COLOR_BLUE, COLOR_RED, COLOR_WHITE, COLOR_BLACK}};
-
+        /* 1  */ {COLOR_WHITE, COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_BLUE},
+        /* 2  */ {COLOR_BLACK, COLOR_WHITE, COLOR_GREEN, COLOR_RED, COLOR_BLUE},
+        /* 3  */ {COLOR_BLACK, COLOR_WHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE},
+        /* 4  */ {COLOR_WHITE, COLOR_BLUE, COLOR_RED, COLOR_BLACK, COLOR_GREEN},
+        /* 5  */ {COLOR_RED, COLOR_WHITE, COLOR_BLACK, COLOR_BLUE, COLOR_GREEN},
+        /* 6  */ {COLOR_RED, COLOR_BLACK, COLOR_WHITE, COLOR_BLUE, COLOR_GREEN},
+        /* 7  */ {COLOR_GREEN, COLOR_BLUE, COLOR_WHITE, COLOR_BLACK, COLOR_RED},
+        /* 8  */ {COLOR_WHITE, COLOR_GREEN, COLOR_BLACK, COLOR_BLUE, COLOR_RED},
+        /* 9  */ {COLOR_GREEN, COLOR_WHITE, COLOR_BLUE, COLOR_BLACK, COLOR_RED},
+        /* 10 */ {COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_BLUE, COLOR_WHITE},
+        /* 11 */ {COLOR_BLUE, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_WHITE},
+        /* 12 */ {COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK, COLOR_WHITE},
+        /* 13 */ {COLOR_RED, COLOR_WHITE, COLOR_GREEN, COLOR_BLUE, COLOR_BLACK},
+        /* 14 */ {COLOR_GREEN, COLOR_RED, COLOR_BLUE, COLOR_WHITE, COLOR_BLACK},
+        /* 15 */ {COLOR_WHITE, COLOR_BLUE, COLOR_RED, COLOR_GREEN, COLOR_BLACK},
+        /* 16 */ {COLOR_BLUE, COLOR_GREEN, COLOR_WHITE, COLOR_RED, COLOR_BLACK}
+			};
     // 检查输入数字是否有效
     if (*color_task_index >= 1 && *color_task_index <= 16)
     {
@@ -157,7 +157,7 @@ void PutGoal(Color_t *color_task, Servo_t *servos, ThingStore_t *plate_things, U
             vTaskDelay(500);
             // 此处还需加入吸盘关闭
             PUMP_OFF;
-            vTaskDelay(1000);
+            vTaskDelay(1500);
             target_upper_loacation = up_location;
             *upperflag = IDLE;
             vTaskDelay(1000);

@@ -29,19 +29,19 @@
 typedef enum
 {
     // 跟逻辑有关
-    GOAL_PLACE = 83,
-    FIND_PLATE = 79 + servo_zero,
-    CENTER_PICK = 265 + servo_zero,
+    GOAL_PLACE = 80 + servo_zero,
+    FIND_PLATE = 80 + servo_zero,
+    CENTER_PICK = 268 + servo_zero,
     // 跟颜色有关
-    BLUE_PICK = 203 + servo_zero,
-    GREEN_PICK = 236 + servo_zero,
-    RED_PICK = 267 + servo_zero,
-    WHITE_PICK = 300 + servo_zero,
-    BLACK_PICK = 332 + servo_zero,
+    BLUE_PICK = 207 + servo_zero,
+    GREEN_PICK = 239 + servo_zero,
+    RED_PICK = 269 + servo_zero,
+    WHITE_PICK = 302 + servo_zero,
+    BLACK_PICK = 334 + servo_zero,
     //跟任务二放置有关
-    THIRD_PLACE= 267 + servo_zero,
-    SECOND_PLACE=236 + servo_zero,
-    ONCE_PLACE= 203 + servo_zero,
+    THIRD_PLACE= 269 + servo_zero,
+    SECOND_PLACE=239 + servo_zero,
+    ONCE_PLACE= 207 + servo_zero,
 } GimbalArm_Servoangle_t;
 
 /*
