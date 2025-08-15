@@ -1584,6 +1584,13 @@ void PutWithVisual()
         {
             osDelay(40);
         }
+        target_odom_base.x=-target_odom_base.x;
+        target_odom_base.y=-target_odom_base.y;
+        result = Planner_LoactaionCloseControl(planner_ptr, &target_odom_base, 1.0, &target_error, true);
+        while (SimpleStatus_t_isResolved(result) == false)
+        {
+            osDelay(40);
+        }
     }
     else
     {
