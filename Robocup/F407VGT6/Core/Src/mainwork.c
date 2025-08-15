@@ -303,7 +303,7 @@ void main_work(void)
     ChassisControl_ptr = &ChassisControl_instance;
     kinematic_ptr = &kinematic_instance;
     planner_ptr = &planner_instance;
-    Kinematic_init(kinematic_ptr, 0.1, 0.2, X_shape);
+    Kinematic_init(kinematic_ptr, 0.6, 2, X_shape);
     Controller_Init(ChassisControl_ptr, zdt_stepmotor_ptr, kinematic_ptr);
     Planner_init(planner_ptr, ChassisControl_ptr);
     //	GetColorTask(color_task,&color_task_index);
@@ -565,7 +565,7 @@ void Onmaincpp(void *pvParameters)
                     color_task_index = qr_mv_code;
                     GetColorTask(color_task, &color_task_index);
 									qr_mv_code=0;
-                    move_step_distance(-0.07, 0.27, 0, 1);
+                    move_step_distance(-0.02, 0.27, 0, 1);
                     main_state++;
                 }
                 break;
@@ -647,7 +647,7 @@ void Onmaincpp(void *pvParameters)
                 {
                     vTaskDelay(1000);
 //                    move_step_distance(0.53, 0.05, 0, 1);
-									  move_step_distance(0.49, 0.05, 0, 1);
+									  move_step_distance(0.44, 0.05, 0, 1);
                     main_state++;
                 }
                 break;
@@ -750,7 +750,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0.39, 0, 0, 1);
+                    move_step_distance(0.41, 0, 0, 1);
                     main_state++;
                 }
             }
@@ -901,7 +901,7 @@ void Onmaincpp(void *pvParameters)
                     {
                         vTaskDelay(200);
 //                        move_step_distance(0.23, -0.30, 0, 1);
-											 move_step_distance(0.225, -0.28, 0, 1);
+											 move_step_distance(0.23, -0.285, 0, 1);
                         main_put_state++;
                     }
                     break;
@@ -1091,7 +1091,8 @@ void Onmaincpp(void *pvParameters)
                     if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                     {
                         vTaskDelay(200);
-                        move_vel(0, 0.2, 0);
+                        move_vel(0, 0.1, 0);
+											vTaskDelay(10);
                         if (gray_data_side_sum >=3)
                         {
                             move_vel(0, 0, 0);
@@ -1190,8 +1191,8 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(500);
-                    move_step_distance(-0.37, 0.8, 0, 1);
-                    main_second_state++;0
+                    move_step_distance(-0.4, 0.8, 0, 1);
+                    main_second_state++;
                 }
                 break;
             }
@@ -1221,7 +1222,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE) // 抓完第一个
                 {
                     vTaskDelay(200);
-                    move_step_distance(-0.44, -0.1, 0, 1);
+                    move_step_distance(-0.43, -0.12, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1264,7 +1265,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                       vTaskDelay(200);
-                    move_step_distance(-0.45, -0.21, 0, 1);
+                    move_step_distance(-0.45, -0.23, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1274,7 +1275,7 @@ void Onmaincpp(void *pvParameters)
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
                     vTaskDelay(200);
-                    move_step_distance(0, 0.3, 0, 1);
+                    move_step_distance(0, 0.35, 0, 1);
                     main_second_state++;
                 }
                 break;
@@ -1319,7 +1320,7 @@ void Onmaincpp(void *pvParameters)
                     vTaskDelay(200);
                     setYawZero();
                     vTaskDelay(200);
-                    move_step_distance(-1.3, 0.07, 0, 1);
+                    move_step_distance(-1.42, 0.07, 0, 1);
 									 vTaskDelay(80);
                     main_second_state++;
                 }
@@ -1353,7 +1354,7 @@ void Onmaincpp(void *pvParameters)
             {
                 if (SimpleStatus_t_isResolved(&planner_ptr->promise))
                 {
-									move_step_distance(-0.08, 0.34, 0, 1);//第一个值是神秘小参数，因为圆在十字左上方
+									move_step_distance(0.06, 0.328, 0, 1);//第一个值是神秘小参数，因为圆在十字左上方
                     main_second_state++;
                 }
 
@@ -1424,7 +1425,7 @@ void Onmaincpp(void *pvParameters)
                 if (*upperflag_ptr == IDLE)
                 {
                     vTaskDelay(200);
-                    move_step_distance(0.134, -2.2, 0, 1);
+                    move_step_distance(0.134, -2.08, 0, 1);
                     main_second_state++;
                 }
                 break;
