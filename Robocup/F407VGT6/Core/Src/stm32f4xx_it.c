@@ -329,7 +329,7 @@ void USART2_IRQHandler(void)
 void TIM8_UP_TIM13_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 0 */
-SoftPwmTimerISR(&soft_pwm_f);
+SoftPwmTimerISR();
   /* USER CODE END TIM8_UP_TIM13_IRQn 0 */
   HAL_TIM_IRQHandler(&htim13);
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 1 */
