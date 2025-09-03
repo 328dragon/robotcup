@@ -23,6 +23,7 @@
 #include "gw_color_iic.h"
 #include "servo.h"
 #include "upper.h"
+#include "soft_pwm.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
@@ -30,6 +31,7 @@
 
 //#define servo_task
 int servo_test_angle=83;
+int soft_pwm_high=0;
 // #define TASK_1
 //#define TASK_2
  #define TASK_ALL
@@ -282,6 +284,7 @@ void GwGet_color_task(void *pvParameters);
 void UPPER_control_task(void *pvParameters);
 void main_work(void)
 {
+	SoftPwmSetPeriod(200);//20ms
     USARTRegister(&uart6, &uart6_cfg);
     USARTRegister(&uart3, &uart3_cfg);
     USARTRegister(&uart1, &uart1_cfg);
@@ -387,6 +390,7 @@ void gray_read_task(void *pvParameters)
 {
     while (Ping())
     {
+			SoftPwmSetHigh(soft_pwm_high);
         vTaskDelay(5);
     }
 
