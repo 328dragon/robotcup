@@ -31,7 +31,7 @@
 
 //#define servo_task
 int servo_test_angle=83;
-int soft_pwm_high=0;
+
 // #define TASK_1
 //#define TASK_2
  #define TASK_ALL
@@ -250,6 +250,9 @@ cmd_vel_t debug_target_vel = {0, 0, 0};
 odom_t debug_target_odom = {0, 0, 0};
 odom_t debug_target_erro = {0.05, 0.05, 0.05};
 
+
+int debug_sf_pwm=0;
+
 // 实例化
 static Controller_t ChassisControl_instance;
 static Kinematic_t kinematic_instance;
@@ -284,7 +287,7 @@ void GwGet_color_task(void *pvParameters);
 void UPPER_control_task(void *pvParameters);
 void main_work(void)
 {
-	SoftPwmSetPeriod(200);//20ms
+SoftPwmInit(&soft_pwm_f,GPIOB,GPIO_PIN_0,200,5);
     USARTRegister(&uart6, &uart6_cfg);
     USARTRegister(&uart3, &uart3_cfg);
     USARTRegister(&uart1, &uart1_cfg);
@@ -390,7 +393,7 @@ void gray_read_task(void *pvParameters)
 {
     while (Ping())
     {
-			SoftPwmSetHigh(soft_pwm_high);
+SoftPwmSetHigh(&soft_pwm_f,debug_sf_pwm);
         vTaskDelay(5);
     }
 
