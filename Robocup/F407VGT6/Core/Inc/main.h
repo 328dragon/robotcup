@@ -69,8 +69,8 @@ void Error_Handler(void);
 #define servos_4_GPIO_Port GPIOA
 #define SPI1_CS_Pin GPIO_PIN_4
 #define SPI1_CS_GPIO_Port GPIOA
-#define servos_1_Pin GPIO_PIN_0
-#define servos_1_GPIO_Port GPIOB
+#define sof_pwm_Pin GPIO_PIN_0
+#define sof_pwm_GPIO_Port GPIOB
 #define servos_2_Pin GPIO_PIN_1
 #define servos_2_GPIO_Port GPIOB
 #define PUMP_Pin GPIO_PIN_8

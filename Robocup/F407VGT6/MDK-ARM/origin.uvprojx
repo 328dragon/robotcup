@@ -1001,6 +1001,11 @@
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\servo\upper.c</FilePath>
             </File>
+            <File>
+              <FileName>soft_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\servo\soft_pwm.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
