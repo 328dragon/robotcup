@@ -16,7 +16,7 @@ typedef enum
     SPEED_CONTROL_GROUND // 大地坐标系速度开环
 } ControlMode_t;
 
-typedef struct _
+typedef struct _ctrl
 {
     StepMotorZDT_t *zdt_mot[4];
     float target_speed[4];
@@ -29,9 +29,9 @@ typedef struct _
     pid_t pid_y;
     pid_t pid_yaw;
     Kinematic_t *kinematic;
-    void (*setmotor_speed)(struct _ *, float *);
-    void (*setmotor_pos_vel)(struct _ *,  float *,float *);
-    void (*Controller_MotorUpdate)(struct _ *, uint16_t);
+    void (*setmotor_speed)(struct _ctrl *, float *);
+    void (*setmotor_pos_vel)(struct _ctrl *,  float *,float *);
+    void (*Controller_MotorUpdate)(struct _ctrl *, uint16_t);
 } Controller_t;
 
 // 初始化函数

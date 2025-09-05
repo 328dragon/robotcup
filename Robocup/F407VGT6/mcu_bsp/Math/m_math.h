@@ -14,6 +14,7 @@
 #include "string.h"
 
 float remap(float x, float y, float x1, float y1, float value);
+float remap_limit(float x, float y, float x1, float y1, float value);
 float fast_sqrt(float number);
 #define LIMIT_MIN_MAX(x, min, max) (x) = (((x) <= (min)) ? (min) : (((x) >= (max)) ? (max) : (x)))
 

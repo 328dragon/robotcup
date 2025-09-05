@@ -70,6 +70,7 @@ typedef struct
         float deg_pos;  // (rad)
         float current;  // (A)
         float get_yaw;
+        float torque;
     } get;
     struct out // 用作电机输出
     {
@@ -77,9 +78,10 @@ typedef struct
         float deg_pos;//目标位置
         float current;//目标电流
         float target_yaw;
+        float torque;
     } set;
 
 } Motor_Controller_struct;
 
 void Motor_Update_Getinfo(Motor_Controller_struct *_motor,uint16_t *dt);
-#endif // !MOTOR_DEF_H
+#endif 

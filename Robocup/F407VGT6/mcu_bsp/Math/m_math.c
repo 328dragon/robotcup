@@ -21,6 +21,13 @@ float remap(float x, float y, float x1, float y1, float value)
 {
     return x1 + (value - x) * (y1 - x1) / (y - x);
 }
+float remap_limit(float x, float y, float x1, float y1, float value)
+{
+	float result= x1 + (value - x) * (y1 - x1) / (y - x);
+	if(result>y1)result=y1;
+	 	if(result<x1)result=x1;
+    return result;
+}
 
 /**
  * @brief 快速平方根计算函数

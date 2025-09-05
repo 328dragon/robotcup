@@ -32,6 +32,9 @@
         "span": "c",
         "bsp_usart.h": "c",
         "soft_pwm.h": "c",
-        "string.h": "c"
-    }
+        "string.h": "c",
+        "lk_ms4005.h": "c",
+        "compare": "c"
+    },
+    "cmake.sourceDirectory": "D:/stmproject/dragonproject/contest/robotcup/Robocup/F407VGT6/Drivers/CMSIS/NN"
 }

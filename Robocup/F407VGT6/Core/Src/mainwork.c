@@ -24,6 +24,7 @@
 #include "servo.h"
 #include "upper.h"
 #include "soft_pwm.h"
+#include "LK_MS4005.h"
 #define BUZZER_ON HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #define BUZZER_OFF HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
 #define get_little_yellow_state HAL_GPIO_ReadPin(little_yellow_GPIO_Port, little_yellow_Pin)
@@ -261,6 +262,9 @@ static Kinematic_t kinematic_instance;
 static Planner_t planner_instance;
 static StepMotorZDT_t zdt_stepmotor_instances[4]; // 静态实例
 static StepMotorZDT_t upper_stepmotor_instance[1];
+LK_MS4005_Controller_t *lk_upper_motor;
+float lk_motor_vel=0.0f;
+float lk_motor_tq=0;
 
 Controller_t *ChassisControl_ptr; // 控制器实例
 Kinematic_t *kinematic_ptr;       // 麦轮实例
@@ -290,6 +294,8 @@ void UPPER_control_task(void *pvParameters);
 void main_work(void)
 {
     SOFTPWMRegister(soft_pwm_first,GPIOB,GPIO_PIN_0,200,0);
+   lk_upper_motor=LK_MS4005_Register(&hcan1,1,vel_close_loop_mode);
+	Enable_LK(lk_upper_motor);
     USARTRegister(&uart6, &uart6_cfg);
     USARTRegister(&uart3, &uart3_cfg);
     USARTRegister(&uart1, &uart1_cfg);
@@ -322,7 +328,7 @@ void main_work(void)
     BaseType_t ok6 = xTaskCreate(LCD_Show_task, "LCD_Show_task", 200, NULL, 1, &LCD_Show_handle);
     BaseType_t ok7 = xTaskCreate(UPPER_control_task, "UPPER_control_task", 300, NULL, 1, &LCD_Show_handle);
     BaseType_t ok8 = xTaskCreate(gray_read_task, "gray_read_task", 300, NULL, 2, &gray_read_handle);
-    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok5 != pdPASS)
+    if (ok2 != pdPASS || ok3 != pdPASS || ok4 != pdPASS || ok5 != pdPASS||ok7!=pdPASS)
     {
         // 任务创建失败，进入死循环
         while (1)
@@ -337,6 +343,7 @@ void GwGet_color_task(void *pvParameters)
     while (Ping_color())
     {
        SoftPwmSetHigh(soft_pwm_first, debug_sf_pwm);
+			Vel_Ctrl_LK(lk_upper_motor,lk_motor_tq,lk_motor_vel);
         vTaskDelay(5);
     }
 
@@ -361,6 +368,7 @@ void UPPER_control_task(void *pvParameters)
     Servo_SetAngle(servo, CENTER_PICK, 360);
     while (1)
     {
+		
         if (pick_goods_flag == 1)
         {
             *upperflag_ptr = PICKINGIN;
@@ -396,8 +404,8 @@ void gray_read_task(void *pvParameters)
 {
     while (Ping())
     {
-
-        vTaskDelay(5);
+	Control_LK_MS4005(lk_upper_motor);	
+  vTaskDelay(100);
     }
 
     while (1)

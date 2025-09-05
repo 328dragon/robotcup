@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../mcu_bsp/planning;../mcu_bsp/system_controller;../Lib;../mcu_bsp/IMU;../mcu_bsp/LCD;../mcu_bsp/uart;../Device;../mcu_bsp/servo</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../mcu_bsp/can;../mcu_bsp/Motor;../mcu_bsp/chassis;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../mcu_bsp/planning;../mcu_bsp/system_controller;../Lib;../mcu_bsp/IMU;../mcu_bsp/LCD;../mcu_bsp/uart;../Device;../mcu_bsp/servo;../mcu_bsp/Math</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1005,6 +1005,16 @@
               <FileName>soft_pwm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\mcu_bsp\servo\soft_pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>LK_MS4005.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\Motor\LK_MS4005.c</FilePath>
+            </File>
+            <File>
+              <FileName>m_math.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mcu_bsp\Math\m_math.c</FilePath>
             </File>
           </Files>
         </Group>

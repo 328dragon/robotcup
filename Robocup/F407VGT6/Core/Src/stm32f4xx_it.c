@@ -29,7 +29,8 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 #include "soft_pwm.h"
-
+#include "LK_MS4005.h"
+extern LK_MS4005_Controller_t *lk_upper_motor;
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -330,6 +331,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 0 */
 SoftPwmTimerISR();
+
   /* USER CODE END TIM8_UP_TIM13_IRQn 0 */
   HAL_TIM_IRQHandler(&htim13);
   /* USER CODE BEGIN TIM8_UP_TIM13_IRQn 1 */
