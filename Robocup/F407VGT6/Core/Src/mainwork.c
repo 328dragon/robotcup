@@ -293,7 +293,7 @@ void GwGet_color_task(void *pvParameters);
 void UPPER_control_task(void *pvParameters);
 void main_work(void)
 {
-    SOFTPWMRegister(soft_pwm_first,GPIOB,GPIO_PIN_0,200,0);
+    SOFTPWMRegister(soft_pwm_first,GPIOB,GPIO_PIN_0,20,180);
    lk_upper_motor=LK_MS4005_Register(&hcan1,1,vel_close_loop_mode);
 	Enable_LK(lk_upper_motor);
     USARTRegister(&uart6, &uart6_cfg);
@@ -342,7 +342,7 @@ void GwGet_color_task(void *pvParameters)
 {
     while (Ping_color())
     {
-       SoftPwmSetHigh(soft_pwm_first, debug_sf_pwm);
+SoftSetAngle(soft_pwm_first,debug_sf_pwm);
 			Vel_Ctrl_LK(lk_upper_motor,lk_motor_tq,lk_motor_vel);
         vTaskDelay(5);
     }

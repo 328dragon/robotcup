@@ -1,40 +1,49 @@
 #include "soft_pwm.h"
 static uint8_t idx;
-static SoftPwmChannel *soft_pwm_instance[SOFT_PWM_CNT]={NULL};
+static SoftPwmChannel *soft_pwm_instance[SOFT_PWM_CNT]={NULL};\
+float angle_high=0;
 ///封装后
 // 初始化PWM通道
 void SoftPwmInit(SoftPwmChannel* _channel, GPIO_TypeDef* port, 
-                uint16_t pin, uint16_t period, uint16_t high) {  
+                float pin, float period,int max_angle) {  
     _channel->port = port;
     _channel->pin = pin;
-    _channel->period = (period == 0) ? 1 : period;
-    _channel->high = (high > _channel->period) ? _channel->period : high;
+    _channel->period = (period == 0) ? 1 : ((period*1000)/SOFT_PWM_BASE_TIM_PERIOD);
     _channel->cnt = 0;
 }
 //注册软件pwm
 void SOFTPWMRegister(SoftPwmChannel* instance, GPIO_TypeDef* port, 
-                uint16_t pin, uint16_t period, uint16_t high) {
+                float pin, float period,int max_angle) {
    memset(instance, 0, sizeof(SoftPwmChannel));
    soft_pwm_instance[idx++] = instance;               
-   SoftPwmInit(instance, port, pin, period, high);
+   SoftPwmInit(instance, port, pin, period,max_angle);
 }
 
 // 设置PWM周期
-void SoftPwmSetPeriod(SoftPwmChannel* _instance, uint16_t period) {
+void SoftPwmSetPeriod(SoftPwmChannel* _instance, float period) {
     if (_instance == NULL) return;
-    _instance->period = (period == 0) ? 1 : period;
+    _instance->period = (period == 0) ? 1 : ((period*1000)/SOFT_PWM_BASE_TIM_PERIOD);
     // 确保高电平时间不超过新周期
-    if (_instance->high > _instance->period) {
-        _instance->high = _instance->period;
-    }
+
 }
 
+
+//单位为us
 // 设置PWM高电平时间
-void SoftPwmSetHigh(SoftPwmChannel* _channel, uint16_t high) {
+void SoftPwmSetHigh(SoftPwmChannel* _channel, float high) {
     if (_channel == NULL) return;
-    _channel->high = (high > _channel->period) ? _channel->period : high;
-}
 
+	float high_temp=high*1.00f/SOFT_PWM_BASE_TIM_PERIOD;
+	
+    _channel->high = (high_temp > _channel->period) ? _channel->period : high_temp;
+
+}
+void SoftSetAngle(SoftPwmChannel* _channel, int  angle)
+{
+angle_high=(angle*1.0f/180)*(servo_max-servo_zero)*1000+500;
+	
+	SoftPwmSetHigh(_channel,angle_high);
+}
 // 定时器中断服务函数
 void SoftPwmTimerISR() {
     for(int i=0; i<idx; i++) {

@@ -5,30 +5,30 @@
 #include "string.h"
 
 #define SOFT_PWM_CNT 5
-#define SOFT_PWM_BASE_TIM_PERIOD 100 // 基础定时器周期，单位为微秒
+#define SOFT_PWM_BASE_TIM_PERIOD 100 // 基础定时器周期，单位为us
+
+#define servo_zero 0.5  //ms
+#define servo_max  2.5
 //封装后
 // PWM通道配置结构体
 typedef struct {
-    uint16_t period;       // 周期值
-    uint16_t high;         // 高电平值
-    uint16_t cnt;          // 计数器
+    float period;       // 周期值
+    float high;         // 高电平值
+    float cnt;          // 计数器
     GPIO_TypeDef* port;    // GPIO端口
-    uint16_t pin;          // GPIO引脚
+    float pin;          // GPIO引脚
+	int angel_max;
 } SoftPwmChannel;
 
-// 初始化PWM通道
-void SoftPwmInit(SoftPwmChannel* _channel, GPIO_TypeDef* port, 
-                uint16_t pin, uint16_t period, uint16_t high);
+
 //注册软件pwm
 void SOFTPWMRegister(SoftPwmChannel* instance, GPIO_TypeDef* port, 
-                uint16_t pin, uint16_t period, uint16_t high) ;
+                float pin, float period,int max_angle);
 
 // 设置PWM周期
-void SoftPwmSetPeriod(SoftPwmChannel* _instance, uint16_t period);
+void SoftPwmSetPeriod(SoftPwmChannel* _instance, float period);
 
-// 设置PWM高电平时间
-void SoftPwmSetHigh(SoftPwmChannel* _channel, uint16_t high);
-
+void SoftSetAngle(SoftPwmChannel* _channel, int  angle);
 // 定时器中断服务函数（需要传入通道数组和数量）
 void SoftPwmTimerISR() ;
 
