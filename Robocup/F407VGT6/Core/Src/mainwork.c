@@ -164,6 +164,11 @@ void usart6_callback(void)
 // 上位机通信，接收二维码
 void usart1_callback(void)
 {
+		if(uart1.recv_buff[0]=='h')
+		{
+			uint8_t temp_trans=1;
+		HAL_UART_Transmit(&huart1,(uint8_t*)"1",1,1000);
+		}
     if (uart1.recv_buff[0] == 0x91 && uart1.recv_buff[1] == 0xCB)
     {
 
@@ -254,7 +259,7 @@ odom_t debug_target_erro = {0.05, 0.05, 0.05};
 
 SoftPwmChannel soft_pwm_debug={NULL};
 SoftPwmChannel *soft_pwm_first=&soft_pwm_debug;
-int debug_sf_pwm=0;
+int debug_sf_angle=0;
 
 // 实例化
 static Controller_t ChassisControl_instance;
@@ -293,7 +298,7 @@ void GwGet_color_task(void *pvParameters);
 void UPPER_control_task(void *pvParameters);
 void main_work(void)
 {
-    SOFTPWMRegister(soft_pwm_first,GPIOB,GPIO_PIN_0,200,0);
+    SOFTPWMRegister(soft_pwm_first,GPIOB,GPIO_PIN_0,20000,0,180);
    lk_upper_motor=LK_MS4005_Register(&hcan1,1,vel_close_loop_mode);
 	Enable_LK(lk_upper_motor);
     USARTRegister(&uart6, &uart6_cfg);
@@ -342,7 +347,7 @@ void GwGet_color_task(void *pvParameters)
 {
     while (Ping_color())
     {
-       SoftPwmSetHigh(soft_pwm_first, debug_sf_pwm);
+       Setangle(soft_pwm_first, debug_sf_angle);
 			Vel_Ctrl_LK(lk_upper_motor,lk_motor_tq,lk_motor_vel);
         vTaskDelay(5);
     }
